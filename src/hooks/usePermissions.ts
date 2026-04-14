@@ -182,9 +182,9 @@ export function usePermissions() {
     return isAdmin || hasRole('CB') || hasRole('DAAF') || hasRole('DAF');
   };
 
-  // Alias pour rétrocompatibilité
+  // Alias pour rétrocompatibilité — DG a accès en lecture (vue EB à valider)
   const canValidateEB = (): boolean => {
-    return isAdmin || hasRole('DAAF') || hasRole('DAF') || hasRole('CB');
+    return isAdmin || hasRole('DG') || hasRole('DAAF') || hasRole('DAF') || hasRole('CB');
   };
 
   // Message d'erreur pour rôle insuffisant

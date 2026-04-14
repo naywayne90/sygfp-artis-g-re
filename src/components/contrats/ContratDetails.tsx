@@ -39,6 +39,7 @@ import {
 import { Plus, FileText, History } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
 
 interface ContratDetailsProps {
   open: boolean;
@@ -94,10 +95,6 @@ export function ContratDetails({
     resetAvenantForm();
   };
 
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-  };
-
   const getStatutBadge = (statut: string) => {
     const s = STATUTS_CONTRAT.find((x) => x.value === statut);
     return <Badge className={s?.color || ''}>{s?.label || statut}</Badge>;
@@ -141,12 +138,12 @@ export function ContratDetails({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-muted-foreground">Montant initial</Label>
-                <p className="font-medium">{formatMontant(contrat.montant_initial)}</p>
+                <p className="font-medium">{formatCurrency(contrat.montant_initial)}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Montant actuel</Label>
                 <p className="font-medium text-primary">
-                  {formatMontant(contrat.montant_actuel || contrat.montant_initial)}
+                  {formatCurrency(contrat.montant_actuel || contrat.montant_initial)}
                 </p>
               </div>
             </div>
@@ -242,7 +239,9 @@ export function ContratDetails({
                           <TableCell>{avenant.type_avenant}</TableCell>
                           <TableCell className="max-w-[200px] truncate">{avenant.objet}</TableCell>
                           <TableCell className="text-right">
-                            {avenant.nouveau_montant ? formatMontant(avenant.nouveau_montant) : '-'}
+                            {avenant.nouveau_montant
+                              ? formatCurrency(avenant.nouveau_montant)
+                              : '-'}
                           </TableCell>
                           <TableCell>
                             <Badge variant={avenant.statut === 'signe' ? 'default' : 'secondary'}>

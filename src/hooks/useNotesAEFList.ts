@@ -189,7 +189,6 @@ export function useNotesAEFList(options: UseNotesAEFListOptions = {}): UseNotesA
   // Données par défaut
   const defaultCounts: NoteAEFCounts = {
     total: 0,
-    brouillon: 0,
     soumis: 0,
     a_valider: 0,
     a_imputer: 0,

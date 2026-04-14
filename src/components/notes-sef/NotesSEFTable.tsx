@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import type { NoteSEFEntity } from '@/lib/notes-sef/types';
 import { STATUT_LABELS, STATUT_BADGE_VARIANTS } from '@/lib/notes-sef/constants';
 import { ValidationButtons } from '@/components/validation';
@@ -71,12 +71,6 @@ function TruncatedText({ text, maxLength = 100 }: { text: string | null; maxLeng
       </Tooltip>
     </TooltipProvider>
   );
-}
-
-// Formater le montant
-function formatMontant(montant: number | null | undefined): string {
-  if (montant == null) return '—';
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 }
 
 // Badge de statut coloré
@@ -263,7 +257,7 @@ export function NotesSEFTable({
                   </span>
                 </TableCell>
                 <TableCell className="font-medium tabular-nums">
-                  {formatMontant(null)} {/* montant_estime non disponible */}
+                  {'—'} {/* montant_estime non disponible */}
                 </TableCell>
                 <TableCell>
                   <StatutBadge statut={note.statut} />

@@ -1,462 +1,217 @@
-# Guide Codification SYGFP
+# Guide de Codification SYGFP -- Systeme de References ARTI
 
-> **Règles de codification et nomenclatures**  
-> Version: 1.0 | Dernière mise à jour: 2026-01-15
+> **Reference definitive sur la codification des documents SYGFP**
+> Version: 2.0 | Derniere mise a jour: 2026-04-13
 
 ---
 
 ## 1. Vue d'ensemble
 
-SYGFP utilise un système de codification structuré pour identifier de manière unique chaque document et entité. Ce guide détaille les formats, les règles et les mécanismes de génération.
+Le SYGFP utilise un systeme de codification unifie herite de l'ancien systeme SQL Server de l'ARTI. Chaque document de la chaine de depense recoit une reference unique au format ARTI.
 
 ---
 
-## 2. Référence Pivot
+## 2. Format Pivot ARTI
 
-### 2.1 Format standard
-
-La **référence pivot** est le code d'identification unique principal :
+### 2.1 Format actuel (14 caracteres)
 
 ```
-ARTI + ÉTAPE + MM + YY + NNNN
+ARTI + {code_etape:2 chiffres} + {mois:2 chiffres} + {annee:2 chiffres} + {sequence:4 chiffres}
 ```
 
-| Segment | Longueur | Description | Exemple |
-|---------|----------|-------------|---------|
-| `ARTI` | 4 | Préfixe fixe (organisation) | `ARTI` |
-| `ÉTAPE` | 1 | Numéro d'étape chaîne dépense | `0` (SEF), `1` (AEF), `6` (ENG) |
-| `MM` | 2 | Mois (01-12) | `01` |
-| `YY` | 2 | Année sur 2 chiffres | `26` |
-| `NNNN` | 4 | Séquence (0001-9999) | `0001` |
+Exemples detailles pour chaque etape :
 
-**Longueur totale : 13 caractères**
+| Reference        | Etape                     | Mois      | Annee | Sequence | Decomposition              |
+| ---------------- | ------------------------- | --------- | ----- | -------- | -------------------------- |
+| `ARTI0001260001` | Note SEF (etape 00)       | janvier   | 2026  | n.1      | ARTI + 00 + 01 + 26 + 0001 |
+| `ARTI0102260005` | Note AEF (etape 01)       | fevrier   | 2026  | n.5      | ARTI + 01 + 02 + 26 + 0005 |
+| `ARTI0203260012` | Imputation (etape 02)     | mars      | 2026  | n.12     | ARTI + 02 + 03 + 26 + 0012 |
+| `ARTI0304260003` | Expr. Besoin (etape 03)   | avril     | 2026  | n.3      | ARTI + 03 + 04 + 26 + 0003 |
+| `ARTI0404260001` | Passation (etape 04)      | avril     | 2026  | n.1      | ARTI + 04 + 04 + 26 + 0001 |
+| `ARTI0505260008` | Engagement (etape 05)     | mai       | 2026  | n.8      | ARTI + 05 + 05 + 26 + 0008 |
+| `ARTI0606260020` | Liquidation (etape 06)    | juin      | 2026  | n.20     | ARTI + 06 + 06 + 26 + 0020 |
+| `ARTI0707260015` | Ordonnancement (etape 07) | juillet   | 2026  | n.15     | ARTI + 07 + 07 + 26 + 0015 |
+| `ARTI0808260001` | Reglement (etape 08)      | aout      | 2026  | n.1      | ARTI + 08 + 08 + 26 + 0001 |
+| `ARTI0909260002` | Virement (etape 09)       | septembre | 2026  | n.2      | ARTI + 09 + 09 + 26 + 0002 |
 
-### 2.2 Codes d'étape
+### 2.2 Format legacy (13 caracteres -- ancien SQL Server)
 
-| Étape | Code | Document |
-|-------|------|----------|
-| Note SEF | `0` | Sans Effet Financier |
-| Note AEF | `1` | Avec Effet Financier |
-| Imputation | `2` | Imputation budgétaire |
-| Expression Besoin | `3` | Expression de besoin |
-| Marché | `4` | Passation de marché |
-| Engagement | `5` | Engagement budgétaire |
-| Liquidation | `6` | Liquidation |
-| Ordonnancement | `7` | Ordonnancement |
-| Règlement | `8` | Règlement |
-| Virement | `9` | Virement de crédit |
+```
+ARTI + {code_etape:1 chiffre} + {mois:2} + {annee:2} + {sequence:4}
+```
 
-### 2.3 Exemples
+Exemple : `ARTI001260001` = SEF, janvier 2026, n.1
 
-| Date | Étape | Séquence | Référence |
-|------|-------|----------|-----------|
-| Janvier 2026, 1ère Note SEF | 0 | 1 | `ARTI001260001` |
-| Janvier 2026, 2ème Note SEF | 0 | 2 | `ARTI001260002` |
-| Février 2026, 1er Engagement | 5 | 1 | `ARTI502260001` |
-| Mars 2026, 15ème Règlement | 8 | 15 | `ARTI803260015` |
+Note : Ce format est encore present dans les donnees migrees.
 
-### 2.4 Génération automatique
+---
+
+## 3. Les 10 codes d'etape de la chaine de depense
+
+| Code   | Etape             | Sigle | Description                                   | Table Supabase      | Colonne reference        |
+| ------ | ----------------- | ----- | --------------------------------------------- | ------------------- | ------------------------ |
+| 0 (00) | Note SEF          | SEF   | Accord de principe sans effet financier       | notes_sef           | numero / reference_pivot |
+| 1 (01) | Note AEF          | AEF   | Note avec effet financier (Note DG)           | notes_dg            | numero / reference_pivot |
+| 2 (02) | Imputation        | IMP   | Imputation budgetaire (affectation ligne)     | imputations         | reference                |
+| 3 (03) | Expression Besoin | EB    | Expression des besoins en biens/services      | expressions_besoin  | numero                   |
+| 4 (04) | Passation Marche  | PM    | Procedure de passation de marche public       | passation_marche    | reference                |
+| 5 (05) | Engagement        | ENG   | Engagement juridique de la depense            | budget_engagements  | numero                   |
+| 6 (06) | Liquidation       | LIQ   | Verification du service fait + calcul fiscal  | budget_liquidations | numero                   |
+| 7 (07) | Ordonnancement    | ORD   | Ordre de payer emis par l'ordonnateur         | ordonnancements     | numero                   |
+| 8 (08) | Reglement         | REG   | Paiement effectif au beneficiaire             | reglements          | numero                   |
+| 9 (09) | Virement credit   | VIR   | Transfert de credits entre lignes budgetaires | credit_transfers    | reference (a creer)      |
+
+---
+
+## 4. Mecanisme de generation
+
+### 4.1 Table des compteurs : `arti_reference_counters`
 
 ```sql
--- Fonction de génération atomique
-CREATE FUNCTION generate_reference(p_etape text, p_date date DEFAULT now()::date)
-RETURNS text AS $$
-DECLARE
-  v_mm text;
-  v_yy text;
-  v_seq integer;
-BEGIN
-  v_mm := LPAD(EXTRACT(MONTH FROM p_date)::text, 2, '0');
-  v_yy := LPAD((EXTRACT(YEAR FROM p_date) % 100)::text, 2, '0');
-  
-  -- UPSERT atomique pour éviter les doublons
-  INSERT INTO reference_counters (etape, mm, yy, sequence)
-  VALUES (p_etape, v_mm, v_yy, 1)
-  ON CONFLICT (etape, mm, yy)
-  DO UPDATE SET sequence = reference_counters.sequence + 1
-  RETURNING sequence INTO v_seq;
-  
-  RETURN 'ARTI' || p_etape || v_mm || v_yy || LPAD(v_seq::text, 4, '0');
-END;
-$$ LANGUAGE plpgsql;
-```
-
-### 2.5 Table des compteurs
-
-```sql
-CREATE TABLE reference_counters (
+CREATE TABLE arti_reference_counters (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  etape TEXT NOT NULL,           -- Code étape (0-9)
-  mm TEXT NOT NULL,              -- Mois (01-12)
-  yy TEXT NOT NULL,              -- Année (00-99)
-  sequence INTEGER DEFAULT 1,     -- Compteur séquentiel
-  UNIQUE (etape, mm, yy)
+  etape INTEGER NOT NULL CHECK (etape BETWEEN 0 AND 99),
+  mois INTEGER NOT NULL CHECK (mois BETWEEN 1 AND 12),
+  annee INTEGER NOT NULL CHECK (annee BETWEEN 2020 AND 2099),
+  dernier_numero INTEGER NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (etape, mois, annee)
 );
 ```
 
----
+Le compteur est **par mois + etape**. Il se reinitialise a 1 chaque nouveau mois.
 
-## 3. Hiérarchie Programmatique
-
-### 3.1 Structure complète
-
-```
-Objectif Stratégique (OS)
-    └── Mission
-        └── Action
-            └── Activité
-                └── Sous-Activité
-                    └── Tâche
-```
-
-### 3.2 Formats de code
-
-| Niveau | Format | Exemple | Longueur |
-|--------|--------|---------|----------|
-| OS | `OS-XX` | `OS-01` | 5 |
-| Mission | `MIS-XXX` | `MIS-001` | 7 |
-| Action | `ACT-XXXX` | `ACT-0101` | 8 |
-| Activité | `ATV-XXXXX` | `ATV-01011` | 9 |
-| Sous-Activité | `SAT-XXXXXX` | `SAT-010111` | 10 |
-| Tâche | `TCH-XXXXXXX` | `TCH-0101111` | 11 |
-
-### 3.3 Exemple concret
-
-```
-OS-01 : Améliorer la qualité des services numériques
-├── MIS-001 : Modernisation des infrastructures
-│   ├── ACT-0101 : Déploiement fibre optique
-│   │   ├── ATV-01011 : Études techniques
-│   │   │   ├── SAT-010111 : Cartographie réseau
-│   │   │   │   ├── TCH-0101111 : Relevés terrain
-│   │   │   │   └── TCH-0101112 : Digitalisation plans
-│   │   │   └── SAT-010112 : Analyse besoins
-│   │   └── ATV-01012 : Travaux de génie civil
-│   └── ACT-0102 : Acquisition équipements
-└── MIS-002 : Formation des agents
-```
-
-### 3.4 Code budgétaire composé
-
-Les lignes budgétaires utilisent un code composé :
-
-```
-DIR-OS-ACT-NBE-SEQ
-```
-
-| Segment | Description | Exemple |
-|---------|-------------|---------|
-| `DIR` | Code direction (2 car.) | `01` |
-| `OS` | Code OS (2 car.) | `01` |
-| `ACT` | Code action (4 car.) | `0101` |
-| `NBE` | Code NBE (3 car.) | `621` |
-| `SEQ` | Séquence (3 car.) | `001` |
-
-**Exemple complet** : `01-01-0101-621-001`
-
----
-
-## 4. Nomenclature NBE
-
-### 4.1 Nature Budgétaire Économique
-
-La NBE classe les dépenses par nature économique :
-
-| Code | Libellé | Type |
-|------|---------|------|
-| `61` | Services extérieurs | Fonctionnement |
-| `62` | Autres services extérieurs | Fonctionnement |
-| `63` | Impôts et taxes | Fonctionnement |
-| `64` | Charges de personnel | Personnel |
-| `65` | Autres charges de gestion | Fonctionnement |
-| `66` | Charges financières | Fonctionnement |
-| `21` | Immobilisations incorporelles | Investissement |
-| `22` | Terrains | Investissement |
-| `23` | Bâtiments | Investissement |
-| `24` | Matériel | Investissement |
-
-### 4.2 Sous-comptes NBE
-
-```
-62 - Autres services extérieurs
-├── 621 - Sous-traitance générale
-├── 622 - Locations et charges locatives
-├── 623 - Entretien, réparations
-├── 624 - Primes d'assurance
-├── 625 - Déplacements, missions
-├── 626 - Frais postaux
-├── 627 - Services bancaires
-└── 628 - Divers services
-```
-
----
-
-## 5. Plan Comptable SYSCO
-
-### 5.1 Structure SYSCOHADA
-
-| Classe | Libellé |
-|--------|---------|
-| 1 | Comptes de ressources durables |
-| 2 | Comptes d'actif immobilisé |
-| 3 | Comptes de stocks |
-| 4 | Comptes de tiers |
-| 5 | Comptes de trésorerie |
-| 6 | Comptes de charges |
-| 7 | Comptes de produits |
-| 8 | Comptes de résultats |
-
-### 5.2 Correspondance NBE ↔ SYSCO
-
-| NBE | SYSCO | Description |
-|-----|-------|-------------|
-| 621 | 621xxx | Sous-traitance générale |
-| 622 | 622xxx | Locations |
-| 641 | 661xxx | Rémunérations personnel |
-| 241 | 241xxx | Matériel de transport |
-| 244 | 244xxx | Matériel informatique |
-
----
-
-## 6. Secteurs d'Activité
-
-### 6.1 Liste des secteurs
-
-| Code | Libellé |
-|------|---------|
-| `TEL` | Télécommunications |
-| `NUM` | Numérique |
-| `POT` | Postal |
-| `RAD` | Radiodiffusion |
-| `ADM` | Administration générale |
-| `FIN` | Finance et comptabilité |
-| `RH` | Ressources humaines |
-| `LOG` | Logistique |
-| `JUR` | Juridique |
-
-### 6.2 Usage
-
-Les secteurs permettent de :
-- Catégoriser les prestataires
-- Filtrer les marchés par domaine
-- Générer des statistiques sectorielles
-
----
-
-## 7. Codes Prestataires
-
-### 7.1 Format NCC
-
-Le **Numéro de Compte Contribuable** (NCC) est l'identifiant fiscal :
-
-```
-CI-XXXXXXXXX-Y
-```
-
-| Segment | Description |
-|---------|-------------|
-| `CI` | Préfixe pays (Côte d'Ivoire) |
-| `XXXXXXXXX` | Numéro à 9 chiffres |
-| `Y` | Clé de contrôle |
-
-### 7.2 Code interne prestataire
-
-```
-PREST-YYYY-NNNN
-```
-
-| Segment | Description | Exemple |
-|---------|-------------|---------|
-| `PREST` | Préfixe fixe | `PREST` |
-| `YYYY` | Année d'enregistrement | `2026` |
-| `NNNN` | Séquence annuelle | `0001` |
-
----
-
-## 8. Codes Documents
-
-### 8.1 Contrats
-
-```
-CTR-YYYY-NNNN
-```
-
-**Exemple** : `CTR-2026-0015` (15ème contrat de 2026)
-
-### 8.2 Marchés
-
-```
-MAR-YYYY-NNNN/TYPE
-```
-
-| Type | Description |
-|------|-------------|
-| `AOO` | Appel d'Offres Ouvert |
-| `AOR` | Appel d'Offres Restreint |
-| `GRE` | Gré à Gré |
-| `DC` | Demande de Cotation |
-
-**Exemple** : `MAR-2026-0003/AOO`
-
-### 8.3 Dossiers
-
-```
-DOS-YYYY-MM-NNNN
-```
-
-**Exemple** : `DOS-2026-01-0042` (42ème dossier de janvier 2026)
-
----
-
-## 9. Variables de Codification
-
-### 9.1 Table `codif_variables`
+### 4.2 Fonction SQL : `generate_arti_reference()`
 
 ```sql
-CREATE TABLE codif_variables (
-  id UUID PRIMARY KEY,
-  key TEXT UNIQUE NOT NULL,        -- Clé variable
-  label TEXT NOT NULL,             -- Libellé
-  format_type TEXT DEFAULT 'text', -- Type (text, number, date)
-  source_table TEXT,               -- Table source si lookup
-  source_field TEXT,               -- Champ source
-  pad_length INTEGER,              -- Longueur avec padding
-  pad_char TEXT DEFAULT '0',       -- Caractère de padding
-  pad_side TEXT DEFAULT 'left',    -- Côté padding (left/right)
-  transform TEXT,                  -- Transformation (upper, lower)
-  default_value TEXT,              -- Valeur par défaut
-  est_active BOOLEAN DEFAULT true
-);
+generate_arti_reference(p_etape INTEGER, p_date TIMESTAMPTZ DEFAULT now())
+RETURNS TEXT
 ```
 
-### 9.2 Variables prédéfinies
+- SECURITY DEFINER, search_path = public
+- Utilise INSERT ON CONFLICT DO UPDATE (UPSERT atomique)
+- Maximum 9999 documents par mois/etape
+- Concurrence : safe grace au UPSERT PostgreSQL
 
-| Clé | Description | Exemple |
-|-----|-------------|---------|
-| `{YEAR}` | Année complète | `2026` |
-| `{YY}` | Année courte | `26` |
-| `{MONTH}` | Mois | `01` |
-| `{DAY}` | Jour | `15` |
-| `{SEQ}` | Séquence | `0001` |
-| `{DIR}` | Code direction | `01` |
-| `{OS}` | Code OS | `01` |
+### 4.3 Triggers par module
 
-### 9.3 Patterns de code
+| Module | Trigger                                          | Moment de generation                            |
+| ------ | ------------------------------------------------ | ----------------------------------------------- |
+| SEF    | submit_note_sef_with_reference() RPC             | A la soumission                                 |
+| AEF    | trg_notes_dg_arti_reference (BEFORE INSERT)      | A l'insertion                                   |
+| IMP    | trg_imputation_arti_reference (BEFORE INSERT)    | A l'insertion                                   |
+| EB     | Trigger BEFORE INSERT                            | A l'insertion                                   |
+| PM     | trg_generate_passation_reference (BEFORE INSERT) | A l'insertion                                   |
+| ENG    | trg_unified_ref_engagements (BEFORE INSERT)      | A l'insertion                                   |
+| LIQ    | A migrer vers generate_arti_reference(6)         | Actuellement via get_next_sequence              |
+| ORD    | A migrer vers generate_arti_reference(7)         | Actuellement via generate_ordonnancement_numero |
+| REG    | A migrer vers generate_arti_reference(8)         | Actuellement via trigger etape 4 (bug)          |
+| VIR    | A creer                                          | Aucun actuellement                              |
+
+---
+
+## 5. Code d'imputation budgetaire (18 chiffres)
+
+Independant de la reference ARTI, le code d'imputation identifie la ligne budgetaire :
+
+```
+{OS:2}-{Action:2}-{Activite:3}-{SousActivite:3}-{Direction:2}-{NBE:6}
+```
+
+Exemple : `11-02-402-020-52-612900`
+
+Structure programmatique :
+
+```
+Objectif Strategique (OS) -- 2 chiffres
+  +-- Mission -- variable
+      +-- Action -- 2 chiffres
+          +-- Activite -- 3 chiffres
+              +-- Sous-Activite -- 3 chiffres
+                  +-- Direction -- 2 chiffres
+                      +-- Nature Economique (NBE) -- 6 chiffres
+                          +-- SYSCO (Plan comptable) -- variable
+```
+
+204 lignes d'imputation budgetaire dans le referentiel ARTI.
+
+---
+
+## 6. Nomenclature NBE (Nature Budgetaire Economique)
+
+| Classe | Nature                                                                  |
+| ------ | ----------------------------------------------------------------------- |
+| 21xxxx | Immobilisations incorporelles                                           |
+| 22xxxx | Terrains                                                                |
+| 23xxxx | Batiments                                                               |
+| 24xxxx | Materiel et equipements                                                 |
+| 61xxxx | Services exterieurs                                                     |
+| 62xxxx | Autres services exterieurs (locations, entretien, assurances, missions) |
+| 63xxxx | Impots et taxes                                                         |
+| 64xxxx | Charges de personnel                                                    |
+| 65xxxx | Gestion courante                                                        |
+| 66xxxx | Charges financieres                                                     |
+| 67xxxx | Interets et frais                                                       |
+
+---
+
+## 7. Autres formats de reference
+
+| Type        | Format                 | Exemple          |
+| ----------- | ---------------------- | ---------------- |
+| Prestataire | PREST-{YYYY}-{NNNN}    | PREST-2026-0042  |
+| Contrat     | CTR-{YYYY}-{NNNN}      | CTR-2026-0015    |
+| Dossier     | DOS-{YYYY}-{MM}-{NNNN} | DOS-2026-02-0001 |
+| Facture     | FAC-{YYYY}-{NNNN}      | FAC-2026-0127    |
+
+---
+
+## 8. Affichage frontend
+
+### Composant : ARTIReferenceBadge
+
+```
+Format badge (long) : ARTI-00-02/26-0001
+Format inline (court) : SEF-02/26-0001
+```
+
+### Service : referenceService.ts
 
 ```typescript
-// Exemple de pattern
-const pattern = "ARTI-{YY}-{DIR}-{SEQ:4}";
-
-// Résultat : "ARTI-26-01-0001"
+ETAPE_CODES = {
+  SEF: 0,
+  AEF: 1,
+  IMPUTATION: 2,
+  EXPRESSION_BESOIN: 3,
+  PASSATION_MARCHE: 4,
+  ENGAGEMENT: 5,
+  LIQUIDATION: 6,
+  ORDONNANCEMENT: 7,
+  REGLEMENT: 8,
+  VIREMENT: 9,
+};
 ```
 
 ---
 
-## 10. Séquences et Compteurs
+## 9. Donnees migrees (SQL Server vers Supabase)
 
-### 10.1 Tables de séquences
+| Source SQL Server     | Volume  | Format ancien              | Format Supabase                     |
+| --------------------- | ------- | -------------------------- | ----------------------------------- |
+| NoteDG vers notes_sef | 4 827   | ARTI0MMYYNNNN              | MIG-YYYY-NNNNNN / NNNN-YYYY-DIR-XXX |
+| Engagement            | 3 151   | ARTI1MMYYNNNN              | MIG-ARTI10MMYYNNNN                  |
+| Liquidation           | 2 960   | ID IDENTITY (ex: 40674895) | LIQ-2026-NNNN                       |
+| Ordonnancement        | 2 727   | ARTI3MMYYNNNN              | ORD-2026-NNNN                       |
+| Fournisseurs          | 422-456 | Code interne (401xxx)      | PREST-YYYY-NNNN                     |
 
-| Table | Usage |
-|-------|-------|
-| `reference_counters` | Références pivot par étape/mois/année |
-| `budget_code_sequences` | Codes lignes budgétaires par exercice |
-| `contrat_sequences` | Numéros de contrats par année |
-| `notes_sef_sequences` | Séquences notes SEF (legacy) |
-
-### 10.2 Gestion atomique
-
-```sql
--- Pattern UPSERT pour éviter les doublons
-INSERT INTO reference_counters (etape, mm, yy, sequence)
-VALUES ($1, $2, $3, 1)
-ON CONFLICT (etape, mm, yy)
-DO UPDATE SET sequence = reference_counters.sequence + 1
-RETURNING sequence;
-```
-
-### 10.3 Verrouillage des codes
-
-Après validation, les codes sont **verrouillés** :
-
-```sql
--- Colonne code_locked
-ALTER TABLE budget_engagements ADD COLUMN code_locked BOOLEAN DEFAULT false;
-
--- Trigger de verrouillage
-IF NEW.statut = 'valide' THEN
-  NEW.code_locked := true;
-END IF;
-```
+Flag de migration : `legacy_import = true` ou `is_migrated = true`
 
 ---
 
-## 11. Bonnes Pratiques
+## 10. Migration prevue vers format unifie
 
-### 11.1 DO ✅
-
-- Utiliser les fonctions de génération SQL (atomicité garantie)
-- Toujours vérifier l'unicité avant insertion
-- Verrouiller les codes après validation
-- Documenter tout nouveau format de code
-
-### 11.2 DON'T ❌
-
-- Générer des codes côté frontend (risque de doublons)
-- Modifier un code après verrouillage
-- Utiliser des séquences sans contrainte unique
-- Ignorer les formats établis
+Les modules Liquidation, Ordonnancement et Reglement utilisent encore l'ancien format PREFIX-YYYY-NNNN. La migration vers le format ARTI unifie est planifiee pour aligner les 10 etapes sur le meme systeme de compteurs.
 
 ---
 
-## 12. Ajouter un Nouveau Type de Code
-
-### 12.1 Checklist
-
-1. Définir le format dans ce guide
-2. Créer la table de séquences si nécessaire
-3. Créer la fonction SQL de génération
-4. Ajouter le trigger de génération automatique
-5. Ajouter la colonne `code_locked`
-6. Documenter les exemples
-
-### 12.2 Template SQL
-
-```sql
--- 1. Table de séquences
-CREATE TABLE mon_entite_sequences (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  exercice INTEGER NOT NULL,
-  dernier_numero INTEGER DEFAULT 0,
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  UNIQUE (exercice)
-);
-
--- 2. Fonction de génération
-CREATE FUNCTION generate_mon_entite_numero(p_exercice INTEGER)
-RETURNS TEXT AS $$
-DECLARE
-  v_seq INTEGER;
-BEGIN
-  INSERT INTO mon_entite_sequences (exercice, dernier_numero)
-  VALUES (p_exercice, 1)
-  ON CONFLICT (exercice)
-  DO UPDATE SET 
-    dernier_numero = mon_entite_sequences.dernier_numero + 1,
-    updated_at = now()
-  RETURNING dernier_numero INTO v_seq;
-  
-  RETURN 'MON-' || p_exercice || '-' || LPAD(v_seq::text, 4, '0');
-END;
-$$ LANGUAGE plpgsql;
-
--- 3. Trigger
-CREATE TRIGGER trigger_generate_mon_entite_numero
-  BEFORE INSERT ON mon_entite
-  FOR EACH ROW
-  WHEN (NEW.numero IS NULL)
-  EXECUTE FUNCTION auto_generate_mon_entite_numero();
-```
-
----
-
-*Documentation générée le 2026-01-15*
+_Documentation reecrite le 2026-04-13_

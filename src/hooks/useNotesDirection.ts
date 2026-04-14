@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 // ============================================
 
 export type TypeNote = 'interne' | 'compte_rendu' | 'rapport' | 'memo' | 'autre';
-export type StatutNote = 'brouillon' | 'publie' | 'archive';
+export type StatutNote = 'soumis' | 'publie' | 'archive';
 export type PrioriteNote = 'normale' | 'haute' | 'urgente';
 
 export interface NoteDirection {
@@ -385,7 +385,7 @@ export function useNotesDirectionStats(directionId: string | undefined) {
       const notes = data || [];
       return {
         total: notes.length,
-        brouillons: notes.filter((n) => n.statut === 'soumis').length,
+        soumis: notes.filter((n) => n.statut === 'soumis').length,
         publies: notes.filter((n) => n.statut === 'publie').length,
         parType: {
           interne: notes.filter((n) => n.type_note === 'interne').length,

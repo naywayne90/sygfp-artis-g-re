@@ -8,6 +8,19 @@ Le module **Engagement** enregistre l'engagement juridique de la depense. Il rec
 
 **Chaine** : Note SEF > Note AEF > Imputation > Expression Besoin > Passation Marche > **Engagement** > Liquidation > Ordonnancement > Reglement
 
+## Codification ARTI
+
+| Propriété            | Valeur                                                             |
+| -------------------- | ------------------------------------------------------------------ |
+| **Code étape**       | 5 (05 en format 14 chars)                                          |
+| **Sigle**            | ENG                                                                |
+| **Format référence** | `ARTI05MMYYNNNN` (14 chars)                                        |
+| **Exemple**          | `ARTI0502260001` = Engagement n°1, février 2026                    |
+| **Colonne DB**       | `budget_engagements.numero`                                        |
+| **Génération**       | Trigger `trg_unified_ref_engagements` (BEFORE INSERT)              |
+| **Compteur**         | `arti_reference_counters` (étape=5, par mois)                      |
+| **Note**             | Données migrées en format `MIG-ARTI10MMYYNNNN` (legacy SQL Server) |
+
 ## 2. Routes et acces
 
 | Route                        | Page                                                           | Roles |

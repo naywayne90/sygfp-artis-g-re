@@ -314,11 +314,6 @@ Deno.serve(async (req) => {
       updates.validated_by = caller.id;
     }
 
-    if (toStatus === 'soumis' && currentStatus === 'brouillon') {
-      updates.submitted_at = new Date().toISOString();
-      updates.submitted_by = caller.id;
-    }
-
     const { error: updateError } = await supabaseAdmin
       .from(tableName)
       .update(updates)

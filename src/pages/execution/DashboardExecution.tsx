@@ -41,14 +41,7 @@ import {
 import { useExecutionDashboard } from '@/hooks/useExecutionDashboard';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-
-const formatMontant = (value: number) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'decimal',
-    maximumFractionDigits: 0,
-  }).format(value);
-};
+import { cn, formatCurrency } from '@/lib/utils';
 
 const formatMontantCompact = (value: number) => {
   if (value >= 1000000000) {
@@ -133,10 +126,7 @@ function StepCard({ title, icon: Icon, stats, color, validKey, pendingKey, href 
       <CardContent className="space-y-4">
         {/* Montant total */}
         <div>
-          <p className="text-2xl font-bold">
-            {formatMontant(totalStats.montant)}{' '}
-            <span className="text-sm font-normal text-muted-foreground">FCFA</span>
-          </p>
+          <p className="text-2xl font-bold">{formatCurrency(totalStats.montant)}</p>
           <p className="text-xs text-muted-foreground">{totalStats.count} dossier(s)</p>
         </div>
 
@@ -486,7 +476,7 @@ export default function DashboardExecution() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => [`${formatMontant(value)} FCFA`, '']} />
+                <Tooltip formatter={(value: number) => [`${formatCurrency(value)}`, '']} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -608,7 +598,7 @@ export default function DashboardExecution() {
                   tickFormatter={(value) => formatMontantCompact(value)}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`${formatMontant(value)} FCFA`, '']}
+                  formatter={(value: number) => [`${formatCurrency(value)}`, '']}
                   labelStyle={{ fontWeight: 'bold' }}
                 />
                 <Legend />
@@ -641,7 +631,7 @@ export default function DashboardExecution() {
                   tickFormatter={(value) => formatMontantCompact(value)}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`${formatMontant(value)} FCFA`, '']}
+                  formatter={(value: number) => [`${formatCurrency(value)}`, '']}
                   labelStyle={{ fontWeight: 'bold' }}
                 />
                 <Legend />
@@ -735,7 +725,7 @@ export default function DashboardExecution() {
                     <p className="text-sm truncate">{dossier.objet}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">{formatMontant(dossier.montant)} FCFA</p>
+                    <p className="font-semibold">{formatCurrency(dossier.montant)}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <Progress value={dossier.progression} className="w-20 h-1.5" />
                       <span className="text-xs text-muted-foreground w-8">

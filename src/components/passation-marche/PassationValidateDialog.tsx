@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle2, Loader2, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { PassationMarche, MODES_PASSATION } from '@/hooks/usePassationsMarche';
+import { formatCurrency } from '@/lib/utils';
 
 interface PassationValidateDialogProps {
   passation: PassationMarche | null;
@@ -39,9 +40,6 @@ export function PassationValidateDialog({
     setComments('');
     setHasConfirmedChecklist(false);
   };
-
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
   const getModeName = (value: string) =>
     MODES_PASSATION.find((m) => m.value === value)?.label || value;
@@ -82,7 +80,7 @@ export function PassationValidateDialog({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Montant retenu:</span>
-                <span className="font-bold">{formatMontant(passation.montant_retenu)}</span>
+                <span className="font-bold">{formatCurrency(passation.montant_retenu)}</span>
               </div>
               {passation.prestataire_retenu && (
                 <div className="flex justify-between">

@@ -1,18 +1,31 @@
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { 
-  AlertTriangle, 
+import { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import {
+  AlertTriangle,
   AlertCircle,
-  CheckCircle2, 
-  XCircle, 
-  Download, 
+  CheckCircle2,
+  XCircle,
+  Download,
   RefreshCw,
   Loader2,
   FileSpreadsheet,
@@ -20,10 +33,10 @@ import {
   Filter,
   BarChart3,
   TrendingDown,
-} from "lucide-react";
-import { format } from "date-fns";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface StagingRow {
   id: string;
@@ -39,7 +52,7 @@ interface AnomalyCategory {
   type: string;
   label: string;
   count: number;
-  severity: "error" | "warning" | "info";
+  severity: 'error' | 'warning' | 'info';
   icon: React.ReactNode;
 }
 
@@ -53,27 +66,27 @@ export function ImportAnomalyReport({ runId, exercice }: ImportAnomalyReportProp
   const [selectedRunId, setSelectedRunId] = useState<string | null>(runId);
   const [stagingData, setStagingData] = useState<StagingRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>('all');
   const [anomalyCategories, setAnomalyCategories] = useState<AnomalyCategory[]>([]);
 
   // Load available runs
   const loadRuns = useCallback(async () => {
     try {
       const { data, error } = await supabase
-        .from("import_runs")
-        .select("id, filename, created_at")
-        .eq("exercice", exercice)
-        .order("created_at", { ascending: false })
+        .from('import_runs')
+        .select('id, filename, created_at')
+        .eq('exercice', exercice)
+        .order('created_at', { ascending: false })
         .limit(20);
 
       if (error) throw error;
       setRuns(data || []);
-      
+
       if (data && data.length > 0 && !selectedRunId) {
         setSelectedRunId(data[0].id);
       }
     } catch (error) {
-      console.error("Error loading runs:", error);
+      console.error('Error loading runs:', error);
     }
   }, [exercice, selectedRunId]);
 
@@ -90,17 +103,17 @@ export function ImportAnomalyReport({ runId, exercice }: ImportAnomalyReportProp
   // Load staging data for selected run
   const loadStagingData = useCallback(async () => {
     if (!selectedRunId) return;
-    
+
     setIsLoading(true);
     try {
       let query = supabase
-        .from("import_budget_staging")
-        .select("*")
-        .eq("run_id", selectedRunId)
-        .order("row_number");
+        .from('import_budget_staging')
+        .select('*')
+        .eq('run_id', selectedRunId)
+        .order('row_number');
 
-      if (filterStatus !== "all") {
-        query = query.eq("validation_status", filterStatus);
+      if (filterStatus !== 'all') {
+        query = query.eq('validation_status', filterStatus);
       }
 
       const { data, error } = await query.limit(500);
@@ -111,8 +124,8 @@ export function ImportAnomalyReport({ runId, exercice }: ImportAnomalyReportProp
       // Categorize anomalies
       categorizeAnomalies(data || []);
     } catch (error) {
-      console.error("Error loading staging data:", error);
-      toast.error("Erreur lors du chargement des données");
+      console.error('Error loading staging data:', error);
+      toast.error('Erreur lors du chargement des données');
     } finally {
       setIsLoading(false);
     }
@@ -124,118 +137,124 @@ export function ImportAnomalyReport({ runId, exercice }: ImportAnomalyReportProp
 
   // Categorize anomalies by type
   const categorizeAnomalies = (data: StagingRow[]) => {
-    const categories: Record<string, { count: number; severity: "error" | "warning" | "info" }> = {
-      doublon: { count: 0, severity: "warning" },
-      imputation_invalide: { count: 0, severity: "error" },
-      montant_invalide: { count: 0, severity: "error" },
-      champ_manquant: { count: 0, severity: "error" },
-      format_incorrect: { count: 0, severity: "warning" },
-      mismatch: { count: 0, severity: "warning" },
+    const categories: Record<string, { count: number; severity: 'error' | 'warning' | 'info' }> = {
+      doublon: { count: 0, severity: 'warning' },
+      imputation_invalide: { count: 0, severity: 'error' },
+      montant_invalide: { count: 0, severity: 'error' },
+      champ_manquant: { count: 0, severity: 'error' },
+      format_incorrect: { count: 0, severity: 'warning' },
+      mismatch: { count: 0, severity: 'warning' },
     };
 
     data.forEach((row) => {
       if (!row.validation_errors) return;
       const errors = row.validation_errors.toLowerCase();
-      
-      if (errors.includes("doublon")) categories.doublon.count++;
-      if (errors.includes("imputation") && (errors.includes("invalide") || errors.includes("absent"))) 
+
+      if (errors.includes('doublon')) categories.doublon.count++;
+      if (
+        errors.includes('imputation') &&
+        (errors.includes('invalide') || errors.includes('absent'))
+      )
         categories.imputation_invalide.count++;
-      if (errors.includes("montant") && (errors.includes("invalide") || errors.includes("négatif"))) 
+      if (errors.includes('montant') && (errors.includes('invalide') || errors.includes('négatif')))
         categories.montant_invalide.count++;
-      if (errors.includes("manquant") || errors.includes("absent")) 
+      if (errors.includes('manquant') || errors.includes('absent'))
         categories.champ_manquant.count++;
-      if (errors.includes("format") || errors.includes("chiffres")) 
+      if (errors.includes('format') || errors.includes('chiffres'))
         categories.format_incorrect.count++;
-      if (errors.includes("mismatch")) 
-        categories.mismatch.count++;
+      if (errors.includes('mismatch')) categories.mismatch.count++;
     });
 
     const categoryList: AnomalyCategory[] = [
-      { 
-        type: "doublon", 
-        label: "Doublons détectés", 
-        count: categories.doublon.count, 
-        severity: "warning" as const,
+      {
+        type: 'doublon',
+        label: 'Doublons détectés',
+        count: categories.doublon.count,
+        severity: 'warning' as const,
         icon: <Copy className="h-4 w-4" />,
       },
-      { 
-        type: "imputation_invalide", 
-        label: "Imputations invalides", 
-        count: categories.imputation_invalide.count, 
-        severity: "error" as const,
+      {
+        type: 'imputation_invalide',
+        label: 'Imputations invalides',
+        count: categories.imputation_invalide.count,
+        severity: 'error' as const,
         icon: <XCircle className="h-4 w-4" />,
       },
-      { 
-        type: "montant_invalide", 
-        label: "Montants invalides", 
-        count: categories.montant_invalide.count, 
-        severity: "error" as const,
+      {
+        type: 'montant_invalide',
+        label: 'Montants invalides',
+        count: categories.montant_invalide.count,
+        severity: 'error' as const,
         icon: <TrendingDown className="h-4 w-4" />,
       },
-      { 
-        type: "champ_manquant", 
-        label: "Champs manquants", 
-        count: categories.champ_manquant.count, 
-        severity: "error" as const,
+      {
+        type: 'champ_manquant',
+        label: 'Champs manquants',
+        count: categories.champ_manquant.count,
+        severity: 'error' as const,
         icon: <AlertCircle className="h-4 w-4" />,
       },
-      { 
-        type: "format_incorrect", 
-        label: "Formats incorrects", 
-        count: categories.format_incorrect.count, 
-        severity: "warning" as const,
+      {
+        type: 'format_incorrect',
+        label: 'Formats incorrects',
+        count: categories.format_incorrect.count,
+        severity: 'warning' as const,
         icon: <AlertTriangle className="h-4 w-4" />,
       },
-      { 
-        type: "mismatch", 
-        label: "Incohérences calcul", 
-        count: categories.mismatch.count, 
-        severity: "warning" as const,
+      {
+        type: 'mismatch',
+        label: 'Incohérences calcul',
+        count: categories.mismatch.count,
+        severity: 'warning' as const,
         icon: <BarChart3 className="h-4 w-4" />,
       },
-    ].filter(c => c.count > 0);
+    ].filter((c) => c.count > 0);
 
     setAnomalyCategories(categoryList);
   };
 
   // Export anomalies to CSV
   const exportAnomalies = () => {
-    const errorRows = stagingData.filter(r => r.validation_status !== "ok");
-    
+    const errorRows = stagingData.filter((r) => r.validation_status !== 'ok');
+
     if (errorRows.length === 0) {
-      toast.info("Aucune anomalie à exporter");
+      toast.info('Aucune anomalie à exporter');
       return;
     }
 
-    const headers = ["Ligne", "Statut", "Imputation Brute", "Imputation Calculée", "Montant", "Erreurs"];
-    const rows = errorRows.map(row => [
+    const headers = [
+      'Ligne',
+      'Statut',
+      'Imputation Brute',
+      'Imputation Calculée',
+      'Montant',
+      'Erreurs',
+    ];
+    const rows = errorRows.map((row) => [
       row.row_number,
       row.validation_status,
-      row.raw_imputation || "",
-      row.computed_imputation || "",
-      row.raw_montant || "",
-      (row.validation_errors || "").replace(/;/g, " | "),
+      row.raw_imputation || '',
+      row.computed_imputation || '',
+      row.raw_montant || '',
+      (row.validation_errors || '').replace(/;/g, ' | '),
     ]);
 
-    const csvContent = [
-      headers.join(";"),
-      ...rows.map(r => r.join(";")),
-    ].join("\n");
+    const csvContent = [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\n');
 
-    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `rapport_anomalies_${exercice}_${format(new Date(), "yyyyMMdd_HHmm")}.csv`;
+    link.download = `rapport_anomalies_${exercice}_${format(new Date(), 'yyyyMMdd_HHmm')}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
-    toast.success("Rapport exporté");
+    toast.success('Rapport exporté');
   };
 
   // Stats
   const totalRows = stagingData.length;
-  const okRows = stagingData.filter(r => r.validation_status === "ok").length;
-  const warningRows = stagingData.filter(r => r.validation_status === "warning").length;
-  const errorRows = stagingData.filter(r => r.validation_status === "error").length;
+  const okRows = stagingData.filter((r) => r.validation_status === 'ok').length;
+  const warningRows = stagingData.filter((r) => r.validation_status === 'warning').length;
+  const errorRows = stagingData.filter((r) => r.validation_status === 'error').length;
   const qualityScore = totalRows > 0 ? Math.round((okRows / totalRows) * 100) : 0;
 
   return (
@@ -254,20 +273,20 @@ export function ImportAnomalyReport({ runId, exercice }: ImportAnomalyReportProp
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Select value={selectedRunId || ""} onValueChange={setSelectedRunId}>
+              <Select value={selectedRunId || ''} onValueChange={setSelectedRunId}>
                 <SelectTrigger className="w-[300px]">
                   <SelectValue placeholder="Sélectionner un import" />
                 </SelectTrigger>
                 <SelectContent>
                   {runs.map((run) => (
                     <SelectItem key={run.id} value={run.id}>
-                      {run.filename} ({format(new Date(run.created_at), "dd/MM HH:mm")})
+                      {run.filename} ({format(new Date(run.created_at), 'dd/MM HH:mm')})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <Button variant="outline" size="icon" onClick={loadStagingData} disabled={isLoading}>
-                <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
             </div>
           </div>
@@ -290,20 +309,26 @@ export function ImportAnomalyReport({ runId, exercice }: ImportAnomalyReportProp
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-muted-foreground">Score Qualité</span>
-                  <span className={`text-2xl font-bold ${
-                    qualityScore >= 90 ? "text-green-600" :
-                    qualityScore >= 70 ? "text-amber-600" :
-                    "text-red-600"
-                  }`}>
+                  <span
+                    className={`text-2xl font-bold ${
+                      qualityScore >= 90
+                        ? 'text-green-600'
+                        : qualityScore >= 70
+                          ? 'text-amber-600'
+                          : 'text-red-600'
+                    }`}
+                  >
                     {qualityScore}%
                   </span>
                 </div>
-                <Progress 
-                  value={qualityScore} 
+                <Progress
+                  value={qualityScore}
                   className={`h-3 ${
-                    qualityScore >= 90 ? "[&>div]:bg-green-500" :
-                    qualityScore >= 70 ? "[&>div]:bg-amber-500" :
-                    "[&>div]:bg-red-500"
+                    qualityScore >= 90
+                      ? '[&>div]:bg-green-500'
+                      : qualityScore >= 70
+                        ? '[&>div]:bg-amber-500'
+                        : '[&>div]:bg-red-500'
                   }`}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-2">
@@ -312,7 +337,7 @@ export function ImportAnomalyReport({ runId, exercice }: ImportAnomalyReportProp
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="border-green-200 bg-green-50/50">
               <CardContent className="pt-4 text-center">
                 <CheckCircle2 className="h-6 w-6 text-green-600 mx-auto mb-1" />
@@ -320,7 +345,7 @@ export function ImportAnomalyReport({ runId, exercice }: ImportAnomalyReportProp
                 <div className="text-xs text-muted-foreground">Valides</div>
               </CardContent>
             </Card>
-            
+
             <Card className="border-amber-200 bg-amber-50/50">
               <CardContent className="pt-4 text-center">
                 <AlertTriangle className="h-6 w-6 text-amber-600 mx-auto mb-1" />
@@ -328,7 +353,7 @@ export function ImportAnomalyReport({ runId, exercice }: ImportAnomalyReportProp
                 <div className="text-xs text-muted-foreground">Avertissements</div>
               </CardContent>
             </Card>
-            
+
             <Card className="border-red-200 bg-red-50/50">
               <CardContent className="pt-4 text-center">
                 <XCircle className="h-6 w-6 text-red-600 mx-auto mb-1" />
@@ -351,9 +376,11 @@ export function ImportAnomalyReport({ runId, exercice }: ImportAnomalyReportProp
                       key={cat.type}
                       variant="outline"
                       className={`gap-1 px-3 py-1 ${
-                        cat.severity === "error" ? "border-red-300 bg-red-50 text-red-700" :
-                        cat.severity === "warning" ? "border-amber-300 bg-amber-50 text-amber-700" :
-                        "border-blue-300 bg-blue-50 text-blue-700"
+                        cat.severity === 'error'
+                          ? 'border-red-300 bg-red-50 text-red-700'
+                          : cat.severity === 'warning'
+                            ? 'border-amber-300 bg-amber-50 text-amber-700'
+                            : 'border-blue-300 bg-blue-50 text-blue-700'
                       }`}
                     >
                       {cat.icon}
@@ -417,36 +444,44 @@ export function ImportAnomalyReport({ runId, exercice }: ImportAnomalyReportProp
                     <TableBody>
                       {stagingData.map((row) => (
                         <TableRow key={row.id}>
-                          <TableCell className="font-mono text-sm">
-                            {row.row_number}
-                          </TableCell>
+                          <TableCell className="font-mono text-sm">{row.row_number}</TableCell>
                           <TableCell>
-                            <Badge className={`gap-1 ${
-                              row.validation_status === "ok" 
-                                ? "bg-green-100 text-green-800" 
-                                : row.validation_status === "warning"
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-red-100 text-red-800"
-                            }`}>
-                              {row.validation_status === "ok" && <CheckCircle2 className="h-3 w-3" />}
-                              {row.validation_status === "warning" && <AlertTriangle className="h-3 w-3" />}
-                              {row.validation_status === "error" && <XCircle className="h-3 w-3" />}
+                            <Badge
+                              className={`gap-1 ${
+                                row.validation_status === 'ok'
+                                  ? 'bg-green-100 text-green-800'
+                                  : row.validation_status === 'warning'
+                                    ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              {row.validation_status === 'ok' && (
+                                <CheckCircle2 className="h-3 w-3" />
+                              )}
+                              {row.validation_status === 'warning' && (
+                                <AlertTriangle className="h-3 w-3" />
+                              )}
+                              {row.validation_status === 'error' && <XCircle className="h-3 w-3" />}
                               {row.validation_status}
                             </Badge>
                           </TableCell>
                           <TableCell className="font-mono text-sm max-w-[200px] truncate">
-                            {row.computed_imputation || row.raw_imputation || "—"}
+                            {row.computed_imputation || row.raw_imputation || '—'}
                           </TableCell>
                           <TableCell className="text-right font-mono">
-                            {row.raw_montant || "—"}
+                            {row.raw_montant || '—'}
                           </TableCell>
                           <TableCell className="max-w-[300px]">
                             {row.validation_errors ? (
-                              <span className={`text-sm ${
-                                row.validation_status === "error" ? "text-red-600" : "text-amber-600"
-                              }`}>
-                                {row.validation_errors.split(";").slice(0, 2).join("; ")}
-                                {row.validation_errors.split(";").length > 2 && "..."}
+                              <span
+                                className={`text-sm ${
+                                  row.validation_status === 'error'
+                                    ? 'text-red-600'
+                                    : 'text-amber-600'
+                                }`}
+                              >
+                                {row.validation_errors.split(';').slice(0, 2).join('; ')}
+                                {row.validation_errors.split(';').length > 2 && '...'}
                               </span>
                             ) : (
                               <span className="text-muted-foreground">—</span>

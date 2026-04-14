@@ -51,7 +51,6 @@ export interface EtapeStats {
   etape: string;
   label: string;
   total: number;
-  brouillon: number;
   soumis: number;
   valide: number;
   rejete: number;
@@ -311,7 +310,6 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         etape: 'notes_aef',
         label: 'Notes AEF',
         total: notes.length,
-        brouillon: notes.filter((n) => n.statut === 'soumis').length,
         soumis: notes.filter((n) => n.statut === 'soumis').length,
         valide: notes.filter((n) => n.statut === 'valide' || n.statut === 'impute').length,
         rejete: notes.filter((n) => n.statut === 'rejete').length,
@@ -330,7 +328,6 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         etape: 'engagements',
         label: 'Engagements',
         total: engagements.length,
-        brouillon: engagements.filter((e) => e.statut === 'soumis').length,
         soumis: engagements.filter((e) => e.statut === 'soumis').length,
         valide: engagements.filter((e) => e.statut === 'valide').length,
         rejete: engagements.filter((e) => e.statut === 'rejete').length,
@@ -349,7 +346,6 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         etape: 'liquidations',
         label: 'Liquidations',
         total: liquidations.length,
-        brouillon: liquidations.filter((l) => l.statut === 'soumis').length,
         soumis: liquidations.filter((l) => l.statut === 'soumis').length,
         valide: liquidations.filter((l) => l.statut === 'validé_dg').length,
         rejete: liquidations.filter((l) => l.statut === 'rejete').length,
@@ -368,7 +364,6 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         etape: 'ordonnancements',
         label: 'Ordonnancements',
         total: ordonnancements.length,
-        brouillon: ordonnancements.filter((o) => o.statut === 'soumis').length,
         soumis: ordonnancements.filter((o) => o.statut === 'soumis').length,
         valide: ordonnancements.filter((o) => o.statut === 'valide').length,
         rejete: ordonnancements.filter((o) => o.statut === 'rejete').length,
@@ -387,7 +382,6 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         etape: 'reglements',
         label: 'Règlements',
         total: reglements.length,
-        brouillon: 0,
         soumis: 0,
         valide: reglements.filter((r) => r.statut === 'valide' || r.statut === 'enregistre').length,
         rejete: reglements.filter((r) => r.statut === 'annule').length,

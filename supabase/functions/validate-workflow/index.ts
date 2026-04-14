@@ -10,6 +10,7 @@ const SPENDING_STAGES = [
   'note_sef',
   'note_aef',
   'imputation',
+  'expression_besoin',
   'passation_marche',
   'engagement',
   'liquidation',
@@ -23,17 +24,19 @@ const STAGE_ORDER: Record<SpendingStage, number> = {
   note_sef: 1,
   note_aef: 2,
   imputation: 3,
-  passation_marche: 4,
-  engagement: 5,
-  liquidation: 6,
-  ordonnancement: 7,
-  reglement: 8,
+  expression_besoin: 4,
+  passation_marche: 5,
+  engagement: 6,
+  liquidation: 7,
+  ordonnancement: 8,
+  reglement: 9,
 };
 
 const STAGE_TABLE: Record<SpendingStage, string> = {
   note_sef: 'notes_sef',
   note_aef: 'notes_aef',
   imputation: 'imputations',
+  expression_besoin: 'expressions_besoin',
   passation_marche: 'passation_marches',
   engagement: 'budget_engagements',
   liquidation: 'budget_liquidations',
@@ -45,11 +48,12 @@ const STAGE_LABELS: Record<SpendingStage, string> = {
   note_sef: 'Note SEF',
   note_aef: 'Note AEF',
   imputation: 'Imputation',
-  passation_marche: 'Passation de marche',
+  expression_besoin: 'Expression de Besoin',
+  passation_marche: 'Passation de Marché',
   engagement: 'Engagement',
   liquidation: 'Liquidation',
   ordonnancement: 'Ordonnancement',
-  reglement: 'Reglement',
+  reglement: 'Règlement',
 };
 
 // Roles allowed to validate each stage
@@ -65,6 +69,10 @@ const STAGE_VALIDATION_ROLES: Record<SpendingStage, { profils: string[]; roles: 
   imputation: {
     profils: ['Controleur', 'Admin'],
     roles: ['CB', 'ADMIN'],
+  },
+  expression_besoin: {
+    profils: ['Validateur', 'Admin'],
+    roles: ['DIRECTEUR', 'DAAF', 'ADMIN'],
   },
   passation_marche: {
     profils: ['Validateur', 'Admin'],

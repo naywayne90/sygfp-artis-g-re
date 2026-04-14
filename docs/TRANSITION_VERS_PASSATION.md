@@ -207,7 +207,7 @@ Procedure allegee pour les fournitures courantes de faible montant.
 | 3     | Validation DAAF                                     | DAAF              |
 | 4     | Emission du bon de commande                         | DAAF              |
 
-**Seuil** : montant total inferieur a 5 000 000 FCFA (cinq millions de francs CFA).
+**Seuil** : montant total inferieur a 5 000 000 FCFA (cinq millions de FCFA).
 
 ---
 

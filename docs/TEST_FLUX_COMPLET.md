@@ -30,11 +30,12 @@ Ce guide couvre le parcours complet d'une dépense :
    - Urgence : Normale
    - Justification : "Besoin trimestriel de fournitures..."
    - Date souhaitée : [+15 jours]
-4. [ ] Enregistrer (brouillon)
+4. [ ] Cliquer Soumettre
 
 **Vérification** :
+
 - ✅ Note créée avec numéro SEF-XXXX-XXXX
-- ✅ Statut = brouillon
+- ✅ Statut = soumis
 - ✅ Visible dans liste personnelle
 
 ### Test 1.2 : Soumission Note SEF
@@ -44,6 +45,7 @@ Ce guide couvre le parcours complet d'une dépense :
 3. [ ] Confirmer
 
 **Vérification** :
+
 - ✅ Statut = soumis
 - ✅ Note visible pour DG
 
@@ -57,6 +59,7 @@ Ce guide couvre le parcours complet d'une dépense :
 4. [ ] Cliquer "Valider"
 
 **Vérification** :
+
 - ✅ Statut = valide
 - ✅ Bouton "Créer Note AEF" apparaît
 
@@ -76,6 +79,7 @@ Ce guide couvre le parcours complet d'une dépense :
 4. [ ] Créer la note
 
 **Vérification** :
+
 - ✅ Note AEF créée avec lien vers SEF
 - ✅ Numéro AEF-XXXX-XXXX
 
@@ -87,6 +91,7 @@ Ce guide couvre le parcours complet d'une dépense :
 2. [ ] Valider l'AEF (DG)
 
 **Vérification** :
+
 - ✅ Statut = a_imputer
 - ✅ Visible dans onglet "À imputer"
 
@@ -106,6 +111,7 @@ Ce guide couvre le parcours complet d'une dépense :
 6. [ ] Valider l'imputation
 
 **Vérification** :
+
 - ✅ Imputation créée
 - ✅ Statut AEF = impute
 - ✅ Crédit réservé sur la ligne
@@ -127,6 +133,7 @@ Ce guide couvre le parcours complet d'une dépense :
 4. [ ] Soumettre
 
 **Vérification** :
+
 - ✅ EB créée avec référence AEF
 - ✅ Détail des quantités/prix
 
@@ -144,6 +151,7 @@ Ce guide couvre le parcours complet d'une dépense :
 4. [ ] Publier / Attribuer
 
 **Vérification** :
+
 - ✅ Marché créé avec numéro
 - ✅ Prestataire attributaire sélectionné
 
@@ -163,6 +171,7 @@ Ce guide couvre le parcours complet d'une dépense :
 3. [ ] Soumettre
 
 **Vérification** :
+
 - ✅ Engagement créé avec numéro ENG-XXXX
 - ✅ Crédit engagé sur la ligne
 
@@ -173,6 +182,7 @@ Ce guide couvre le parcours complet d'une dépense :
 1. [ ] Valider l'engagement
 
 **Vérification** :
+
 - ✅ Statut = valide
 - ✅ Engagement prêt pour liquidation
 
@@ -193,6 +203,7 @@ Ce guide couvre le parcours complet d'une dépense :
 4. [ ] Soumettre
 
 **Vérification** :
+
 - ✅ Liquidation créée avec numéro LIQ-XXXX
 - ✅ Calcul fiscal correct (AIRSI, retenues)
 
@@ -204,6 +215,7 @@ Ce guide couvre le parcours complet d'une dépense :
 2. [ ] Valider la liquidation
 
 **Vérification** :
+
 - ✅ Statut = valide
 - ✅ Prêt pour ordonnancement
 
@@ -221,6 +233,7 @@ Ce guide couvre le parcours complet d'une dépense :
 4. [ ] Générer le bon de paiement
 
 **Vérification** :
+
 - ✅ Ordonnancement créé avec numéro ORD-XXXX
 - ✅ Document imprimable généré
 
@@ -231,6 +244,7 @@ Ce guide couvre le parcours complet d'une dépense :
 3. [ ] Signature Ordonnateur (DG)
 
 **Vérification** :
+
 - ✅ 3 signatures collectées
 - ✅ Statut = pret_paiement
 
@@ -251,6 +265,7 @@ Ce guide couvre le parcours complet d'une dépense :
 4. [ ] Exécuter le paiement
 
 **Vérification** :
+
 - ✅ Règlement créé avec numéro REG-XXXX
 - ✅ Statut = paye
 - ✅ Solde compte mis à jour
@@ -278,26 +293,26 @@ Ce guide couvre le parcours complet d'une dépense :
 
 ## Résumé
 
-| Phase | Étape | Statut |
-|-------|-------|--------|
-| 1 | Note SEF - Création | [ ] |
-| 1 | Note SEF - Soumission | [ ] |
-| 1 | Note SEF - Validation | [ ] |
-| 2 | Note AEF - Création | [ ] |
-| 2 | Note AEF - Validation | [ ] |
-| 3 | Imputation | [ ] |
-| 4 | Expression Besoin | [ ] |
-| 5 | Marché (si applicable) | [ ] |
-| 6 | Engagement - Création | [ ] |
-| 6 | Engagement - Validation | [ ] |
-| 7 | Liquidation - Création | [ ] |
-| 7 | Liquidation - Validation | [ ] |
-| 8 | Ordonnancement | [ ] |
-| 8 | Signatures | [ ] |
-| 9 | Règlement | [ ] |
+| Phase | Étape                    | Statut |
+| ----- | ------------------------ | ------ |
+| 1     | Note SEF - Création      | [ ]    |
+| 1     | Note SEF - Soumission    | [ ]    |
+| 1     | Note SEF - Validation    | [ ]    |
+| 2     | Note AEF - Création      | [ ]    |
+| 2     | Note AEF - Validation    | [ ]    |
+| 3     | Imputation               | [ ]    |
+| 4     | Expression Besoin        | [ ]    |
+| 5     | Marché (si applicable)   | [ ]    |
+| 6     | Engagement - Création    | [ ]    |
+| 6     | Engagement - Validation  | [ ]    |
+| 7     | Liquidation - Création   | [ ]    |
+| 7     | Liquidation - Validation | [ ]    |
+| 8     | Ordonnancement           | [ ]    |
+| 8     | Signatures               | [ ]    |
+| 9     | Règlement                | [ ]    |
 
 **Temps estimé** : 30-45 minutes
 
-**Date du test** : ____/____/______
+**Date du test** : \_**\_/\_\_**/**\_\_**
 
-**Testeur** : _________________________
+**Testeur** : ************\_************

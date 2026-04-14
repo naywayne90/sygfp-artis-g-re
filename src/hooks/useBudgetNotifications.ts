@@ -15,6 +15,7 @@ import { useExercice } from '@/contexts/ExerciceContext';
 import { toast } from 'sonner';
 import { useCallback } from 'react';
 import { r2Storage } from '@/services/r2Storage';
+import { formatCurrency } from '@/lib/utils';
 
 // ============================================
 // TYPES
@@ -52,7 +53,7 @@ export interface BudgetNotification {
   attachments_count?: number;
 }
 
-export type NotificationStatut = 'brouillon' | 'soumis' | 'valide' | 'rejete' | 'annule';
+export type NotificationStatut = 'soumis' | 'valide' | 'rejete' | 'annule';
 
 export interface NotificationFilters {
   statut?: NotificationStatut | 'all';
@@ -99,7 +100,6 @@ export const NOTIFICATION_STATUTS: {
   label: string;
   color: string;
 }[] = [
-  { value: 'brouillon', label: 'Brouillon', color: 'bg-gray-100 text-gray-800' },
   { value: 'soumis', label: 'Soumis', color: 'bg-blue-100 text-blue-800' },
   { value: 'valide', label: 'Validé', color: 'bg-green-100 text-green-800' },
   { value: 'rejete', label: 'Rejeté', color: 'bg-red-100 text-red-800' },
@@ -523,9 +523,7 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
     );
   }, []);
 
-  const formatMontant = useCallback((montant: number): string => {
-    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-  }, []);
+  const formatMontant = formatCurrency;
 
   // Export CSV
   const exportToCSV = useCallback(() => {
@@ -559,7 +557,7 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
       ...rows.map((r) => r.map((c) => `"${c}"`).join(';')),
     ].join('\n');
 
-    const blob = new Blob(['\ufeff' + csvContent], {
+    const blob = new Blob(['﻿' + csvContent], {
       type: 'text/csv;charset=utf-8;',
     });
     const url = URL.createObjectURL(blob);

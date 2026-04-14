@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * FileUploadGroup - Groupe de 3 zones d'upload
  * PJ n°1 obligatoire, PJ n°2 et n°3 optionnelles
@@ -30,18 +29,11 @@ export function FileUploadGroup({
   disabled = false,
   className,
 }: FileUploadGroupProps) {
-  const {
-    uploadFile,
-    deleteFile,
-    isUploading,
-    isDeleting,
-    progress,
-    error,
-    getFileByNumero,
-  } = useFileUpload({
-    entityType,
-    entityId,
-  });
+  const { uploadFile, deleteFile, isUploading, isDeleting, progress, error, getFileByNumero } =
+    useFileUpload({
+      entityType,
+      entityId,
+    });
 
   // Handlers d'upload pour chaque zone
   const handleUpload = useCallback(
@@ -138,18 +130,11 @@ export function SingleFileUpload({
   disabled = false,
   className,
 }: SingleFileUploadProps) {
-  const {
-    uploadFile,
-    deleteFile,
-    isUploading,
-    isDeleting,
-    progress,
-    error,
-    getFileByNumero,
-  } = useFileUpload({
-    entityType,
-    entityId,
-  });
+  const { uploadFile, deleteFile, isUploading, isDeleting, progress, error, getFileByNumero } =
+    useFileUpload({
+      entityType,
+      entityId,
+    });
 
   const file = getFileByNumero(1);
 

@@ -1,4 +1,3 @@
-// @ts-nocheck - Enum comparisons
 /**
  * useSpendingCase - Hook pour gérer un dossier de dépense complet
  *
@@ -6,10 +5,10 @@
  * Avec règles de transition et validation des étapes.
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useAuditLog } from "@/hooks/useAuditLog";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import {
   SpendingCase,
   SpendingStage,
@@ -23,8 +22,8 @@ import {
   getNextStage,
   getStageStatus,
   isStageComplete,
-} from "@/types/spending-case";
-import { isFeatureEnabled } from "@/lib/feature-flags/flags";
+} from '@/types/spending-case';
+import { isFeatureEnabled } from '@/lib/feature-flags/flags';
 
 interface UseSpendingCaseOptions {
   dossierRef?: string;
@@ -51,10 +50,10 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
     error,
     refetch,
   } = useQuery({
-    queryKey: ["spending-case", dossierRef || dossierId],
+    queryKey: ['spending-case', dossierRef || dossierId],
     queryFn: async (): Promise<SpendingCase | null> => {
       // Build query
-      let query = supabase.from("dossiers").select(`
+      let query = supabase.from('dossiers').select(`
         *,
         direction:directions(id, code, label),
         demandeur:profiles!dossiers_demandeur_id_fkey(id, full_name),
@@ -62,9 +61,9 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
       `);
 
       if (dossierRef) {
-        query = query.eq("numero", dossierRef);
+        query = query.eq('numero', dossierRef);
       } else if (dossierId) {
-        query = query.eq("id", dossierId);
+        query = query.eq('id', dossierId);
       } else {
         return null;
       }
@@ -72,7 +71,7 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
       const { data: dossier, error } = await query.single();
 
       if (error) {
-        if (error.code === "PGRST116") return null; // Not found
+        if (error.code === 'PGRST116') return null; // Not found
         throw error;
       }
 
@@ -80,10 +79,10 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
 
       // Fetch related etapes
       const { data: etapes } = await supabase
-        .from("dossier_etapes")
-        .select("*")
-        .eq("dossier_id", dossier.id)
-        .order("created_at", { ascending: true });
+        .from('dossier_etapes')
+        .select('*')
+        .eq('dossier_id', dossier.id)
+        .order('created_at', { ascending: true });
 
       // Build timeline from etapes
       const timeline: SpendingTimeline = {
@@ -106,19 +105,19 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
         montantLiquide: dossier.montant_liquide,
         montantOrdonnance: dossier.montant_ordonnance,
         montantPaye: dossier.montant_paye,
-        currentStage: (dossier.etape_courante as SpendingStage) || "note_sef",
+        currentStage: (dossier.etape_courante as SpendingStage) || 'note_sef',
         status: mapDossierStatus(dossier.statut_global),
         timeline,
         createdAt: dossier.created_at,
         updatedAt: dossier.updated_at,
-        noteSefId: findEntityId(etapes, "note_sef"),
-        noteAefId: findEntityId(etapes, "note_aef"),
-        imputationId: findEntityId(etapes, "imputation"),
-        passationMarcheId: findEntityId(etapes, "passation_marche"),
-        engagementId: findEntityId(etapes, "engagement"),
-        liquidationId: findEntityId(etapes, "liquidation"),
-        ordonnancementId: findEntityId(etapes, "ordonnancement"),
-        reglementId: findEntityId(etapes, "reglement"),
+        noteSefId: findEntityId(etapes, 'note_sef'),
+        noteAefId: findEntityId(etapes, 'note_aef'),
+        imputationId: findEntityId(etapes, 'imputation'),
+        passationMarcheId: findEntityId(etapes, 'passation_marche'),
+        engagementId: findEntityId(etapes, 'engagement'),
+        liquidationId: findEntityId(etapes, 'liquidation'),
+        ordonnancementId: findEntityId(etapes, 'ordonnancement'),
+        reglementId: findEntityId(etapes, 'reglement'),
         beneficiaireId: dossier.beneficiaire_id,
         beneficiaireNom: dossier.beneficiaire?.raison_sociale,
       };
@@ -137,10 +136,10 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
       montant,
       skipValidation = false,
     }: TransitionOptions) => {
-      if (!spendingCase) throw new Error("Dossier non chargé");
+      if (!spendingCase) throw new Error('Dossier non chargé');
 
       // Check if workflow_v2 is enabled
-      if (!isFeatureEnabled("WORKFLOW_V2") && !skipValidation) {
+      if (!isFeatureEnabled('WORKFLOW_V2') && !skipValidation) {
         // Legacy mode - just update without strict validation
         return await updateStageDirectly(spendingCase.id, stage, entityId, reference, montant);
       }
@@ -148,19 +147,19 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
       // Get user info for role check
       const { data: userData } = await supabase.auth.getUser();
       const { data: profile } = await supabase
-        .from("profiles")
-        .select("profil_fonctionnel")
-        .eq("id", userData.user?.id)
+        .from('profiles')
+        .select('profil_fonctionnel')
+        .eq('id', userData.user?.id)
         .single();
 
-      const userRole = profile?.profil_fonctionnel || "OPERATEUR";
-      const isAdmin = userRole === "ADMIN";
+      const userRole = profile?.profil_fonctionnel || 'OPERATEUR';
+      const isAdmin = userRole === 'ADMIN';
 
       // Validate transition
       if (!skipValidation && !isAdmin) {
         const { allowed, reason } = canTransitionTo(spendingCase, stage, userRole, isAdmin);
         if (!allowed) {
-          throw new Error(reason || "Transition non autorisée");
+          throw new Error(reason || 'Transition non autorisée');
         }
       }
 
@@ -169,9 +168,9 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
 
       // Audit log
       await logAction({
-        entityType: "dossier",
+        entityType: 'dossier',
         entityId: spendingCase.id,
-        action: "TRANSITION",
+        action: 'TRANSITION',
         newValues: {
           from_stage: spendingCase.currentStage,
           to_stage: stage,
@@ -182,12 +181,12 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spending-case", dossierRef || dossierId] });
-      queryClient.invalidateQueries({ queryKey: ["dossier-etapes"] });
-      toast.success("Étape mise à jour");
+      queryClient.invalidateQueries({ queryKey: ['spending-case', dossierRef || dossierId] });
+      queryClient.invalidateQueries({ queryKey: ['dossier-etapes'] });
+      toast.success('Étape mise à jour');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la transition");
+      toast.error(error.message || 'Erreur lors de la transition');
     },
   });
 
@@ -202,67 +201,67 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
       status: StepStatus;
       reason?: string;
     }) => {
-      if (!spendingCase) throw new Error("Dossier non chargé");
+      if (!spendingCase) throw new Error('Dossier non chargé');
 
       // Find existing etape
       const { data: etape } = await supabase
-        .from("dossier_etapes")
-        .select("id")
-        .eq("dossier_id", spendingCase.id)
-        .eq("type_etape", stage)
+        .from('dossier_etapes')
+        .select('id')
+        .eq('dossier_id', spendingCase.id)
+        .eq('type_etape', stage)
         .single();
 
       const statusMap: Record<StepStatus, string> = {
-        pending: "en_attente",
-        in_progress: "en_cours",
-        completed: "valide",
-        rejected: "rejete",
-        deferred: "differe",
-        skipped: "ignore",
+        pending: 'en_attente',
+        in_progress: 'en_cours',
+        completed: 'valide',
+        rejected: 'rejete',
+        deferred: 'differe',
+        skipped: 'ignore',
       };
 
       if (etape) {
         // Update existing
         const { error } = await supabase
-          .from("dossier_etapes")
+          .from('dossier_etapes')
           .update({
             statut: statusMap[status],
             commentaire: reason,
             updated_at: new Date().toISOString(),
           })
-          .eq("id", etape.id);
+          .eq('id', etape.id);
 
         if (error) throw error;
       }
 
       // Update dossier current stage if completing
-      if (status === "completed") {
+      if (status === 'completed') {
         const nextStage = getNextStage(stage);
         if (nextStage) {
           await supabase
-            .from("dossiers")
+            .from('dossiers')
             .update({
               etape_courante: nextStage,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", spendingCase.id);
+            .eq('id', spendingCase.id);
         } else {
           // Final stage - mark as completed
           await supabase
-            .from("dossiers")
+            .from('dossiers')
             .update({
-              statut_global: "termine",
+              statut_global: 'termine',
               updated_at: new Date().toISOString(),
             })
-            .eq("id", spendingCase.id);
+            .eq('id', spendingCase.id);
         }
       }
 
       // Audit log
       await logAction({
-        entityType: "dossier",
+        entityType: 'dossier',
         entityId: spendingCase.id,
-        action: status === "completed" ? "VALIDATE" : status === "rejected" ? "REJECT" : "UPDATE",
+        action: status === 'completed' ? 'VALIDATE' : status === 'rejected' ? 'REJECT' : 'UPDATE',
         newValues: {
           stage,
           status,
@@ -271,11 +270,11 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spending-case", dossierRef || dossierId] });
-      toast.success("Statut mis à jour");
+      queryClient.invalidateQueries({ queryKey: ['spending-case', dossierRef || dossierId] });
+      toast.success('Statut mis à jour');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la mise à jour");
+      toast.error(error.message || 'Erreur lors de la mise à jour');
     },
   });
 
@@ -295,13 +294,10 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
     }
 
     // Check if passation can be skipped
-    if (
-      spendingCase.currentStage === "imputation" &&
-      isStageComplete(spendingCase, "imputation")
-    ) {
+    if (spendingCase.currentStage === 'imputation' && isStageComplete(spendingCase, 'imputation')) {
       // Can skip to engagement if montant < seuil
       if ((spendingCase.montantEstime || 0) < 5000000) {
-        available.push("engagement");
+        available.push('engagement');
       }
     }
 
@@ -335,7 +331,7 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
     isCurrentStage,
     canProceed,
     getStageStatus: (stage: SpendingStage) =>
-      spendingCase ? getStageStatus(spendingCase, stage) : "pending",
+      spendingCase ? getStageStatus(spendingCase, stage) : 'pending',
     isStageComplete: (stage: SpendingStage) =>
       spendingCase ? isStageComplete(spendingCase, stage) : false,
   };
@@ -358,13 +354,13 @@ function buildStepsFromEtapes(
   currentStage: string | null
 ): SpendingStepData[] {
   const statusMap: Record<string, StepStatus> = {
-    en_attente: "pending",
-    en_cours: "in_progress",
-    valide: "completed",
-    termine: "completed",
-    rejete: "rejected",
-    differe: "deferred",
-    ignore: "skipped",
+    en_attente: 'pending',
+    en_cours: 'in_progress',
+    valide: 'completed',
+    termine: 'completed',
+    rejete: 'rejected',
+    differe: 'deferred',
+    ignore: 'skipped',
   };
 
   const currentOrder = currentStage ? STAGE_ORDER[currentStage as SpendingStage] : 1;
@@ -373,14 +369,14 @@ function buildStepsFromEtapes(
     const etape = etapes.find((e) => e.type_etape === stage);
     const stageOrder = STAGE_ORDER[stage];
 
-    let status: StepStatus = "pending";
+    let status: StepStatus = 'pending';
     if (etape) {
-      status = statusMap[etape.statut] || "pending";
+      status = statusMap[etape.statut] || 'pending';
     } else if (stageOrder < currentOrder) {
       // Implicit completion if before current
-      status = "completed";
+      status = 'completed';
     } else if (stageOrder === currentOrder) {
-      status = "in_progress";
+      status = 'in_progress';
     }
 
     return {
@@ -392,8 +388,8 @@ function buildStepsFromEtapes(
       date: etape?.created_at,
       validatedBy: etape?.validated_by,
       validatedAt: etape?.validated_at,
-      rejectionReason: etape?.statut === "rejete" ? etape.commentaire : undefined,
-      deferralReason: etape?.statut === "differe" ? etape.commentaire : undefined,
+      rejectionReason: etape?.statut === 'rejete' ? etape.commentaire : undefined,
+      deferralReason: etape?.statut === 'differe' ? etape.commentaire : undefined,
     };
   });
 }
@@ -405,19 +401,17 @@ function findEntityId(
   return etapes?.find((e) => e.type_etape === stage)?.ref_id;
 }
 
-function mapDossierStatus(
-  statut: string | null
-): SpendingCase["status"] {
+function mapDossierStatus(statut: string | null): SpendingCase['status'] {
   switch (statut) {
-    case "termine":
-      return "completed";
-    case "annule":
-      return "cancelled";
-    case "suspendu":
-      return "blocked";
-    case "en_cours":
+    case 'termine':
+      return 'completed';
+    case 'annule':
+      return 'cancelled';
+    case 'suspendu':
+      return 'blocked';
+    case 'en_cours':
     default:
-      return "in_progress";
+      return 'in_progress';
   }
 }
 
@@ -430,35 +424,35 @@ async function updateStageDirectly(
 ) {
   // Check if etape exists
   const { data: existing } = await supabase
-    .from("dossier_etapes")
-    .select("id")
-    .eq("dossier_id", dossierId)
-    .eq("type_etape", stage)
+    .from('dossier_etapes')
+    .select('id')
+    .eq('dossier_id', dossierId)
+    .eq('type_etape', stage)
     .single();
 
   if (existing) {
     // Update existing
     const { error } = await supabase
-      .from("dossier_etapes")
+      .from('dossier_etapes')
       .update({
         ref_id: entityId,
         reference,
         montant,
-        statut: "valide",
+        statut: 'valide',
         updated_at: new Date().toISOString(),
       })
-      .eq("id", existing.id);
+      .eq('id', existing.id);
 
     if (error) throw error;
   } else {
     // Insert new
-    const { error } = await supabase.from("dossier_etapes").insert({
+    const { error } = await supabase.from('dossier_etapes').insert({
       dossier_id: dossierId,
       type_etape: stage,
       ref_id: entityId,
       reference,
       montant,
-      statut: "valide",
+      statut: 'valide',
     });
 
     if (error) throw error;
@@ -467,12 +461,12 @@ async function updateStageDirectly(
   // Update dossier current stage
   const nextStage = getNextStage(stage);
   const { error: updateError } = await supabase
-    .from("dossiers")
+    .from('dossiers')
     .update({
       etape_courante: nextStage || stage,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", dossierId);
+    .eq('id', dossierId);
 
   if (updateError) throw updateError;
 }
@@ -480,15 +474,15 @@ async function updateStageDirectly(
 // Hook for checking if user can perform action on a stage
 export function useStagePermission(stage: SpendingStage) {
   const { data: profile } = useQuery({
-    queryKey: ["current-user-profile"],
+    queryKey: ['current-user-profile'],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return null;
 
       const { data } = await supabase
-        .from("profiles")
-        .select("profil_fonctionnel, role_hierarchique")
-        .eq("id", userData.user.id)
+        .from('profiles')
+        .select('profil_fonctionnel, role_hierarchique')
+        .eq('id', userData.user.id)
         .single();
 
       return data;
@@ -499,9 +493,9 @@ export function useStagePermission(stage: SpendingStage) {
   const userRole = profile?.profil_fonctionnel;
 
   const canValidate =
-    userRole === "ADMIN" ||
+    userRole === 'ADMIN' ||
     userRole === requiredRole ||
-    (requiredRole === "DG" && userRole === "DG");
+    (requiredRole === 'DG' && userRole === 'DG');
 
   const canView = true; // Everyone can view based on their visibility rules
 

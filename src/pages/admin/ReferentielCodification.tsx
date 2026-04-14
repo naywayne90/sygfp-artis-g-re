@@ -107,7 +107,6 @@ export default function ReferentielCodification() {
   };
 
   const handleEdit = (rule: any) => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     setEditingRule(rule);
     setEditPrefixe(rule.prefixe || '');
     setEditFormatNumero(rule.format_numero || '');

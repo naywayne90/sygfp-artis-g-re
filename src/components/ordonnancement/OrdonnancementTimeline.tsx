@@ -129,7 +129,7 @@ export function OrdonnancementTimeline({
 
         steps.push({
           key: `validation_${step.order}`,
-          label: `Validation ${step.role}`,
+          label: `Validation ${step.shortLabel ?? step.role}`,
           icon: Users,
           status: isCompleted
             ? 'completed'
@@ -161,7 +161,7 @@ export function OrdonnancementTimeline({
 
         steps.push({
           key: `signature_${step.role}`,
-          label: `Signature ${step.role}`,
+          label: `Signature ${step.shortLabel ?? step.role}`,
           icon: FileSignature,
           status: isSigned ? 'signed' : isPending ? 'current' : 'pending',
           date: signature?.signed_at,

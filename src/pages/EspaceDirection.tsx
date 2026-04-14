@@ -5,6 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -846,7 +847,9 @@ export default function EspaceDirection() {
                 {viewingNote.contenu ? (
                   <div
                     className="prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: viewingNote.contenu }}
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(viewingNote.contenu || ''),
+                    }}
                   />
                 ) : (
                   <p className="text-muted-foreground italic">Aucun contenu</p>

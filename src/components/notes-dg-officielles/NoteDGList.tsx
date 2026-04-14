@@ -52,7 +52,7 @@ interface NoteDGListProps {
   onValidate?: (noteId: string) => void;
   onReject?: (note: NoteDirectionGenerale) => void;
   onDiffuse?: (noteId: string) => void;
-  onRevertToDraft?: (noteId: string) => void;
+  onRevertToSoumis?: (noteId: string) => void;
   onDelete?: (noteId: string) => void;
   onCreate?: () => void;
   onRetry?: () => void;
@@ -135,7 +135,7 @@ export function NoteDGList({
   onValidate,
   onReject,
   onDiffuse,
-  onRevertToDraft,
+  onRevertToSoumis,
   onDelete,
   onCreate,
   onRetry,
@@ -355,10 +355,10 @@ export function NoteDGList({
                           )}
 
                           {/* Revenir en soumis (rejeté) */}
-                          {onRevertToDraft && note.statut === 'dg_rejetee' && (
-                            <DropdownMenuItem onClick={() => onRevertToDraft(note.id)}>
+                          {onRevertToSoumis && note.statut === 'dg_rejetee' && (
+                            <DropdownMenuItem onClick={() => onRevertToSoumis(note.id)}>
                               <RotateCcw className="h-4 w-4 mr-2" />
-                              Reprendre en soumis
+                              Reprendre pour correction
                             </DropdownMenuItem>
                           )}
 

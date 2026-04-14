@@ -1,25 +1,24 @@
-// @ts-nocheck
-import { useState } from "react";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useState } from 'react';
+import { useExercice } from '@/contexts/ExerciceContext';
 import {
   useTaskExecutions,
   useTaskFiltersData,
   TASK_STATUS_CONFIG,
   type TaskStatus,
-  type TaskFilters
-} from "@/hooks/useTaskExecution";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+  type TaskFilters,
+} from '@/hooks/useTaskExecution';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -27,13 +26,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -41,9 +40,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   Search,
   Filter,
@@ -62,12 +61,12 @@ import {
   TrendingUp,
   Clock,
   XCircle,
-  Eye
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { toast } from "sonner";
-import { TaskExecutionDetailModal } from "@/components/execution/TaskExecutionDetailModal";
+  Eye,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { toast } from 'sonner';
+import { TaskExecutionDetailModal } from '@/components/execution/TaskExecutionDetailModal';
 
 export default function TaskExecutionPage() {
   const { exerciceId, exercice, isReadOnly } = useExercice();
@@ -75,7 +74,7 @@ export default function TaskExecutionPage() {
   // Filtres
   const [filters, setFilters] = useState<TaskFilters>({
     exercice_id: exerciceId || undefined,
-    search: "",
+    search: '',
   });
   const [showFilters, setShowFilters] = useState(false);
 
@@ -88,8 +87,8 @@ export default function TaskExecutionPage() {
     open: boolean;
     activiteId: string | null;
     activiteLibelle: string;
-  }>({ open: false, activiteId: null, activiteLibelle: "" });
-  const [motifBlocage, setMotifBlocage] = useState("");
+  }>({ open: false, activiteId: null, activiteLibelle: '' });
+  const [motifBlocage, setMotifBlocage] = useState('');
 
   // Modal détail
   const [detailModal, setDetailModal] = useState<{
@@ -98,16 +97,9 @@ export default function TaskExecutionPage() {
   }>({ open: false, taskId: null });
 
   // Données
-  const {
-    executions,
-    stats,
-    isLoading,
-    startTask,
-    completeTask,
-    blockTask
-  } = useTaskExecutions({
+  const { executions, stats, isLoading, startTask, completeTask, blockTask } = useTaskExecutions({
     ...filters,
-    exercice_id: exerciceId || undefined
+    exercice_id: exerciceId || undefined,
   });
 
   const { directions, objectifsStrategiques } = useTaskFiltersData();
@@ -115,50 +107,50 @@ export default function TaskExecutionPage() {
   // Actions rapides
   const handleStartTask = async (activiteId: string) => {
     if (!exerciceId) {
-      toast.error("Veuillez sélectionner un exercice");
+      toast.error('Veuillez sélectionner un exercice');
       return;
     }
     try {
       await startTask.mutateAsync({ activiteId, exerciceId });
-      toast.success("Tâche démarrée");
+      toast.success('Tâche démarrée');
     } catch (error) {
-      toast.error("Erreur lors du démarrage");
+      toast.error('Erreur lors du démarrage');
     }
   };
 
   const handleCompleteTask = async (activiteId: string) => {
     if (!exerciceId) {
-      toast.error("Veuillez sélectionner un exercice");
+      toast.error('Veuillez sélectionner un exercice');
       return;
     }
     try {
       await completeTask.mutateAsync({
         activiteId,
         exerciceId,
-        commentaire: "Marqué comme réalisé"
+        commentaire: 'Marqué comme réalisé',
       });
-      toast.success("Tâche marquée comme réalisée");
+      toast.success('Tâche marquée comme réalisée');
     } catch (error) {
-      toast.error("Erreur lors de la validation");
+      toast.error('Erreur lors de la validation');
     }
   };
 
   const handleBlockTask = async () => {
     if (!exerciceId || !blockDialog.activiteId || !motifBlocage) {
-      toast.error("Veuillez renseigner le motif de blocage");
+      toast.error('Veuillez renseigner le motif de blocage');
       return;
     }
     try {
       await blockTask.mutateAsync({
         activiteId: blockDialog.activiteId,
         exerciceId,
-        motif: motifBlocage
+        motif: motifBlocage,
       });
-      toast.success("Tâche marquée comme bloquée");
-      setBlockDialog({ open: false, activiteId: null, activiteLibelle: "" });
-      setMotifBlocage("");
+      toast.success('Tâche marquée comme bloquée');
+      setBlockDialog({ open: false, activiteId: null, activiteLibelle: '' });
+      setMotifBlocage('');
     } catch (error) {
-      toast.error("Erreur lors du blocage");
+      toast.error('Erreur lors du blocage');
     }
   };
 
@@ -167,32 +159,26 @@ export default function TaskExecutionPage() {
   };
 
   // Filtrage local pour la recherche
-  const filteredExecutions = executions?.filter(exec => {
-    if (!filters.search) return true;
-    const search = filters.search.toLowerCase();
-    return (
-      exec.activite_libelle?.toLowerCase().includes(search) ||
-      exec.activite_code?.toLowerCase().includes(search) ||
-      exec.action_libelle?.toLowerCase().includes(search) ||
-      exec.mission_libelle?.toLowerCase().includes(search) ||
-      exec.direction_label?.toLowerCase().includes(search)
-    );
-  }) || [];
+  const filteredExecutions =
+    executions?.filter((exec) => {
+      if (!filters.search) return true;
+      const search = filters.search.toLowerCase();
+      return (
+        exec.activite_libelle?.toLowerCase().includes(search) ||
+        exec.activite_code?.toLowerCase().includes(search) ||
+        exec.action_libelle?.toLowerCase().includes(search) ||
+        exec.mission_libelle?.toLowerCase().includes(search) ||
+        exec.direction_label?.toLowerCase().includes(search)
+      );
+    }) || [];
 
   // Pagination
   const totalPages = Math.ceil(filteredExecutions.length / pageSize);
-  const paginatedExecutions = filteredExecutions.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
+  const paginatedExecutions = filteredExecutions.slice((page - 1) * pageSize, page * pageSize);
 
   const getStatusBadge = (status: TaskStatus) => {
     const config = TASK_STATUS_CONFIG[status];
-    return (
-      <Badge className={`${config.bgColor} ${config.color} border-0`}>
-        {config.label}
-      </Badge>
-    );
+    return <Badge className={`${config.bgColor} ${config.color} border-0`}>{config.label}</Badge>;
   };
 
   return (
@@ -202,7 +188,7 @@ export default function TaskExecutionPage() {
         <div>
           <h1 className="text-2xl font-bold">Exécution Physique des Activités</h1>
           <p className="text-muted-foreground">
-            Suivi de l'avancement des activités - Exercice {exercice?.annee || "Non sélectionné"}
+            Suivi de l'avancement des activités - Exercice {exercice?.annee || 'Non sélectionné'}
           </p>
         </div>
         {isReadOnly && (
@@ -292,11 +278,7 @@ export default function TaskExecutionPage() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Liste des activités</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
               <Filter className="h-4 w-4 mr-2" />
               Filtres
             </Button>
@@ -309,8 +291,8 @@ export default function TaskExecutionPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher par activité, action, mission..."
-                value={filters.search || ""}
-                onChange={(e) => setFilters(f => ({ ...f, search: e.target.value }))}
+                value={filters.search || ''}
+                onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
                 className="pl-10"
               />
             </div>
@@ -325,18 +307,20 @@ export default function TaskExecutionPage() {
                   Direction
                 </Label>
                 <Select
-                  value={filters.direction_id || "all"}
-                  onValueChange={(v) => setFilters(f => ({
-                    ...f,
-                    direction_id: v === "all" ? undefined : v
-                  }))}
+                  value={filters.direction_id || 'all'}
+                  onValueChange={(v) =>
+                    setFilters((f) => ({
+                      ...f,
+                      direction_id: v === 'all' ? undefined : v,
+                    }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Toutes les directions" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Toutes les directions</SelectItem>
-                    {directions?.map(d => (
+                    {directions?.map((d) => (
                       <SelectItem key={d.id} value={d.id}>
                         {d.code} - {d.label}
                       </SelectItem>
@@ -351,18 +335,20 @@ export default function TaskExecutionPage() {
                   Objectif Stratégique
                 </Label>
                 <Select
-                  value={filters.objectif_strategique_id || "all"}
-                  onValueChange={(v) => setFilters(f => ({
-                    ...f,
-                    objectif_strategique_id: v === "all" ? undefined : v
-                  }))}
+                  value={filters.objectif_strategique_id || 'all'}
+                  onValueChange={(v) =>
+                    setFilters((f) => ({
+                      ...f,
+                      objectif_strategique_id: v === 'all' ? undefined : v,
+                    }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Tous les OS" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Tous les OS</SelectItem>
-                    {objectifsStrategiques?.map(os => (
+                    {objectifsStrategiques?.map((os) => (
                       <SelectItem key={os.id} value={os.id}>
                         {os.code} - {os.libelle}
                       </SelectItem>
@@ -377,11 +363,13 @@ export default function TaskExecutionPage() {
                   Statut
                 </Label>
                 <Select
-                  value={filters.status || "all"}
-                  onValueChange={(v) => setFilters(f => ({
-                    ...f,
-                    status: v === "all" ? undefined : v as TaskStatus
-                  }))}
+                  value={filters.status || 'all'}
+                  onValueChange={(v) =>
+                    setFilters((f) => ({
+                      ...f,
+                      status: v === 'all' ? undefined : (v as TaskStatus),
+                    }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Tous les statuts" />
@@ -400,7 +388,7 @@ export default function TaskExecutionPage() {
               <div className="flex items-end">
                 <Button
                   variant="ghost"
-                  onClick={() => setFilters({ exercice_id: exerciceId || undefined, search: "" })}
+                  onClick={() => setFilters({ exercice_id: exerciceId || undefined, search: '' })}
                 >
                   Réinitialiser
                 </Button>
@@ -450,8 +438,12 @@ export default function TaskExecutionPage() {
                       </TableCell>
                       <TableCell>
                         <div className="text-xs">
-                          <p className="font-medium">{exec.action_code} - {exec.action_libelle}</p>
-                          <p className="text-muted-foreground">{exec.mission_code} - {exec.mission_libelle}</p>
+                          <p className="font-medium">
+                            {exec.action_code} - {exec.action_libelle}
+                          </p>
+                          <p className="text-muted-foreground">
+                            {exec.mission_code} - {exec.mission_libelle}
+                          </p>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -471,7 +463,7 @@ export default function TaskExecutionPage() {
                       <TableCell>
                         <div className="flex items-center gap-1 text-xs">
                           <User className="h-3 w-3" />
-                          {exec.responsable_display || "-"}
+                          {exec.responsable_display || '-'}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -479,9 +471,15 @@ export default function TaskExecutionPage() {
                           {exec.date_debut_reelle && (
                             <p className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              {format(new Date(exec.date_debut_reelle), "dd/MM/yy", { locale: fr })}
+                              {format(new Date(exec.date_debut_reelle), 'dd/MM/yy', { locale: fr })}
                               {exec.date_fin_reelle && (
-                                <> → {format(new Date(exec.date_fin_reelle), "dd/MM/yy", { locale: fr })}</>
+                                <>
+                                  {' '}
+                                  →{' '}
+                                  {format(new Date(exec.date_fin_reelle), 'dd/MM/yy', {
+                                    locale: fr,
+                                  })}
+                                </>
                               )}
                             </p>
                           )}
@@ -505,7 +503,7 @@ export default function TaskExecutionPage() {
                             {/* Actions - uniquement si pas en lecture seule */}
                             {!isReadOnly && (
                               <>
-                                {exec.status === "non_demarre" && (
+                                {exec.status === 'non_demarre' && (
                                   <DropdownMenuItem
                                     onClick={() => handleStartTask(exec.activite_id)}
                                   >
@@ -513,7 +511,7 @@ export default function TaskExecutionPage() {
                                     Démarrer
                                   </DropdownMenuItem>
                                 )}
-                                {(exec.status === "non_demarre" || exec.status === "en_cours") && (
+                                {(exec.status === 'non_demarre' || exec.status === 'en_cours') && (
                                   <DropdownMenuItem
                                     onClick={() => handleCompleteTask(exec.activite_id)}
                                   >
@@ -521,9 +519,11 @@ export default function TaskExecutionPage() {
                                     Marquer réalisé
                                   </DropdownMenuItem>
                                 )}
-                                {exec.status !== "bloque" && exec.status !== "realise" && (
+                                {exec.status !== 'bloque' && exec.status !== 'realise' && (
                                   <DropdownMenuItem
-                                    onClick={() => openBlockDialog(exec.activite_id, exec.activite_libelle || "")}
+                                    onClick={() =>
+                                      openBlockDialog(exec.activite_id, exec.activite_libelle || '')
+                                    }
                                     className="text-red-600"
                                   >
                                     <AlertTriangle className="h-4 w-4 mr-2" />
@@ -546,13 +546,15 @@ export default function TaskExecutionPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
               <p className="text-sm text-muted-foreground">
-                Affichage {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, filteredExecutions.length)} sur {filteredExecutions.length}
+                Affichage {(page - 1) * pageSize + 1} -{' '}
+                {Math.min(page * pageSize, filteredExecutions.length)} sur{' '}
+                {filteredExecutions.length}
               </p>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -563,7 +565,7 @@ export default function TaskExecutionPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -575,21 +577,22 @@ export default function TaskExecutionPage() {
       </Card>
 
       {/* Dialog blocage */}
-      <Dialog open={blockDialog.open} onOpenChange={(open) => {
-        if (!open) {
-          setBlockDialog({ open: false, activiteId: null, activiteLibelle: "" });
-          setMotifBlocage("");
-        }
-      }}>
+      <Dialog
+        open={blockDialog.open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setBlockDialog({ open: false, activiteId: null, activiteLibelle: '' });
+            setMotifBlocage('');
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />
               Signaler un blocage
             </DialogTitle>
-            <DialogDescription>
-              Activité : {blockDialog.activiteLibelle}
-            </DialogDescription>
+            <DialogDescription>Activité : {blockDialog.activiteLibelle}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -607,17 +610,13 @@ export default function TaskExecutionPage() {
             <Button
               variant="outline"
               onClick={() => {
-                setBlockDialog({ open: false, activiteId: null, activiteLibelle: "" });
-                setMotifBlocage("");
+                setBlockDialog({ open: false, activiteId: null, activiteLibelle: '' });
+                setMotifBlocage('');
               }}
             >
               Annuler
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleBlockTask}
-              disabled={!motifBlocage.trim()}
-            >
+            <Button variant="destructive" onClick={handleBlockTask} disabled={!motifBlocage.trim()}>
               <XCircle className="h-4 w-4 mr-2" />
               Confirmer le blocage
             </Button>

@@ -386,7 +386,7 @@ export function useImputation() {
       .from('imputations')
       .select('id')
       .eq('note_aef_id', noteAefId)
-      .eq('statut', 'active')
+      .in('statut', ['soumis', 'vise', 'valide'])
       .maybeSingle();
 
     if (error) {
@@ -484,32 +484,12 @@ export function useImputation() {
 
       if (dossierError) throw dossierError;
 
-      // Créer le mouvement de réservation budgétaire (bloquant)
-      await supabase.from('budget_movements').insert({
-        budget_line_id: budgetLineId,
-        type_mouvement: 'reservation',
-        montant: data.montant,
-        sens: 'debit',
-        disponible_avant: availability.disponible,
-        disponible_apres: availability.disponible_net,
-        reserve_avant: availability.montant_reserve,
-        reserve_apres: availability.montant_reserve + data.montant,
-        entity_type: 'imputation',
-        entity_id: data.noteId,
-        dossier_id: dossier.id,
-        exercice: exercice || new Date().getFullYear(),
-        motif: 'Réservation budgétaire - Imputation AEF',
-        created_by: user.id,
-        statut: 'valide',
-      });
-
-      // Mettre à jour montant_reserve sur la ligne budgétaire
-      await supabase
-        .from('budget_lines')
-        .update({
-          montant_reserve: (availability.montant_reserve || 0) + data.montant,
-        })
-        .eq('id', budgetLineId);
+      // ⚠️ PAS de réservation budgétaire à la création (statut = soumis).
+      // La réservation se fait UNIQUEMENT à la validation DG via RPC validate_imputation().
+      // Ancien code supprimé (P1-1 double réservation) :
+      // - budget_movements.insert(...) → supprimé
+      // - budget_lines.update(montant_reserve += montant) → supprimé
+      // Le contrôle de disponibilité ci-dessus reste informatif (alerte si insuffisant).
 
       // Créer l'étape d'imputation dans le dossier
       await supabase.from('dossier_etapes').insert({
@@ -602,12 +582,12 @@ export function useImputation() {
             virements_recus: availability.virements_recus,
             virements_emis: availability.virements_emis,
             cumul_engage: availability.engagements_anterieurs,
-            montant_reserve_avant: availability.montant_reserve,
-            montant_reserve_apres: availability.montant_reserve + data.montant,
+            montant_reserve: availability.montant_reserve,
             disponible_avant: availability.disponible,
-            disponible_apres: availability.disponible_net,
+            disponible_net: availability.disponible_net,
             is_sufficient: availability.is_sufficient,
             deficit: availability.deficit,
+            // Réservation effective à la validation DG uniquement
           },
           // Rattachement programmatique
           rattachement: {
@@ -643,9 +623,9 @@ export function useImputation() {
           },
           newValues: {
             disponible_net: availability.disponible_net,
-            montant_reserve: availability.montant_reserve + data.montant,
             deficit: availability.deficit,
             imputation_id: imputation.id,
+            // Réservation différée à la validation DG
           },
           justification: data.justification_depassement,
         });

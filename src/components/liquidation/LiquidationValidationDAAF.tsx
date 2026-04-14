@@ -570,7 +570,7 @@ export function LiquidationValidationDAAF({
                         <AlertTriangle className="h-4 w-4 text-secondary mt-0.5" />
                         <div className="text-sm">
                           <p className="font-medium text-secondary">
-                            Montant {'\u2265'} {formatCurrency(SEUIL_VALIDATION_DG)}
+                            Montant {'≥'} {formatCurrency(SEUIL_VALIDATION_DG)}
                           </p>
                           <p className="text-muted-foreground">
                             Cette liquidation sera transmise au DG pour validation finale.

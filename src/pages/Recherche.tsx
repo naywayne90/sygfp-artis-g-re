@@ -30,6 +30,7 @@ import { DossierBlockDialog } from '@/components/dossier/DossierBlockDialog';
 import { ChaineDepenseVisuel } from '@/components/workflow/ChaineDepenseVisuel';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useToast } from '@/hooks/use-toast';
+import { formatCurrency } from '@/lib/utils';
 
 export default function Recherche() {
   const navigate = useNavigate();
@@ -264,15 +265,6 @@ export default function Recherche() {
     }
   };
 
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XOF',
-      minimumFractionDigits: 0,
-      notation: 'compact',
-    }).format(montant);
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -468,7 +460,7 @@ export default function Recherche() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatMontant(stats.montant_total)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(stats.montant_total)}</div>
             <p className="text-xs text-muted-foreground">estimé</p>
           </CardContent>
         </Card>

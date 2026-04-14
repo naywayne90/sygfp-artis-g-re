@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
 import {
   useRoadmapSubmissionDetail,
   computeActivityDiff,
@@ -111,16 +112,6 @@ export function RoadmapSubmissionDetailDialog({
   const [revisionComment, setRevisionComment] = useState('');
   const [validationComment, setValidationComment] = useState('');
 
-  // Formatage montant
-  const formatMontant = (montant: number | undefined) => {
-    if (montant === undefined) return '—';
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XOF',
-      maximumFractionDigits: 0,
-    }).format(montant);
-  };
-
   // Calcul des activités avec diff
   const activitiesWithDiff = activities.map((activity) => ({
     ...activity,
@@ -192,7 +183,7 @@ export function RoadmapSubmissionDetailDialog({
                   {submission.nb_activites} activités
                 </div>
                 <div className="font-mono font-medium">
-                  {formatMontant(submission.montant_total)}
+                  {formatCurrency(submission.montant_total)}
                 </div>
               </div>
             </div>
@@ -417,7 +408,7 @@ export function RoadmapSubmissionDetailDialog({
                               {activity.activite?.libelle || activity.snapshot_data?.libelle || '—'}
                             </TableCell>
                             <TableCell className="text-right font-mono">
-                              {formatMontant(
+                              {formatCurrency(
                                 activity.activite?.montant_prevu ??
                                   activity.snapshot_data?.montant_prevu
                               )}

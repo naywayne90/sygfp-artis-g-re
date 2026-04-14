@@ -17,13 +17,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const formatMontant = (montant: number): string => {
-  if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
-  if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
-  if (montant >= 1_000) return `${(montant / 1_000).toFixed(0)} K`;
-  return montant.toFixed(0);
-};
+import { formatCurrency } from '@/lib/utils';
 
 export function DashboardDAF() {
   const { data: stats, isLoading } = useDAFDashboard();
@@ -153,11 +147,13 @@ export function DashboardDAF() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Montant engagé</span>
-                <span className="font-medium">{formatMontant(stats?.montantEngageMois || 0)}</span>
+                <span className="font-medium">{formatCurrency(stats?.montantEngageMois || 0)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Montant liquidé</span>
-                <span className="font-medium">{formatMontant(stats?.montantLiquideMois || 0)}</span>
+                <span className="font-medium">
+                  {formatCurrency(stats?.montantLiquideMois || 0)}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -201,7 +197,7 @@ export function DashboardDAF() {
                 <span className="text-sm text-muted-foreground">Reste à engager</span>
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
               </div>
-              <p className="text-2xl font-bold">{formatMontant(stats?.resteAEngager || 0)}</p>
+              <p className="text-2xl font-bold">{formatCurrency(stats?.resteAEngager || 0)}</p>
               <p className="text-xs text-muted-foreground">FCFA disponible</p>
             </div>
             <div className="p-4 rounded-lg border space-y-2">
@@ -209,7 +205,7 @@ export function DashboardDAF() {
                 <span className="text-sm text-muted-foreground">Reste à liquider</span>
                 <Receipt className="h-4 w-4 text-muted-foreground" />
               </div>
-              <p className="text-2xl font-bold">{formatMontant(stats?.resteALiquider || 0)}</p>
+              <p className="text-2xl font-bold">{formatCurrency(stats?.resteALiquider || 0)}</p>
               <p className="text-xs text-muted-foreground">FCFA engagés non liquidés</p>
             </div>
             <div className="p-4 rounded-lg border space-y-2">
@@ -217,7 +213,7 @@ export function DashboardDAF() {
                 <span className="text-sm text-muted-foreground">Reste à payer</span>
                 <Wallet className="h-4 w-4 text-muted-foreground" />
               </div>
-              <p className="text-2xl font-bold">{formatMontant(stats?.resteAPayer || 0)}</p>
+              <p className="text-2xl font-bold">{formatCurrency(stats?.resteAPayer || 0)}</p>
               <p className="text-xs text-muted-foreground">FCFA liquidés non payés</p>
             </div>
           </div>
@@ -247,7 +243,7 @@ export function DashboardDAF() {
                       </div>
                     </div>
                     <p className="text-sm font-medium text-muted-foreground mt-2">
-                      {formatMontant(liqStats.montantEnAttente)} FCFA
+                      {formatCurrency(liqStats.montantEnAttente)}
                     </p>
                   </CardContent>
                 </Card>
@@ -338,7 +334,7 @@ export function DashboardDAF() {
                           {p.count}
                         </Badge>
                         <span className="text-right font-medium text-xs">
-                          {formatMontant(p.montant)}
+                          {formatCurrency(p.montant)}
                         </span>
                       </div>
                     ))}
@@ -375,7 +371,7 @@ export function DashboardDAF() {
                           {d.count}
                         </Badge>
                         <span className="text-right font-medium text-xs">
-                          {formatMontant(d.montant)}
+                          {formatCurrency(d.montant)}
                         </span>
                       </div>
                     ))}

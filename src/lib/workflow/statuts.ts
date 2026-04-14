@@ -8,9 +8,7 @@
 // ===== Statuts génériques (toutes étapes) =====
 
 export const STATUTS_WORKFLOW = {
-  // Phase validation (brouillon supprime — creation = soumis)
-
-  // Phase validation
+  // Phase validation (brouillon supprime — tout document est soumis des la creation)
   SOUMIS: 'soumis', // Soumis pour validation
   EN_ATTENTE: 'en_attente', // En attente d'action
   EN_COURS: 'en_cours', // Traitement en cours

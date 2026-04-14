@@ -10,11 +10,11 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import type { PassationMarche, LotMarche, Soumissionnaire } from '@/hooks/usePassationsMarche';
 import { MODES_PASSATION, STATUTS } from '@/hooks/usePassationsMarche';
+import { formatCurrency } from '@/lib/utils';
 
 // ── Helpers ──
 
-const fmt = (montant: number | null): string =>
-  montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
+const fmt = (montant: number | null): string => (montant != null ? formatCurrency(montant) : '-');
 
 const fmtDate = (d: string | null): string => {
   if (!d) return '-';

@@ -8,6 +8,18 @@ Les **Notes Sans Effet Financier (SEF)** constituent le point d'entree de la cha
 
 **Chaine** : Note SEF > Note AEF > Imputation > Expression Besoin > Passation Marche > Engagement > Liquidation > Ordonnancement > Reglement
 
+## Codification ARTI
+
+| Propriété            | Valeur                                                 |
+| -------------------- | ------------------------------------------------------ |
+| **Code étape**       | 0 (00 en format 14 chars)                              |
+| **Sigle**            | SEF                                                    |
+| **Format référence** | `ARTI00MMYYNNNN` (14 chars)                            |
+| **Exemple**          | `ARTI0002260001` = SEF n°1, février 2026               |
+| **Colonne DB**       | `notes_sef.numero` et `notes_sef.reference_pivot`      |
+| **Génération**       | RPC `submit_note_sef_with_reference()` à la soumission |
+| **Compteur**         | `arti_reference_counters` (étape=0, par mois)          |
+
 ## 2. Routes et acces
 
 | Route                   | Page                                         | Roles           |

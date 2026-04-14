@@ -4,11 +4,11 @@
  * Exemple: EB-2026-001_PROFORMA_2026-01-17.pdf
  */
 
-import { format } from "date-fns";
+import { format } from 'date-fns';
 
 export interface NamingParams {
-  reference: string;      // Ex: "EB-2026-001", "ENG-2026-042"
-  typePiece: string;      // Ex: "PROFORMA", "FACTURE", "PV_RECEPTION"
+  reference: string; // Ex: "EB-2026-001", "ENG-2026-042"
+  typePiece: string; // Ex: "PROFORMA", "FACTURE", "PV_RECEPTION"
   originalFilename: string;
   date?: Date;
 }
@@ -29,30 +29,38 @@ export const DOCUMENT_TYPES = {
   FACTURE: { code: 'FACTURE', label: 'Facture définitive', obligatoire: true },
   BON_COMMANDE: { code: 'BON_COMMANDE', label: 'Bon de commande', obligatoire: false },
   BON_LIVRAISON: { code: 'BON_LIVRAISON', label: 'Bon de livraison', obligatoire: true },
-  
+
   // Documents de réception
   PV_RECEPTION: { code: 'PV_RECEPTION', label: 'PV de réception', obligatoire: true },
-  ATTESTATION_SERVICE_FAIT: { code: 'ATTESTATION_SERVICE_FAIT', label: 'Attestation service fait', obligatoire: true },
-  
+  ATTESTATION_SERVICE_FAIT: {
+    code: 'ATTESTATION_SERVICE_FAIT',
+    label: 'Attestation service fait',
+    obligatoire: true,
+  },
+
   // Documents financiers
-  FICHE_ENGAGEMENT: { code: 'FICHE_ENGAGEMENT', label: 'Fiche d\'engagement', obligatoire: true },
-  FICHE_LIQUIDATION: { code: 'FICHE_LIQUIDATION', label: 'Fiche de liquidation', obligatoire: true },
+  FICHE_ENGAGEMENT: { code: 'FICHE_ENGAGEMENT', label: "Fiche d'engagement", obligatoire: true },
+  FICHE_LIQUIDATION: {
+    code: 'FICHE_LIQUIDATION',
+    label: 'Fiche de liquidation',
+    obligatoire: true,
+  },
   ORDRE_PAYER: { code: 'ORDRE_PAYER', label: 'Ordre de payer', obligatoire: true },
-  
+
   // Documents marchés
   CAHIER_CHARGES: { code: 'CAHIER_CHARGES', label: 'Cahier des charges', obligatoire: false },
   OFFRE_TECHNIQUE: { code: 'OFFRE_TECHNIQUE', label: 'Offre technique', obligatoire: false },
   OFFRE_FINANCIERE: { code: 'OFFRE_FINANCIERE', label: 'Offre financière', obligatoire: false },
-  PV_OUVERTURE: { code: 'PV_OUVERTURE', label: 'PV d\'ouverture des plis', obligatoire: false },
-  PV_ATTRIBUTION: { code: 'PV_ATTRIBUTION', label: 'PV d\'attribution', obligatoire: false },
+  PV_OUVERTURE: { code: 'PV_OUVERTURE', label: "PV d'ouverture des plis", obligatoire: false },
+  PV_ATTRIBUTION: { code: 'PV_ATTRIBUTION', label: "PV d'attribution", obligatoire: false },
   CONTRAT: { code: 'CONTRAT', label: 'Contrat signé', obligatoire: true },
-  
+
   // Documents prestataire
   RIB: { code: 'RIB', label: 'RIB bancaire', obligatoire: true },
   RCCM: { code: 'RCCM', label: 'RCCM', obligatoire: false },
   QUITUS_FISCAL: { code: 'QUITUS_FISCAL', label: 'Quitus fiscal', obligatoire: false },
   ATTESTATION_CNSS: { code: 'ATTESTATION_CNSS', label: 'Attestation CNSS', obligatoire: false },
-  
+
   // Autres
   AUTRE: { code: 'AUTRE', label: 'Autre document', obligatoire: false },
   NOTE: { code: 'NOTE', label: 'Note de service', obligatoire: false },
@@ -68,10 +76,10 @@ function sanitizeForFilename(str: string): string {
   return str
     .toUpperCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove accents
-    .replace(/[^A-Z0-9-]/g, '_')     // Replace special chars
-    .replace(/_+/g, '_')             // Collapse multiple underscores
-    .replace(/^_|_$/g, '');          // Trim underscores
+    .replace(/[̀-ͯ]/g, '') // Remove accents
+    .replace(/[^A-Z0-9-]/g, '_') // Replace special chars
+    .replace(/_+/g, '_') // Collapse multiple underscores
+    .replace(/^_|_$/g, ''); // Trim underscores
 }
 
 /**
@@ -89,14 +97,14 @@ function getExtension(filename: string): string {
  */
 export function generateStandardName(params: NamingParams): StandardNameResult {
   const { reference, typePiece, originalFilename, date = new Date() } = params;
-  
+
   const sanitizedReference = sanitizeForFilename(reference);
   const sanitizedType = sanitizeForFilename(typePiece);
   const extension = getExtension(originalFilename);
   const formattedDate = format(date, 'yyyy-MM-dd');
-  
+
   const standardName = `${sanitizedReference}_${sanitizedType}_${formattedDate}.${extension}`;
-  
+
   return {
     standardName,
     extension,
@@ -118,13 +126,13 @@ export function generateStandardPath(params: {
   originalFilename: string;
 }): string {
   const { exercice, entityType, entityId, reference, typePiece, originalFilename } = params;
-  
+
   const { standardName } = generateStandardName({
     reference,
     typePiece,
     originalFilename,
   });
-  
+
   return `${exercice}/${entityType}/${entityId}/${standardName}`;
 }
 
@@ -139,9 +147,9 @@ export function parseStandardName(standardName: string): {
 } | null {
   // Format: REFERENCE_TYPE_DATE.ext
   const match = standardName.match(/^(.+)_([A-Z_]+)_(\d{4}-\d{2}-\d{2})\.(\w+)$/);
-  
+
   if (!match) return null;
-  
+
   return {
     reference: match[1],
     typePiece: match[2],

@@ -2,7 +2,7 @@
  * NotificationBudgetaireForm - Formulaire de création/édition de notification budgétaire
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,25 +10,25 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Loader2, Save } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon, Loader2, Save } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn, formatCurrency } from '@/lib/utils';
 import {
   useBudgetNotifications,
   BudgetNotification,
   CreateNotificationData,
-} from "@/hooks/useBudgetNotifications";
-import { FundingSourceSelect } from "@/components/shared/FundingSourceSelect";
-import { useExercice } from "@/contexts/ExerciceContext";
+} from '@/hooks/useBudgetNotifications';
+import { FundingSourceSelect } from '@/components/shared/FundingSourceSelect';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 interface NotificationBudgetaireFormProps {
   open: boolean;
@@ -44,23 +44,19 @@ export function NotificationBudgetaireForm({
   onSuccess,
 }: NotificationBudgetaireFormProps) {
   const { exercice } = useExercice();
-  const {
-    createNotificationAsync,
-    updateNotificationAsync,
-    isCreating,
-    isUpdating,
-  } = useBudgetNotifications();
+  const { createNotificationAsync, updateNotificationAsync, isCreating, isUpdating } =
+    useBudgetNotifications();
 
   const isEditing = !!notification;
 
   const [formData, setFormData] = useState<CreateNotificationData>({
-    objet: "",
+    objet: '',
     montant: 0,
-    origine_fonds_code: "budget_etat",
-    nature_depense: "",
-    date_notification: new Date().toISOString().split("T")[0],
-    date_reception: "",
-    commentaire: "",
+    origine_fonds_code: 'budget_etat',
+    nature_depense: '',
+    date_notification: new Date().toISOString().split('T')[0],
+    date_reception: '',
+    commentaire: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -73,21 +69,21 @@ export function NotificationBudgetaireForm({
         montant: notification.montant,
         origine_fonds_id: notification.origine_fonds_id || undefined,
         origine_fonds_code: notification.origine_fonds_code || undefined,
-        nature_depense: notification.nature_depense || "",
+        nature_depense: notification.nature_depense || '',
         date_notification: notification.date_notification,
-        date_reception: notification.date_reception || "",
-        commentaire: notification.commentaire || "",
+        date_reception: notification.date_reception || '',
+        commentaire: notification.commentaire || '',
       });
       setErrors({});
     } else if (!notification && open) {
       setFormData({
-        objet: "",
+        objet: '',
         montant: 0,
-        origine_fonds_code: "budget_etat",
-        nature_depense: "",
-        date_notification: new Date().toISOString().split("T")[0],
-        date_reception: "",
-        commentaire: "",
+        origine_fonds_code: 'budget_etat',
+        nature_depense: '',
+        date_notification: new Date().toISOString().split('T')[0],
+        date_reception: '',
+        commentaire: '',
       });
       setErrors({});
     }
@@ -101,11 +97,11 @@ export function NotificationBudgetaireForm({
     }
 
     if (!formData.montant || formData.montant <= 0) {
-      newErrors.montant = "Le montant doit être supérieur à 0";
+      newErrors.montant = 'Le montant doit être supérieur à 0';
     }
 
     if (!formData.date_notification) {
-      newErrors.date_notification = "La date est requise";
+      newErrors.date_notification = 'La date est requise';
     }
 
     setErrors(newErrors);
@@ -130,12 +126,8 @@ export function NotificationBudgetaireForm({
     }
   };
 
-  const formatMontant = (value: number): string => {
-    return new Intl.NumberFormat("fr-FR").format(value);
-  };
-
   const parseMontant = (value: string): number => {
-    return parseFloat(value.replace(/\s/g, "").replace(",", ".")) || 0;
+    return parseFloat(value.replace(/\s/g, '').replace(',', '.')) || 0;
   };
 
   return (
@@ -143,7 +135,7 @@ export function NotificationBudgetaireForm({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Modifier la notification" : "Nouvelle notification budgétaire"}
+            {isEditing ? 'Modifier la notification' : 'Nouvelle notification budgétaire'}
           </DialogTitle>
           <DialogDescription>
             {isEditing
@@ -162,7 +154,7 @@ export function NotificationBudgetaireForm({
               onChange={(e) => setFormData({ ...formData, objet: e.target.value })}
               placeholder="Décrivez l'objet de la notification..."
               rows={3}
-              className={errors.objet ? "border-red-500" : ""}
+              className={errors.objet ? 'border-red-500' : ''}
             />
             {errors.objet && <p className="text-sm text-red-500">{errors.objet}</p>}
           </div>
@@ -174,12 +166,12 @@ export function NotificationBudgetaireForm({
               <Input
                 id="montant"
                 type="text"
-                value={formatMontant(formData.montant)}
+                value={formatCurrency(formData.montant, { showSymbol: false })}
                 onChange={(e) =>
                   setFormData({ ...formData, montant: parseMontant(e.target.value) })
                 }
                 placeholder="0"
-                className={errors.montant ? "border-red-500" : ""}
+                className={errors.montant ? 'border-red-500' : ''}
               />
               {errors.montant && <p className="text-sm text-red-500">{errors.montant}</p>}
             </div>
@@ -204,29 +196,27 @@ export function NotificationBudgetaireForm({
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.date_notification && "text-muted-foreground",
-                      errors.date_notification && "border-red-500"
+                      'w-full justify-start text-left font-normal',
+                      !formData.date_notification && 'text-muted-foreground',
+                      errors.date_notification && 'border-red-500'
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {formData.date_notification
-                      ? format(new Date(formData.date_notification), "dd/MM/yyyy", { locale: fr })
-                      : "Sélectionner..."}
+                      ? format(new Date(formData.date_notification), 'dd/MM/yyyy', { locale: fr })
+                      : 'Sélectionner...'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={
-                      formData.date_notification
-                        ? new Date(formData.date_notification)
-                        : undefined
+                      formData.date_notification ? new Date(formData.date_notification) : undefined
                     }
                     onSelect={(date) =>
                       setFormData({
                         ...formData,
-                        date_notification: date?.toISOString().split("T")[0] || "",
+                        date_notification: date?.toISOString().split('T')[0] || '',
                       })
                     }
                     locale={fr}
@@ -247,28 +237,26 @@ export function NotificationBudgetaireForm({
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.date_reception && "text-muted-foreground"
+                      'w-full justify-start text-left font-normal',
+                      !formData.date_reception && 'text-muted-foreground'
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {formData.date_reception
-                      ? format(new Date(formData.date_reception), "dd/MM/yyyy", { locale: fr })
-                      : "Sélectionner..."}
+                      ? format(new Date(formData.date_reception), 'dd/MM/yyyy', { locale: fr })
+                      : 'Sélectionner...'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={
-                      formData.date_reception
-                        ? new Date(formData.date_reception)
-                        : undefined
+                      formData.date_reception ? new Date(formData.date_reception) : undefined
                     }
                     onSelect={(date) =>
                       setFormData({
                         ...formData,
-                        date_reception: date?.toISOString().split("T")[0] || "",
+                        date_reception: date?.toISOString().split('T')[0] || '',
                       })
                     }
                     locale={fr}
@@ -312,7 +300,7 @@ export function NotificationBudgetaireForm({
           <Button onClick={handleSubmit} disabled={isCreating || isUpdating}>
             {(isCreating || isUpdating) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            {isEditing ? "Mettre à jour" : "Créer"}
+            {isEditing ? 'Mettre à jour' : 'Créer'}
           </Button>
         </DialogFooter>
       </DialogContent>

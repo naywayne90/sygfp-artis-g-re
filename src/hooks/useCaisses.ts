@@ -8,10 +8,11 @@
  * - Export CSV
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useCallback, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useCallback, useMemo } from 'react';
+import { formatCurrency } from '@/lib/utils';
 
 // ============================================
 // TYPES
@@ -42,7 +43,7 @@ export interface Caisse {
 
 export interface CaisseFilters {
   search?: string;
-  statut?: "all" | "actif" | "inactif";
+  statut?: 'all' | 'actif' | 'inactif';
   direction_id?: string;
 }
 
@@ -79,18 +80,20 @@ export function useCaisses(filters?: CaisseFilters) {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["caisses", filters],
+    queryKey: ['caisses', filters],
     queryFn: async (): Promise<Caisse[]> => {
       try {
         // Tentative de requête - la table peut ne pas exister
-        const { data, error } = await supabase
-          .from("caisses" as any)
-          .select(`
+        const { data, error } = (await supabase
+          .from('caisses' as any)
+          .select(
+            `
             *,
             responsable:profiles!caisses_responsable_id_fkey(id, full_name),
             direction:directions(id, code, label)
-          `)
-          .order("code") as any;
+          `
+          )
+          .order('code')) as any;
 
         if (error) {
           // Si la table n'existe pas, retourner tableau vide
@@ -104,9 +107,9 @@ export function useCaisses(filters?: CaisseFilters) {
         let result = (data || []) as Caisse[];
 
         // Filtrer par statut
-        if (filters?.statut === "actif") {
+        if (filters?.statut === 'actif') {
           result = result.filter((c) => c.est_actif);
-        } else if (filters?.statut === "inactif") {
+        } else if (filters?.statut === 'inactif') {
           result = result.filter((c) => !c.est_actif);
         }
 
@@ -128,7 +131,7 @@ export function useCaisses(filters?: CaisseFilters) {
 
         return result;
       } catch {
-        console.warn("Erreur récupération caisses - table probablement inexistante");
+        console.warn('Erreur récupération caisses - table probablement inexistante');
         return [];
       }
     },
@@ -136,14 +139,14 @@ export function useCaisses(filters?: CaisseFilters) {
 
   // Récupérer les caisses actives uniquement (pour les sélecteurs)
   const { data: caissesActives } = useQuery({
-    queryKey: ["caisses-actives"],
+    queryKey: ['caisses-actives'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
-          .from("caisses" as any)
-          .select("id, code, libelle, solde_actuel, devise, plafond")
-          .eq("est_actif", true)
-          .order("code") as any;
+        const { data, error } = (await supabase
+          .from('caisses' as any)
+          .select('id, code, libelle, solde_actuel, devise, plafond')
+          .eq('est_actif', true)
+          .order('code')) as any;
         if (error) {
           if (error.code === 'PGRST205') return [];
           throw error;
@@ -181,7 +184,7 @@ export function useCaisses(filters?: CaisseFilters) {
       const userId = (await supabase.auth.getUser()).data.user?.id;
 
       const { data: result, error } = await (supabase
-        .from("caisses" as any)
+        .from('caisses' as any)
         .insert([
           {
             code: data.code.toUpperCase().trim(),
@@ -189,7 +192,7 @@ export function useCaisses(filters?: CaisseFilters) {
             description: data.description?.trim() || null,
             solde_initial: data.solde_initial || 0,
             solde_actuel: data.solde_initial || 0,
-            devise: data.devise || "XAF",
+            devise: data.devise || 'XAF',
             plafond: data.plafond || null,
             responsable_id: data.responsable_id || null,
             direction_id: data.direction_id || null,
@@ -200,10 +203,10 @@ export function useCaisses(filters?: CaisseFilters) {
         .single() as any);
 
       if (error) {
-        if (error.code === "23505") {
-          throw new Error("Une caisse avec ce code existe déjà");
+        if (error.code === '23505') {
+          throw new Error('Une caisse avec ce code existe déjà');
         }
-        if (error.code === "PGRST205") {
+        if (error.code === 'PGRST205') {
           throw new Error("La table 'caisses' n'existe pas encore");
         }
         throw error;
@@ -212,8 +215,8 @@ export function useCaisses(filters?: CaisseFilters) {
       return result;
     },
     onSuccess: () => {
-      toast.success("Caisse créée avec succès");
-      queryClient.invalidateQueries({ queryKey: ["caisses"] });
+      toast.success('Caisse créée avec succès');
+      queryClient.invalidateQueries({ queryKey: ['caisses'] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -235,17 +238,17 @@ export function useCaisses(filters?: CaisseFilters) {
       if (data.direction_id !== undefined) updateData.direction_id = data.direction_id;
 
       const { data: result, error } = await (supabase
-        .from("caisses" as any)
+        .from('caisses' as any)
         .update(updateData)
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single() as any);
 
       if (error) {
-        if (error.code === "23505") {
-          throw new Error("Une caisse avec ce code existe déjà");
+        if (error.code === '23505') {
+          throw new Error('Une caisse avec ce code existe déjà');
         }
-        if (error.code === "PGRST205") {
+        if (error.code === 'PGRST205') {
           throw new Error("La table 'caisses' n'existe pas encore");
         }
         throw error;
@@ -254,8 +257,8 @@ export function useCaisses(filters?: CaisseFilters) {
       return result;
     },
     onSuccess: () => {
-      toast.success("Caisse modifiée");
-      queryClient.invalidateQueries({ queryKey: ["caisses"] });
+      toast.success('Caisse modifiée');
+      queryClient.invalidateQueries({ queryKey: ['caisses'] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -267,19 +270,19 @@ export function useCaisses(filters?: CaisseFilters) {
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
       const userId = (await supabase.auth.getUser()).data.user?.id;
       const { data, error } = await (supabase
-        .from("caisses" as any)
+        .from('caisses' as any)
         .update({
           est_actif: false,
           deactivated_at: new Date().toISOString(),
           deactivated_by: userId,
-          deactivation_reason: reason || "Désactivation manuelle",
+          deactivation_reason: reason || 'Désactivation manuelle',
         })
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single() as any);
 
       if (error) {
-        if (error.code === "PGRST205") {
+        if (error.code === 'PGRST205') {
           throw new Error("La table 'caisses' n'existe pas encore");
         }
         throw error;
@@ -287,8 +290,8 @@ export function useCaisses(filters?: CaisseFilters) {
       return data;
     },
     onSuccess: () => {
-      toast.success("Caisse désactivée");
-      queryClient.invalidateQueries({ queryKey: ["caisses"] });
+      toast.success('Caisse désactivée');
+      queryClient.invalidateQueries({ queryKey: ['caisses'] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -299,19 +302,19 @@ export function useCaisses(filters?: CaisseFilters) {
   const reactivateCaisse = useMutation({
     mutationFn: async (id: string) => {
       const { data, error } = await (supabase
-        .from("caisses" as any)
+        .from('caisses' as any)
         .update({
           est_actif: true,
           deactivated_at: null,
           deactivated_by: null,
           deactivation_reason: null,
         })
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single() as any);
 
       if (error) {
-        if (error.code === "PGRST205") {
+        if (error.code === 'PGRST205') {
           throw new Error("La table 'caisses' n'existe pas encore");
         }
         throw error;
@@ -319,8 +322,8 @@ export function useCaisses(filters?: CaisseFilters) {
       return data;
     },
     onSuccess: () => {
-      toast.success("Caisse réactivée");
-      queryClient.invalidateQueries({ queryKey: ["caisses"] });
+      toast.success('Caisse réactivée');
+      queryClient.invalidateQueries({ queryKey: ['caisses'] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -334,60 +337,49 @@ export function useCaisses(filters?: CaisseFilters) {
   // Export CSV
   const exportToCSV = useCallback(() => {
     if (!caisses || caisses.length === 0) {
-      toast.error("Aucune donnée à exporter");
+      toast.error('Aucune donnée à exporter');
       return;
     }
 
     const headers = [
-      "Code",
-      "Libellé",
-      "Description",
-      "Devise",
-      "Solde Initial",
-      "Solde Actuel",
-      "Plafond",
-      "Responsable",
-      "Direction",
-      "Statut",
-    ].join(";");
+      'Code',
+      'Libellé',
+      'Description',
+      'Devise',
+      'Solde Initial',
+      'Solde Actuel',
+      'Plafond',
+      'Responsable',
+      'Direction',
+      'Statut',
+    ].join(';');
 
     const rows = caisses.map((c) =>
       [
         c.code,
         c.libelle,
-        c.description || "",
+        c.description || '',
         c.devise,
         c.solde_initial,
         c.solde_actuel,
-        c.plafond || "",
-        c.responsable?.full_name || "",
-        c.direction?.libelle || "",
-        c.est_actif ? "Active" : "Inactive",
-      ].join(";")
+        c.plafond || '',
+        c.responsable?.full_name || '',
+        c.direction?.libelle || '',
+        c.est_actif ? 'Active' : 'Inactive',
+      ].join(';')
     );
 
-    const content = [headers, ...rows].join("\n");
-    const blob = new Blob(["\ufeff" + content], {
-      type: "text/csv;charset=utf-8;",
+    const content = [headers, ...rows].join('\n');
+    const blob = new Blob(['﻿' + content], {
+      type: 'text/csv;charset=utf-8;',
     });
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `caisses_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `caisses_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
     toast.success(`Export de ${caisses.length} caisse(s) réussi`);
   }, [caisses]);
-
-  // Formater montant
-  const formatMontant = useCallback((montant: number, devise?: string) => {
-    return (
-      new Intl.NumberFormat("fr-FR", {
-        style: "decimal",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(montant) + ` ${devise || "FCFA"}`
-    );
-  }, []);
 
   // ============================================
   // RETURN
@@ -410,7 +402,7 @@ export function useCaisses(filters?: CaisseFilters) {
 
     // Helpers
     exportToCSV,
-    formatMontant,
+    formatMontant: formatCurrency,
     refetch,
 
     // Loading states

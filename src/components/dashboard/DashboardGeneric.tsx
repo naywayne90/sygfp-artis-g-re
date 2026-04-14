@@ -24,8 +24,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useDirectionDashboard } from '@/hooks/dashboard/useDirectionDashboard';
+import { cn, formatCurrency } from '@/lib/utils';
 import { formatMontant } from '@/lib/config/sygfp-constants';
-import { cn } from '@/lib/utils';
 
 interface DashboardGenericProps {
   directionId: string;

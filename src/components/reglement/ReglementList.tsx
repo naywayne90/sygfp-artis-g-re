@@ -31,21 +31,26 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useReglements, MODES_PAIEMENT, type ReglementWithRelations } from '@/hooks/useReglements';
 import { ReglementReceiptDialog } from './ReglementReceipt';
+import { formatCurrency } from '@/lib/utils';
 
 interface ReglementListProps {
   reglements: ReglementWithRelations[];
   onViewDetails?: (reglement: ReglementWithRelations) => void;
 }
 
-const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-};
-
 const getModePaiementLabel = (mode: string) => {
   return MODES_PAIEMENT.find((m) => m.value === mode)?.label || mode;
 };
 
 const getStatutBadge = (reglement: ReglementWithRelations) => {
+  if (reglement.statut === 'rejete') {
+    return (
+      <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
+        Rejeté
+      </Badge>
+    );
+  }
+
   const ord = reglement.ordonnancement;
   const isFullyPaid = ord && (ord.montant_paye || 0) >= (ord.montant || 0);
 
@@ -120,7 +125,7 @@ export function ReglementList({ reglements, onViewDetails }: ReglementListProps)
                 <Badge variant="outline">{getModePaiementLabel(reglement.mode_paiement)}</Badge>
               </TableCell>
               <TableCell className="text-right font-medium">
-                {formatMontant(reglement.montant)}
+                {formatCurrency(reglement.montant)}
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">
                 {reglement.reference_paiement || '-'}

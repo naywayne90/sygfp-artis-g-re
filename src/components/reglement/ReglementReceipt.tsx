@@ -18,10 +18,7 @@ import {
   COMPTES_BANCAIRES_ARTI,
   type ReglementWithRelations,
 } from '@/hooks/useReglements';
-
-const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-};
+import { formatCurrency } from '@/lib/utils';
 
 const getModePaiementLabel = (mode: string) => {
   return MODES_PAIEMENT.find((m) => m.value === mode)?.label || mode;
@@ -250,7 +247,7 @@ const ReglementReceiptContent = forwardRef<HTMLDivElement, ReglementReceiptConte
                   textAlign: 'right',
                 }}
               >
-                {formatMontant(reglement.montant)}
+                {formatCurrency(reglement.montant)}
               </td>
             </tr>
             <tr>
@@ -366,7 +363,7 @@ const ReglementReceiptContent = forwardRef<HTMLDivElement, ReglementReceiptConte
                     fontSize: '0.875rem',
                   }}
                 >
-                  {formatMontant(ordonnancement.montant || 0)}
+                  {formatCurrency(ordonnancement.montant || 0)}
                 </td>
               </tr>
               <tr>
@@ -388,7 +385,7 @@ const ReglementReceiptContent = forwardRef<HTMLDivElement, ReglementReceiptConte
                     fontSize: '0.875rem',
                   }}
                 >
-                  {formatMontant(ordonnancement.montant_paye || 0)}
+                  {formatCurrency(ordonnancement.montant_paye || 0)}
                 </td>
               </tr>
               <tr>
@@ -411,7 +408,7 @@ const ReglementReceiptContent = forwardRef<HTMLDivElement, ReglementReceiptConte
                     fontSize: '0.875rem',
                   }}
                 >
-                  {formatMontant(
+                  {formatCurrency(
                     Math.max(0, (ordonnancement.montant || 0) - (ordonnancement.montant_paye || 0))
                   )}
                 </td>

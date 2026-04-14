@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * AttachmentSection - Composant combiné pour les formulaires
  *
@@ -6,17 +5,17 @@
  * facile dans les formulaires de la chaîne de dépense.
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Paperclip, ChevronDown, ChevronUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { AttachmentUploader } from "./AttachmentUploader";
-import { AttachmentList } from "./AttachmentList";
-import { AttachmentPreviewDialog } from "./AttachmentPreviewDialog";
-import { useAttachments, type UseAttachmentsOptions } from "@/hooks/useAttachments";
-import type { AttachmentMetadata } from "@/services/attachmentService";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Paperclip, ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { AttachmentUploader } from './AttachmentUploader';
+import { AttachmentList } from './AttachmentList';
+import { AttachmentPreviewDialog } from './AttachmentPreviewDialog';
+import { useAttachments, type UseAttachmentsOptions } from '@/hooks/useAttachments';
+import type { AttachmentMetadata } from '@/services/attachmentService';
 
 // ============================================
 // TYPES
@@ -52,7 +51,7 @@ export interface AttachmentSectionProps extends UseAttachmentsOptions {
 // ============================================
 
 export function AttachmentSection({
-  title = "Pièces jointes",
+  title = 'Pièces jointes',
   description,
   readOnly = false,
   allowDelete = true,
@@ -112,19 +111,13 @@ export function AttachmentSection({
   // Header avec toggle
   const renderHeader = () => (
     <CardHeader
-      className={cn(
-        "pb-2",
-        collapsible && "cursor-pointer select-none",
-        compact && "py-3"
-      )}
+      className={cn('pb-2', collapsible && 'cursor-pointer select-none', compact && 'py-3')}
       onClick={collapsible ? () => setIsOpen(!isOpen) : undefined}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Paperclip className="h-4 w-4 text-muted-foreground" />
-          <CardTitle className={cn("text-base", compact && "text-sm")}>
-            {title}
-          </CardTitle>
+          <CardTitle className={cn('text-base', compact && 'text-sm')}>{title}</CardTitle>
           {totalCount > 0 && (
             <Badge variant="secondary" className="ml-2">
               {totalCount}
@@ -133,17 +126,11 @@ export function AttachmentSection({
         </div>
         {collapsible && (
           <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-            {isOpen ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
+            {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
         )}
       </div>
-      {description && isOpen && (
-        <p className="text-sm text-muted-foreground mt-1">{description}</p>
-      )}
+      {description && isOpen && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
     </CardHeader>
   );
 
@@ -152,7 +139,7 @@ export function AttachmentSection({
     if (!isOpen) return null;
 
     return (
-      <CardContent className={cn("space-y-4", compact && "pt-0")}>
+      <CardContent className={cn('space-y-4', compact && 'pt-0')}>
         {/* Uploader */}
         {!readOnly && (
           <AttachmentUploader
@@ -178,8 +165,8 @@ export function AttachmentSection({
           compact={compact}
           emptyMessage={
             readOnly
-              ? "Aucune pièce jointe"
-              : "Aucun fichier. Glissez-déposez ou cliquez pour ajouter."
+              ? 'Aucune pièce jointe'
+              : 'Aucun fichier. Glissez-déposez ou cliquez pour ajouter.'
           }
         />
       </CardContent>
@@ -188,7 +175,7 @@ export function AttachmentSection({
 
   return (
     <>
-      <Card className={cn("overflow-hidden", className)}>
+      <Card className={cn('overflow-hidden', className)}>
         {renderHeader()}
         {renderContent()}
       </Card>

@@ -1,20 +1,27 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { 
-  MoreHorizontal, 
-  Eye, 
-  Edit, 
-  History, 
-  Paperclip, 
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  MoreHorizontal,
+  Eye,
+  Edit,
+  History,
+  Paperclip,
   RefreshCw,
   UserPlus,
   ArrowUpDown,
@@ -22,12 +29,19 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-} from "lucide-react";
-import { Dossier } from "@/hooks/useDossiers";
-import { DossierEmptyState } from "./DossierEmptyState";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+} from 'lucide-react';
+import { Dossier } from '@/hooks/useDossiers';
+import { DossierEmptyState } from './DossierEmptyState';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { formatCurrency } from '@/lib/utils';
 
 interface DossierListProps {
   dossiers: Dossier[];
@@ -47,7 +61,7 @@ interface DossierListProps {
   onPageSizeChange: (pageSize: number) => void;
   onSort: (field: string) => void;
   sortField?: string;
-  sortDirection?: "asc" | "desc";
+  sortDirection?: 'asc' | 'desc';
   hasFilters?: boolean;
   searchTerm?: string;
   onReset?: () => void;
@@ -55,41 +69,41 @@ interface DossierListProps {
 }
 
 const STATUT_COLORS: Record<string, string> = {
-  en_cours: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  termine: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  annule: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  suspendu: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  en_cours: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  termine: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  annule: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+  suspendu: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
 };
 
 const STATUT_LABELS: Record<string, string> = {
-  en_cours: "En cours",
-  termine: "Terminé",
-  annule: "Annulé",
-  suspendu: "Suspendu",
+  en_cours: 'En cours',
+  termine: 'Terminé',
+  annule: 'Annulé',
+  suspendu: 'Suspendu',
 };
 
 const ETAPE_LABELS: Record<string, string> = {
-  note: "Note",
-  expression_besoin: "Expression besoin",
-  marche: "Marché",
-  engagement: "Engagement",
-  liquidation: "Liquidation",
-  ordonnancement: "Ordonnancement",
-  reglement: "Règlement",
+  note: 'Note',
+  expression_besoin: 'Expression besoin',
+  marche: 'Marché',
+  engagement: 'Engagement',
+  liquidation: 'Liquidation',
+  ordonnancement: 'Ordonnancement',
+  reglement: 'Règlement',
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  AEF: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-  SEF: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
-  MARCHE: "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200",
+  AEF: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  SEF: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
+  MARCHE: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
 };
 
-export function DossierList({ 
-  dossiers, 
-  loading, 
+export function DossierList({
+  dossiers,
+  loading,
   pagination,
-  onView, 
-  onEdit, 
+  onView,
+  onEdit,
   onHistory,
   onAttach,
   onChangeStatus,
@@ -100,18 +114,10 @@ export function DossierList({
   sortField: _sortField,
   sortDirection: _sortDirection,
   hasFilters = false,
-  searchTerm = "",
+  searchTerm = '',
   onReset,
-  onCreate
+  onCreate,
 }: DossierListProps) {
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "XOF",
-      minimumFractionDigits: 0,
-    }).format(montant);
-  };
-
   const totalPages = Math.ceil(pagination.total / pagination.pageSize);
 
   const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
@@ -147,15 +153,33 @@ export function DossierList({
             <TableBody>
               {Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-12" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-8 rounded" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-48" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-12" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-8 rounded" />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -167,7 +191,7 @@ export function DossierList({
 
   if (dossiers.length === 0) {
     return (
-      <DossierEmptyState 
+      <DossierEmptyState
         hasFilters={hasFilters}
         searchTerm={searchTerm}
         onReset={onReset}
@@ -214,23 +238,21 @@ export function DossierList({
                     {dossier.objet}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {dossier.direction?.sigle || dossier.direction?.code || "-"}
+                    {dossier.direction?.sigle || dossier.direction?.code || '-'}
                   </div>
                 </TableCell>
                 <TableCell>
                   {dossier.type_dossier && (
-                    <Badge className={TYPE_COLORS[dossier.type_dossier] || ""} variant="outline">
+                    <Badge className={TYPE_COLORS[dossier.type_dossier] || ''} variant="outline">
                       {dossier.type_dossier}
                     </Badge>
                   )}
                 </TableCell>
                 <TableCell className="max-w-[150px]">
-                  <div className="truncate">
-                    {dossier.beneficiaire?.raison_sociale || "-"}
-                  </div>
+                  <div className="truncate">{dossier.beneficiaire?.raison_sociale || '-'}</div>
                 </TableCell>
                 <TableCell className="font-medium tabular-nums">
-                  {formatMontant(dossier.montant_estime)}
+                  {formatCurrency(dossier.montant_estime)}
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="font-normal">
@@ -238,12 +260,12 @@ export function DossierList({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge className={STATUT_COLORS[dossier.statut_global] || ""}>
+                  <Badge className={STATUT_COLORS[dossier.statut_global] || ''}>
                     {STATUT_LABELS[dossier.statut_global] || dossier.statut_global}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
-                  {format(new Date(dossier.updated_at), "dd/MM/yy", { locale: fr })}
+                  {format(new Date(dossier.updated_at), 'dd/MM/yy', { locale: fr })}
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu>

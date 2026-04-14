@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * FileUploadZone - Zone de drop unique pour upload de fichier
  * Supporte drag & drop et sélection par clic
@@ -101,9 +100,7 @@ export function FileUploadZone({
       <div className={cn('space-y-2', className)}>
         {/* En-tête avec badge */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">
-            {label || `Pièce jointe n°${numero}`}
-          </span>
+          <span className="text-sm font-medium">{label || `Pièce jointe n°${numero}`}</span>
           <Badge
             variant={required ? 'destructive' : 'secondary'}
             className={cn(
@@ -116,11 +113,7 @@ export function FileUploadZone({
         </div>
 
         {/* Prévisualisation du fichier */}
-        <FilePreview
-          file={file}
-          onDelete={onDelete}
-          isDeleting={isDeleting}
-        />
+        <FilePreview file={file} onDelete={onDelete} isDeleting={isDeleting} />
       </div>
     );
   }
@@ -129,9 +122,7 @@ export function FileUploadZone({
     <div className={cn('space-y-2', className)}>
       {/* En-tête avec badge */}
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium">
-          {label || `Pièce jointe n°${numero}`}
-        </span>
+        <span className="text-sm font-medium">{label || `Pièce jointe n°${numero}`}</span>
         <Badge
           variant={required ? 'destructive' : 'secondary'}
           className={cn(
@@ -172,7 +163,9 @@ export function FileUploadZone({
             />
 
             <p className="text-sm font-medium mb-1">
-              {isDragActive ? 'Déposez le fichier ici' : 'Glissez un fichier ou cliquez pour sélectionner'}
+              {isDragActive
+                ? 'Déposez le fichier ici'
+                : 'Glissez un fichier ou cliquez pour sélectionner'}
             </p>
 
             <p className="text-xs text-muted-foreground">

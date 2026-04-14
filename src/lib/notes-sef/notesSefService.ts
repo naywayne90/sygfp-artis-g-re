@@ -238,7 +238,6 @@ export const notesSefService = {
 
       const counts: NoteSEFCounts = {
         total: 0,
-        brouillon: 0,
         soumis: 0,
         a_valider: 0,
         valide: 0,
@@ -308,7 +307,7 @@ export const notesSefService = {
    * @param attachments Fichiers à uploader (optionnel)
    * @returns La note créée avec sa référence pivot générée
    */
-  async createDraftWithAttachments(
+  async createWithAttachments(
     dto: CreateNoteSEFDTO,
     exercice: number,
     attachments?: File[]
@@ -427,14 +426,11 @@ export const notesSefService = {
   },
 
   /**
-   * Créer une nouvelle note SEF (soumis) - ALIAS pour compatibilité
-   * @deprecated Utiliser createDraftWithAttachments pour le support des PJ
+   * Creer une nouvelle note SEF (soumis) - ALIAS pour compatibilite
+   * @deprecated Utiliser createWithAttachments pour le support des PJ
    */
-  async createDraft(
-    dto: CreateNoteSEFDTO,
-    exercice: number
-  ): Promise<ServiceResult<NoteSEFEntity>> {
-    return this.createDraftWithAttachments(dto, exercice);
+  async create(dto: CreateNoteSEFDTO, exercice: number): Promise<ServiceResult<NoteSEFEntity>> {
+    return this.createWithAttachments(dto, exercice);
   },
 
   /**

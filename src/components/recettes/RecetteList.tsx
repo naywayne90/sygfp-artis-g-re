@@ -33,6 +33,7 @@ import { useTresorerie } from '@/hooks/useTresorerie';
 import { Plus, Eye, Check, Banknote, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
 
 const STATUT_COLORS: Record<string, string> = {
   soumis: 'bg-gray-100 text-gray-800',
@@ -83,10 +84,6 @@ export function RecetteList() {
       setSelectedRecette(null);
       setEncaissementCompte('');
     }
-  };
-
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
   };
 
   const filteredRecettes =
@@ -303,7 +300,7 @@ export function RecetteList() {
                   <TableCell>{recette.origine}</TableCell>
                   <TableCell>{recette.categorie || '-'}</TableCell>
                   <TableCell className="text-right font-medium text-success">
-                    +{formatMontant(recette.montant)}
+                    +{formatCurrency(recette.montant)}
                   </TableCell>
                   <TableCell>
                     <Badge className={STATUT_COLORS[recette.statut] || ''}>{recette.statut}</Badge>
@@ -370,7 +367,7 @@ export function RecetteList() {
                 <div>
                   <Label className="text-muted-foreground">Montant</Label>
                   <p className="font-medium text-success">
-                    {formatMontant(selectedRecette.montant)}
+                    {formatCurrency(selectedRecette.montant)}
                   </p>
                 </div>
               </div>
@@ -421,7 +418,7 @@ export function RecetteList() {
             <div>
               <Label className="text-muted-foreground">Montant à encaisser</Label>
               <p className="text-2xl font-bold text-success">
-                {formatMontant(selectedRecette?.montant || 0)}
+                {formatCurrency(selectedRecette?.montant || 0)}
               </p>
             </div>
             <div className="space-y-2">

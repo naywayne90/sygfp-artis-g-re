@@ -65,6 +65,7 @@ import { formatCurrency } from '@/lib/utils';
 import { useUrgentLiquidations } from '@/hooks/useUrgentLiquidations';
 import { useLiquidationExport } from '@/hooks/useLiquidationExport';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useRBAC } from '@/contexts/RBACContext';
 import { LiquidationForm } from '@/components/liquidation/LiquidationForm';
 import { LiquidationList } from '@/components/liquidation/LiquidationList';
 import { LiquidationDetails } from '@/components/liquidation/LiquidationDetails';
@@ -83,6 +84,7 @@ import { toast } from 'sonner';
 export default function Liquidations() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isDG } = useRBAC();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDetailsSheet, setShowDetailsSheet] = useState(false);
@@ -91,7 +93,7 @@ export default function Liquidations() {
   const [showDeferDialog, setShowDeferDialog] = useState(false);
   const [showValidateDialog, setShowValidateDialog] = useState(false);
   const [actionLiquidationId, setActionLiquidationId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('a_traiter');
+  const [activeTab, setActiveTab] = useState(isDG ? 'a_valider' : 'a_traiter');
   const [urgentOnlyFilter, setUrgentOnlyFilter] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -147,6 +149,11 @@ export default function Liquidations() {
   const { exportExcel, exportCSV, exportPDF, exportAttestation, isExporting } =
     useLiquidationExport();
   const { hasRole, hasAnyRole, isAdmin: isAdminUser } = usePermissions();
+
+  // DG : ouvrir directement sur "À valider" (fallback si isDG charge après le mount)
+  useEffect(() => {
+    if (isDG) setActiveTab('a_valider');
+  }, [isDG]);
 
   const { canPerform } = usePermissionCheck();
   const {

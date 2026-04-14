@@ -52,7 +52,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import {
   useMouvementsTresorerie,
   CreateMouvementData,
@@ -90,7 +90,6 @@ export default function MouvementsCaisse() {
     createMouvement,
     isCreating,
     exportToExcel,
-    formatMontant,
     getSensColor,
     getSensLabel,
     refetch,
@@ -220,7 +219,7 @@ export default function MouvementsCaisse() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-green-600">
-              +{formatMontant(stats.montantEntrees)}
+              +{formatCurrency(stats.montantEntrees)}
             </p>
             <p className="text-xs text-muted-foreground">{stats.entrees} opération(s)</p>
           </CardContent>
@@ -234,7 +233,7 @@ export default function MouvementsCaisse() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-red-600">
-              -{formatMontant(stats.montantSorties)}
+              -{formatCurrency(stats.montantSorties)}
             </p>
             <p className="text-xs text-muted-foreground">{stats.sorties} opération(s)</p>
           </CardContent>
@@ -251,7 +250,7 @@ export default function MouvementsCaisse() {
               )}
             >
               {stats.soldeNet >= 0 ? '+' : ''}
-              {formatMontant(stats.soldeNet)}
+              {formatCurrency(stats.soldeNet)}
             </p>
           </CardContent>
         </Card>
@@ -412,10 +411,10 @@ export default function MouvementsCaisse() {
                         )}
                       >
                         {mvt.sens === 'ENTREE' ? '+' : '-'}
-                        {formatMontant(mvt.montant)}
+                        {formatCurrency(mvt.montant)}
                       </TableCell>
                       <TableCell className="text-right text-sm">
-                        {mvt.solde_apres !== null ? formatMontant(mvt.solde_apres) : '-'}
+                        {mvt.solde_apres !== null ? formatCurrency(mvt.solde_apres) : '-'}
                       </TableCell>
                       <TableCell>{getStatutBadge(mvt.statut)}</TableCell>
                     </TableRow>

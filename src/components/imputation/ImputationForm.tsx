@@ -38,6 +38,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ImputationSummaryCard } from './ImputationSummaryCard';
 import { FundingSourceSelect } from '@/components/shared/FundingSourceSelect';
+import { formatCurrency } from '@/lib/utils';
 
 interface Note {
   id: string;
@@ -65,8 +66,6 @@ interface BudgetLineOption {
   os_id: string | null;
   direction_id: string | null;
 }
-
-const formatMontant = (montant: number) => new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
 const formatMontantInput = (value: number): string => {
   if (!value) return '';
@@ -392,7 +391,7 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
                     <span className="text-muted-foreground">—</span>
                     <span className="truncate max-w-[250px]">{n.objet}</span>
                     <span className="text-muted-foreground">—</span>
-                    <span className="font-medium">{formatMontant(n.montant_estime || 0)}</span>
+                    <span className="font-medium">{formatCurrency(n.montant_estime || 0)}</span>
                     {(n as Record<string, unknown>).is_migrated && (
                       <Badge variant="outline" className="text-xs ml-1">
                         <Database className="h-3 w-3 mr-1" />
@@ -430,7 +429,9 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
               </div>
               <div>
                 <span className="text-muted-foreground">Montant estimé :</span>
-                <p className="font-medium">{formatMontant(selectedNoteData.montant_estime || 0)}</p>
+                <p className="font-medium">
+                  {formatCurrency(selectedNoteData.montant_estime || 0)}
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 {isMigrated && (
@@ -494,7 +495,7 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
                                   : 'text-green-600'
                             }`}
                           >
-                            Dispo: {formatMontant(disponible)}
+                            Dispo: {formatCurrency(disponible)}
                           </span>
                         </div>
                       </SelectItem>
@@ -514,7 +515,7 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
                   <div>
                     <span className="text-muted-foreground">Dotation :</span>
                     <p className="font-medium font-mono">
-                      {formatMontant(
+                      {formatCurrency(
                         selectedBudgetLine.dotation_modifiee ?? selectedBudgetLine.dotation_initiale
                       )}
                     </p>
@@ -522,7 +523,7 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
                   <div>
                     <span className="text-muted-foreground">Engagé actuel :</span>
                     <p className="font-medium font-mono text-orange-600">
-                      {formatMontant(selectedBudgetLine.total_engage || 0)}
+                      {formatCurrency(selectedBudgetLine.total_engage || 0)}
                     </p>
                   </div>
                   <div>
@@ -538,7 +539,7 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
                             : 'text-green-600'
                       }`}
                     >
-                      {formatMontant(budgetLineDisponible ?? 0)}
+                      {formatCurrency(budgetLineDisponible ?? 0)}
                     </p>
                   </div>
                 </div>
@@ -550,10 +551,10 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
                   <XCircle className="h-4 w-4" />
                   <AlertTitle>Budget insuffisant — Imputation bloquée</AlertTitle>
                   <AlertDescription>
-                    Le montant demandé ({formatMontant(formData.montant || 0)}) dépasse le
-                    disponible de la ligne ({formatMontant(budgetLineDisponible ?? 0)}). Déficit :{' '}
+                    Le montant demandé ({formatCurrency(formData.montant || 0)}) dépasse le
+                    disponible de la ligne ({formatCurrency(budgetLineDisponible ?? 0)}). Déficit :{' '}
                     <strong>
-                      {formatMontant((formData.montant || 0) - (budgetLineDisponible ?? 0))}
+                      {formatCurrency((formData.montant || 0) - (budgetLineDisponible ?? 0))}
                     </strong>
                   </AlertDescription>
                 </Alert>
@@ -839,7 +840,7 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
                   {selectedNoteData?.montant_estime &&
                     formData.montant !== selectedNoteData.montant_estime && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Montant estimé initial : {formatMontant(selectedNoteData.montant_estime)}
+                        Montant estimé initial : {formatCurrency(selectedNoteData.montant_estime)}
                       </p>
                     )}
                   {!formData.montant && (
@@ -886,13 +887,13 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
                   <AlertDescription className="space-y-4 mt-2">
                     <div className="bg-destructive/10 p-3 rounded-lg">
                       <p className="font-medium">
-                        Le montant demandé ({formatMontant(formData.montant || 0)}) dépasse le
+                        Le montant demandé ({formatCurrency(formData.montant || 0)}) dépasse le
                         disponible net.
                       </p>
                       <p className="text-sm mt-1">
                         Déficit :{' '}
                         <strong className="text-destructive">
-                          {formatMontant(availability.deficit || 0)}
+                          {formatCurrency(availability.deficit || 0)}
                         </strong>
                       </p>
                     </div>
@@ -969,7 +970,7 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
                   <AlertTitle className="text-green-700">Budget disponible suffisant</AlertTitle>
                   <AlertDescription className="text-green-600">
                     L&apos;imputation peut être effectuée. Le montant de{' '}
-                    {formatMontant(formData.montant || 0)} sera réservé sur la ligne budgétaire{' '}
+                    {formatCurrency(formData.montant || 0)} sera réservé sur la ligne budgétaire{' '}
                     {availability.budget_line_code}.
                   </AlertDescription>
                 </Alert>

@@ -22,15 +22,8 @@ import { generatePDFHeader, loadImageAsDataUrl } from '@/lib/pdf/pdfHeader';
 import { generatePDFFooter } from '@/lib/pdf/pdfFooter';
 import { PDF_COLORS, PDF_FONTS, PDF_MARGINS, PDF_PAGE, CONTENT_WIDTH } from '@/lib/pdf/pdfStyles';
 import { getUniteLabel } from '@/components/expression-besoin/articleConstants';
+import { formatCurrency } from '@/lib/utils';
 import logoArti from '@/assets/logo-arti.jpg';
-
-// ============================================================================
-// UTILITAIRES
-// ============================================================================
-
-function formatMontant(montant: number): string {
-  return new Intl.NumberFormat('fr-FR').format(montant);
-}
 
 function formatDateFr(date: string | Date | null): string {
   if (!date) return '-';
@@ -181,8 +174,8 @@ export async function generateArticlesPdf(expression: ExpressionBesoin): Promise
     item.designation || ((item as unknown as Record<string, unknown>).article as string) || '-',
     String(item.quantite),
     getUniteLabel(item.unite),
-    item.prix_unitaire > 0 ? formatMontant(item.prix_unitaire) : '-',
-    item.prix_total > 0 ? formatMontant(item.prix_total) : '-',
+    item.prix_unitaire > 0 ? formatCurrency(item.prix_unitaire) : '-',
+    item.prix_total > 0 ? formatCurrency(item.prix_total) : '-',
   ]);
 
   autoTable(doc, {
@@ -197,7 +190,7 @@ export async function generateArticlesPdf(expression: ExpressionBesoin): Promise
           styles: { halign: 'right' as const, fontStyle: 'bold' as const },
         },
         {
-          content: formatMontant(totalHT) + ' FCFA',
+          content: formatCurrency(totalHT),
           styles: { fontStyle: 'bold' as const, halign: 'right' as const },
         },
       ],
@@ -208,7 +201,7 @@ export async function generateArticlesPdf(expression: ExpressionBesoin): Promise
           styles: { halign: 'right' as const, textColor: PDF_COLORS.secondary },
         },
         {
-          content: formatMontant(tva) + ' FCFA',
+          content: formatCurrency(tva),
           styles: { halign: 'right' as const, textColor: PDF_COLORS.secondary },
         },
       ],
@@ -219,7 +212,7 @@ export async function generateArticlesPdf(expression: ExpressionBesoin): Promise
           styles: { halign: 'right' as const, fontStyle: 'bold' as const },
         },
         {
-          content: formatMontant(totalTTC) + ' FCFA',
+          content: formatCurrency(totalTTC),
           styles: { fontStyle: 'bold' as const, halign: 'right' as const },
         },
       ],

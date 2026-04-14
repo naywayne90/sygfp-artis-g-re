@@ -78,7 +78,7 @@ function ValidationTimeline({ currentStep }: { currentStep: number }) {
               ) : (
                 <Circle className="mr-1 h-3 w-3" />
               )}
-              {step.role}
+              {step.shortLabel ?? step.role}
             </Badge>
           </div>
         );

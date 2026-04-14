@@ -18,7 +18,7 @@ import {
 import { computeEvaluations } from './EvaluationCOJO';
 import type { PassationMarche, Soumissionnaire } from '@/hooks/usePassationsMarche';
 import { STATUTS_SOUMISSIONNAIRE } from '@/hooks/usePassationsMarche';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { BarChart3, FileDown, Trophy, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 
 const SEUIL_TECHNIQUE = 70;
@@ -35,9 +35,6 @@ export function ComparatifEvaluation({ passation, onExportPV }: ComparatifEvalua
   );
 
   const evaluations = useMemo(() => computeEvaluations(soumissionnaires), [soumissionnaires]);
-
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
   if (soumissionnaires.length === 0) {
     return (
@@ -112,7 +109,7 @@ export function ComparatifEvaluation({ passation, onExportPV }: ComparatifEvalua
                     >
                       {s.offre_financiere ? (
                         <span className={isBest ? 'font-bold' : ''}>
-                          {formatMontant(s.offre_financiere)}
+                          {formatCurrency(s.offre_financiere)}
                         </span>
                       ) : (
                         '-'

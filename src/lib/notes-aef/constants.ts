@@ -12,7 +12,7 @@
  * Statuts possibles d'une Note AEF dans son cycle de vie
  */
 export const NoteAEFStatut = {
-  /** Soumis - note envoyée pour validation DG (statut initial depuis suppression brouillon) */
+  /** Soumis - note envoyee pour validation DG (statut initial, pas de brouillon) */
   SUBMITTED: 'soumis',
   /** À valider - en attente de décision du DG */
   PENDING_VALIDATION: 'a_valider',

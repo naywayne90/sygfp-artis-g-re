@@ -1,7 +1,7 @@
 # SYGFP - Notes de Développement et Mapping
 
 > Document de référence pour le développement SYGFP.
-> Dernière mise à jour : 2026-01-18
+> Dernière mise à jour : 2026-04-14
 
 ---
 
@@ -27,15 +27,15 @@
 
 ### Tables principales vs noms dans les prompts
 
-| Nom dans les prompts | Nom réel en BDD | Notes |
-|---------------------|-----------------|-------|
-| `exercises` | `exercices_budgetaires` | Table existante, NE PAS créer `exercises` |
-| `profiles.role_level` | `profiles.role_hierarchique` + `profil_fonctionnel` | 2 colonnes au lieu d'une |
-| `fournisseurs` | `prestataires` | Table existante |
-| `notes_aef` | `notes_dg` | Notes DG = AEF (Autorisation Engagement Fonds) |
-| `budget_lines` | `budget_lines` | ✅ Nom identique |
-| `attachments` | Plusieurs tables par entité | `notes_sef_attachments`, `engagement_attachments`, etc. |
-| `audit_events` | `audit_logs` | Nom légèrement différent |
+| Nom dans les prompts  | Nom réel en BDD                                     | Notes                                                   |
+| --------------------- | --------------------------------------------------- | ------------------------------------------------------- |
+| `exercises`           | `exercices_budgetaires`                             | Table existante, NE PAS créer `exercises`               |
+| `profiles.role_level` | `profiles.role_hierarchique` + `profil_fonctionnel` | 2 colonnes au lieu d'une                                |
+| `fournisseurs`        | `prestataires`                                      | Table existante                                         |
+| `notes_aef`           | `notes_dg`                                          | Notes DG = AEF (Autorisation Engagement Fonds)          |
+| `budget_lines`        | `budget_lines`                                      | ✅ Nom identique                                        |
+| `attachments`         | Plusieurs tables par entité                         | `notes_sef_attachments`, `engagement_attachments`, etc. |
+| `audit_events`        | `audit_logs`                                        | Nom légèrement différent                                |
 
 ### Structure des rôles
 
@@ -58,12 +58,12 @@ profil_fonctionnel TEXT -- Admin, CB, DAAF, DG, Tresorerie, Directeur, Operateur
 ARTI{MM}{YY}{XXXXXX}
 ```
 
-| Composant | Description | Exemple |
-|-----------|-------------|---------|
-| `ARTI` | Préfixe fixe | ARTI |
-| `MM` | Mois (01-12) | 01 |
-| `YY` | Année (2 chiffres) | 26 |
-| `XXXXXX` | Séquence (6 chiffres) | 000001 |
+| Composant | Description           | Exemple |
+| --------- | --------------------- | ------- |
+| `ARTI`    | Préfixe fixe          | ARTI    |
+| `MM`      | Mois (01-12)          | 01      |
+| `YY`      | Année (2 chiffres)    | 26      |
+| `XXXXXX`  | Séquence (6 chiffres) | 000001  |
 
 **Exemple complet** : `ARTI012600001`
 
@@ -100,24 +100,24 @@ Règlement (hérite référence)
 
 Les directions sont déjà créées (24 entrées). **NE PAS recréer**.
 
-| Code | Sigle | Libellé |
-|------|-------|---------|
-| 01 | DG | Direction Générale de l'ARTI |
-| 02 | DAAF | Direction des Affaires Administratives et Financières |
-| 03 | SDMG | Service des Moyens Généraux |
-| 04 | DSESP | Direction des Statistiques, des Études, de la Stratégie et de la Prospective |
-| 05 | DGPECRP | Direction de la Gestion Prévisionnelle de l'Emploi |
-| 06 | DCSTI | Direction du Contrôle et de la Surveillance du Transport Intérieur |
-| 07 | DRRN | Direction des Recours, de la Réglementation et des Normes |
-| 08 | DCP | Direction de la Communication et du Partenariat |
-| 09 | DSI | Direction des Systèmes d'Information |
-| 10 | CB | Contrôleur Budgétaire |
-| 11 | AC | Agent Comptable |
-| 12 | CM | Chargé de Mission du DG |
-| 13 | DP | Direction du Patrimoine |
-| 14 | DCZ | Direction Centrale des Zones |
-| 15 | DQ | Direction de la Qualité |
-| 16 | AS | Autres Services |
+| Code | Sigle   | Libellé                                                                      |
+| ---- | ------- | ---------------------------------------------------------------------------- |
+| 01   | DG      | Direction Générale de l'ARTI                                                 |
+| 02   | DAAF    | Direction des Affaires Administratives et Financières                        |
+| 03   | SDMG    | Service des Moyens Généraux                                                  |
+| 04   | DSESP   | Direction des Statistiques, des Études, de la Stratégie et de la Prospective |
+| 05   | DGPECRP | Direction de la Gestion Prévisionnelle de l'Emploi                           |
+| 06   | DCSTI   | Direction du Contrôle et de la Surveillance du Transport Intérieur           |
+| 07   | DRRN    | Direction des Recours, de la Réglementation et des Normes                    |
+| 08   | DCP     | Direction de la Communication et du Partenariat                              |
+| 09   | DSI     | Direction des Systèmes d'Information                                         |
+| 10   | CB      | Contrôleur Budgétaire                                                        |
+| 11   | AC      | Agent Comptable                                                              |
+| 12   | CM      | Chargé de Mission du DG                                                      |
+| 13   | DP      | Direction du Patrimoine                                                      |
+| 14   | DCZ     | Direction Centrale des Zones                                                 |
+| 15   | DQ      | Direction de la Qualité                                                      |
+| 16   | AS      | Autres Services                                                              |
 
 ---
 
@@ -136,6 +136,7 @@ refuse, clos, annule
 ### Transitions (table `workflow_transitions`)
 
 Les transitions sont définies par module avec :
+
 - `from_status` → `to_status`
 - `action_code` (ex: "soumettre", "valider", "rejeter")
 - `required_roles` (rôles autorisés)
@@ -146,12 +147,12 @@ Les transitions sont définies par module avec :
 
 ## 6. EDGE FUNCTIONS
 
-| Fonction | Endpoint | Rôle |
-|----------|----------|------|
-| `create-user` | `/functions/v1/create-user` | Création utilisateur (Admin) |
-| `r2-storage` | `/functions/v1/r2-storage` | Stockage Cloudflare R2 |
-| `send-notification-email` | `/functions/v1/send-notification-email` | Emails via Resend |
-| `generate-export` | `/functions/v1/generate-export` | Export Excel/CSV/PDF |
+| Fonction                  | Endpoint                                | Rôle                         |
+| ------------------------- | --------------------------------------- | ---------------------------- |
+| `create-user`             | `/functions/v1/create-user`             | Création utilisateur (Admin) |
+| `r2-storage`              | `/functions/v1/r2-storage`              | Stockage Cloudflare R2       |
+| `send-notification-email` | `/functions/v1/send-notification-email` | Emails via Resend            |
+| `generate-export`         | `/functions/v1/generate-export`         | Export Excel/CSV/PDF         |
 
 ---
 
@@ -169,6 +170,7 @@ sygfp/{entityType}/{exercice}/{entityId}/{timestamp}_{filename}
 ```
 
 **Exemple** :
+
 ```
 sygfp/notes-sef/2026/abc123-uuid/1705574400_facture.pdf
 ```
@@ -182,11 +184,13 @@ sygfp/notes-sef/2026/abc123-uuid/1705574400_facture.pdf
 **Contexte** : Le prompt 3/25 fournit un SQL incompatible avec la structure existante.
 
 **Décision** :
+
 - NE PAS exécuter le SQL du prompt 3/25
 - Adapter les futures migrations à la structure RÉELLE
 - Documenter les différences de nomenclature
 
 **Justification** :
+
 - `exercises` n'existe pas → utiliser `exercices_budgetaires`
 - `profiles.role_level` n'existe pas → utiliser `role_hierarchique` + `profil_fonctionnel`
 - Les directions existent déjà (24 entrées)
@@ -197,26 +201,26 @@ sygfp/notes-sef/2026/abc123-uuid/1705574400_facture.pdf
 
 ### Par module
 
-| Module | Routes | Composants |
-|--------|--------|------------|
-| Auth | `/auth`, `/select-exercice` | LoginPage, SelectExercice |
-| Notes SEF | `/notes-sef`, `/notes-sef/:id`, `/notes-sef/validation` | NotesSEF, NoteSEFDetail |
-| Notes AEF | `/notes-aef`, `/notes-aef/:id`, `/notes-aef/validation` | NotesAEF, NoteAEFDetail |
-| Exécution | `/execution/*` | ImputationPage, PassationMarche |
-| Engagements | `/engagements`, `/liquidations`, `/ordonnancements`, `/reglements` | Engagements, Liquidations, etc. |
-| Admin | `/admin/*` (20+ routes) | GestionUtilisateurs, GestionExercices, etc. |
+| Module      | Routes                                                             | Composants                                  |
+| ----------- | ------------------------------------------------------------------ | ------------------------------------------- |
+| Auth        | `/auth`, `/select-exercice`                                        | LoginPage, SelectExercice                   |
+| Notes SEF   | `/notes-sef`, `/notes-sef/:id`, `/notes-sef/validation`            | NotesSEF, NoteSEFDetail                     |
+| Notes AEF   | `/notes-aef`, `/notes-aef/:id`, `/notes-aef/validation`            | NotesAEF, NoteAEFDetail                     |
+| Exécution   | `/execution/*`                                                     | ImputationPage, PassationMarche             |
+| Engagements | `/engagements`, `/liquidations`, `/ordonnancements`, `/reglements` | Engagements, Liquidations, etc.             |
+| Admin       | `/admin/*` (20+ routes)                                            | GestionUtilisateurs, GestionExercices, etc. |
 
 ---
 
 ## 10. HOOKS CRITIQUES
 
-| Hook | Rôle | Fichier |
-|------|------|---------|
-| `usePermissions` | Permissions et rôles | `src/hooks/usePermissions.ts` |
-| `useExerciceFilter` | Contexte exercice | `src/hooks/useExerciceFilter.ts` |
+| Hook                     | Rôle                 | Fichier                               |
+| ------------------------ | -------------------- | ------------------------------------- |
+| `usePermissions`         | Permissions et rôles | `src/hooks/usePermissions.ts`         |
+| `useExerciceFilter`      | Contexte exercice    | `src/hooks/useExerciceFilter.ts`      |
 | `useWorkflowTransitions` | Transitions workflow | `src/hooks/useWorkflowTransitions.ts` |
-| `useBudgetAvailability` | Disponibilité budget | `src/hooks/useBudgetAvailability.ts` |
-| `useR2Storage` | Stockage R2 | `src/hooks/useR2Storage.ts` |
+| `useBudgetAvailability`  | Disponibilité budget | `src/hooks/useBudgetAvailability.ts`  |
+| `useR2Storage`           | Stockage R2          | `src/hooks/useR2Storage.ts`           |
 
 ---
 
@@ -227,3 +231,54 @@ sygfp/notes-sef/2026/abc123-uuid/1705574400_facture.pdf
 - [ ] Nouveaux éléments documentés ici
 - [ ] Tests de non-régression passés
 - [ ] Build TypeScript OK
+
+---
+
+## 12. SESSIONS DE TRAVAIL
+
+### Session 14/04/2026 — Centre de Pilotage + Passation DG
+
+#### Contexte
+
+Le badge TopBar "18 à traiter" pointait vers `/taches` qui affichait "Aucune tâche" — la page utilisait `useWorkflowTasks()` qui requêtait la table `workflow_tasks` (vide), alors que le badge utilisait `useSidebarBadges()` (données réelles).
+
+#### Fichiers modifiés
+
+1. **`src/pages/WorkflowTasks.tsx`** — Réécriture complète en "Centre de Pilotage"
+   - Utilise `useSidebarBadges()` (aucune nouvelle query DB)
+   - 4 KPIs : À traiter, Modules actifs (X/10 avec progressbar), Différés, Urgents
+   - Banner Actions prioritaires (3 modules les plus chargés)
+   - ChainVisual 9 cercles cliquables avec badge "N total"
+   - 10 ModuleCards (clic → navigation React Router)
+   - Bouton refresh (invalidate TanStack query)
+
+2. **`src/config/modules.registry.ts`** — Breadcrumb
+   - Ligne ~1695 : `name: 'Mes Tâches'` → `name: 'Centre de pilotage'`
+
+3. **`src/hooks/useSidebarBadges.ts`** — Fix console errors
+   - Ligne ~189 : `supabase.from('roadmap_submissions')` remplacé par `Promise.resolve({ count: 0, data: [], error: null })`
+   - Raison : table inexistante en prod, provoquait 16x 404/30s
+
+4. **`src/pages/execution/PassationMarche.tsx`** — Améliorations DG
+   - Import : `ArrowRight, ChevronRight, AlertTriangle, CheckCircle2, Clock, BarChart3`
+   - Variable : `const dgRejetees = counts.rejete || 0;`
+   - KPI "Traitées" rendu cliquable (`handleTabChange('approuve')`)
+   - Ajout KPI "Rejetées" conditionnel (si `dgRejetees > 0`)
+   - Wrapper Fragment (`<>...</>`) autour du ternaire DG pour contenir 2 éléments
+   - Nouvelle Card "Progression du pipeline" (7 pastilles cliquables avec ChevronRight)
+   - Empty state "attribue" enrichi avec funnel visuel + destination "Approbation DG → Vous"
+   - Empty state "tout à jour" si `dgPipeline === 0` (CheckCircle2 vert)
+
+#### Règles découvertes
+
+- **Ternaire JSX** : si on veut renvoyer plusieurs éléments frères, wrapper avec `<>...</>` (Fragment). Erreur build sinon : `Expected ")" but found "{"`.
+- **Deux sessions de navigation distinctes** : le Preview MCP (`mcp__Claude_Preview__*`) et Playwright MCP utilisent des browsers/sessions séparés. Se connecter dans l'un n'authentifie pas l'autre.
+- **`useSidebarBadges`** est la source canonique des comptes dans toute la nav ; ne pas créer de hook parallèle.
+
+#### Résultats
+
+- 30/30 interactions testées OK (Centre de Pilotage + Passation DG)
+- `tsc --noEmit` : 0 erreur
+- `vite build` : OK
+- `vitest run` : 809/809 PASS
+- Module certifié Passation : 94 tests passation toujours verts

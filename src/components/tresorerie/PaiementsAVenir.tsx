@@ -1,23 +1,32 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { Wallet, Clock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { Wallet, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { formatCurrency } from '@/lib/utils';
 
 export function PaiementsAVenir() {
   const { exercice } = useExercice();
   const navigate = useNavigate();
 
   const { data: paiements = [], isLoading } = useQuery({
-    queryKey: ["paiements-a-venir", exercice],
+    queryKey: ['paiements-a-venir', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("ordonnancements")
-        .select(`
+        .from('ordonnancements')
+        .select(
+          `
           id,
           numero,
           montant,
@@ -33,29 +42,29 @@ export function PaiementsAVenir() {
               budget_line:budget_lines(code, label)
             )
           )
-        `)
-        .eq("exercice", exercice)
-        .in("statut", ["valide", "signe"])
-        .order("created_at", { ascending: true });
+        `
+        )
+        .eq('exercice', exercice)
+        .in('statut', ['valide', 'signe'])
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
-      return (data || []).filter(o => (o.montant || 0) > (o.montant_paye || 0));
+      return (data || []).filter((o) => (o.montant || 0) > (o.montant_paye || 0));
     },
     enabled: !!exercice,
   });
 
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
-  };
-
   const getAnciennete = (createdAt: string) => {
     const days = Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
-    if (days > 30) return { label: `${days}j`, variant: "destructive" as const };
-    if (days > 14) return { label: `${days}j`, variant: "outline" as const };
-    return { label: `${days}j`, variant: "secondary" as const };
+    if (days > 30) return { label: `${days}j`, variant: 'destructive' as const };
+    if (days > 14) return { label: `${days}j`, variant: 'outline' as const };
+    return { label: `${days}j`, variant: 'secondary' as const };
   };
 
-  const totalAPayer = paiements.reduce((sum, p) => sum + ((p.montant || 0) - (p.montant_paye || 0)), 0);
+  const totalAPayer = paiements.reduce(
+    (sum, p) => sum + ((p.montant || 0) - (p.montant_paye || 0)),
+    0
+  );
 
   return (
     <Card>
@@ -72,7 +81,7 @@ export function PaiementsAVenir() {
           </div>
           <div className="text-right">
             <div className="text-sm text-muted-foreground">Total à payer</div>
-            <div className="text-xl font-bold text-destructive">{formatMontant(totalAPayer)}</div>
+            <div className="text-xl font-bold text-destructive">{formatCurrency(totalAPayer)}</div>
           </div>
         </div>
       </CardHeader>
@@ -108,9 +117,9 @@ export function PaiementsAVenir() {
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-sm">{p.numero}</TableCell>
-                    <TableCell>{p.beneficiaire || "-"}</TableCell>
+                    <TableCell>{p.beneficiaire || '-'}</TableCell>
                     <TableCell className="text-right font-medium text-warning">
-                      {formatMontant(reste)}
+                      {formatCurrency(reste)}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button

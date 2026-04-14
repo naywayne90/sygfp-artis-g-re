@@ -23,9 +23,9 @@ export interface ImputationExportFilters {
 }
 
 const STATUT_LABELS: Record<string, string> = {
-  soumis: 'Soumis',
-  a_valider: 'À valider',
-  valide: 'Validée',
+  soumis: 'Soumise',
+  vise: 'Visée CB',
+  valide: 'Validée DG',
   rejete: 'Rejetée',
   differe: 'Différée',
 };
@@ -45,9 +45,10 @@ const EXPORT_COLUMNS: ExportColumn[] = [
   { key: 'dotation', label: 'Dotation (FCFA)', type: 'currency', width: 18 },
   { key: 'disponible', label: 'Disponible (FCFA)', type: 'currency', width: 18 },
   { key: 'statut', label: 'Statut', format: statusLabel },
-  { key: 'createur_nom', label: 'CB', type: 'text', width: 22 },
-  { key: 'validateur_nom', label: 'Validé par', type: 'text', width: 22 },
-  { key: 'created_at', label: 'Date', type: 'date', width: 12 },
+  { key: 'createur_nom', label: 'Imputé par', type: 'text', width: 22 },
+  { key: 'visa_cb_nom', label: 'Visé par (CB)', type: 'text', width: 22 },
+  { key: 'validateur_nom', label: 'Validé par (DG)', type: 'text', width: 22 },
+  { key: 'created_at', label: 'Date création', type: 'date', width: 12 },
 ];
 
 const TAB_LABELS: Record<string, string> = {
@@ -69,6 +70,7 @@ interface ExportRow {
   disponible: number;
   statut: string;
   createur_nom: string;
+  visa_cb_nom: string;
   validateur_nom: string;
   created_at: string;
 }
@@ -81,7 +83,7 @@ async function fetchExportData(
     .from('imputations')
     .select(
       `
-      id, reference, objet, montant, statut, code_imputation, created_at,
+      id, reference, objet, montant, statut, code_imputation, created_at, vise_at, validated_at,
       direction:directions(sigle),
       note_aef:notes_dg!imputations_note_aef_id_fkey(numero),
       budget_line:budget_lines(code, dotation_initiale, dotation_modifiee, total_engage),
@@ -151,6 +153,7 @@ async function fetchExportData(
       createur_nom: createur
         ? `${createur.first_name ?? ''} ${createur.last_name ?? ''}`.trim()
         : '',
+      visa_cb_nom: '',
       validateur_nom: validateur
         ? `${validateur.first_name ?? ''} ${validateur.last_name ?? ''}`.trim()
         : '',

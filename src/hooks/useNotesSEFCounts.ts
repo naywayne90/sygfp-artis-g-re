@@ -17,7 +17,6 @@ interface UseNotesSEFCountsReturn {
 
 const defaultCounts: NoteSEFCounts = {
   total: 0,
-  brouillon: 0,
   soumis: 0,
   a_valider: 0,
   valide: 0,
@@ -65,8 +64,6 @@ export function getTabCount(counts: NoteSEFCounts, tab: string): number {
   switch (tab) {
     case 'toutes':
       return counts.total;
-    case 'brouillons':
-      return counts.brouillon;
     case 'a_valider':
       return counts.soumis + counts.a_valider;
     case 'validees':

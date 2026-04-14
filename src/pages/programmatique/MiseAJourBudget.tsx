@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Mise à jour du Budget - Ajustements avec justification et historisation
  *
@@ -9,14 +8,13 @@
  * - Vue des modifications récentes
  */
 
-import { useState, useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-} from "@/components/ui/select";
+import { useState, useMemo } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -24,7 +22,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -32,11 +30,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Edit,
   Search,
@@ -50,15 +48,16 @@ import {
   TrendingDown,
   FileText,
   Clock,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useBudgetLines } from "@/hooks/useBudgetLines";
-import { useBudgetLineVersions } from "@/hooks/useBudgetLineVersions";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useBudgetLines } from '@/hooks/useBudgetLines';
+import { useBudgetLineVersions } from '@/hooks/useBudgetLineVersions';
+import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
 
-type AdjustmentType = "increase" | "decrease";
+type AdjustmentType = 'increase' | 'decrease';
 
 interface AdjustmentFormData {
   budgetLineId: string;
@@ -71,16 +70,16 @@ interface AdjustmentFormData {
 
 export default function MiseAJourBudget() {
   const { selectedExercice, isReadOnly } = useExercice();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [selectedLine, setSelectedLine] = useState<any>(null);
   const [isAdjustDialogOpen, setIsAdjustDialogOpen] = useState(false);
-  const [adjustmentType, setAdjustmentType] = useState<AdjustmentType>("increase");
-  const [activeTab, setActiveTab] = useState("lines");
+  const [adjustmentType, setAdjustmentType] = useState<AdjustmentType>('increase');
+  const [activeTab, setActiveTab] = useState('lines');
 
   // Form state
   const [formData, setFormData] = useState<Partial<AdjustmentFormData>>({
     amount: 0,
-    reason: "",
+    reason: '',
   });
 
   // Hooks
@@ -116,16 +115,6 @@ export default function MiseAJourBudget() {
     );
   }, [budgetLines, search]);
 
-  // Format currency
-  const formatMontant = (montant: number | null | undefined) => {
-    if (montant === null || montant === undefined) return "0 FCFA";
-    return new Intl.NumberFormat("fr-FR", {
-      style: "decimal",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(montant) + " FCFA";
-  };
-
   // Open adjustment dialog
   const openAdjustDialog = (line: any, type: AdjustmentType) => {
     setSelectedLine(line);
@@ -134,7 +123,7 @@ export default function MiseAJourBudget() {
       budgetLineId: line.id,
       type,
       amount: 0,
-      reason: "",
+      reason: '',
     });
     setIsAdjustDialogOpen(true);
   };
@@ -142,21 +131,22 @@ export default function MiseAJourBudget() {
   // Execute adjustment
   const handleAdjust = async () => {
     if (!selectedLine || !formData.amount || formData.amount <= 0) {
-      toast.error("Veuillez saisir un montant valide");
+      toast.error('Veuillez saisir un montant valide');
       return;
     }
     if (!formData.reason?.trim()) {
-      toast.error("La justification est obligatoire");
+      toast.error('La justification est obligatoire');
       return;
     }
 
     const currentDotation = selectedLine.dotation_modifiee || selectedLine.dotation_initiale || 0;
-    const newDotation = adjustmentType === "increase"
-      ? currentDotation + formData.amount
-      : currentDotation - formData.amount;
+    const newDotation =
+      adjustmentType === 'increase'
+        ? currentDotation + formData.amount
+        : currentDotation - formData.amount;
 
     if (newDotation < 0) {
-      toast.error("La dotation ne peut pas être négative");
+      toast.error('La dotation ne peut pas être négative');
       return;
     }
 
@@ -166,14 +156,16 @@ export default function MiseAJourBudget() {
         changes: {
           dotation_modifiee: newDotation,
         },
-        reason: `${adjustmentType === "increase" ? "Augmentation" : "Diminution"} de ${formatMontant(formData.amount)}: ${formData.reason}`,
+        reason: `${adjustmentType === 'increase' ? 'Augmentation' : 'Diminution'} de ${formatCurrency(formData.amount)}: ${formData.reason}`,
       });
 
-      toast.success(`Ligne budgétaire ${adjustmentType === "increase" ? "augmentée" : "diminuée"} avec succès`);
+      toast.success(
+        `Ligne budgétaire ${adjustmentType === 'increase' ? 'augmentée' : 'diminuée'} avec succès`
+      );
       setIsAdjustDialogOpen(false);
       refetchLines();
     } catch (error) {
-      console.error("Erreur ajustement:", error);
+      console.error('Erreur ajustement:', error);
       toast.error("Erreur lors de l'ajustement");
     }
   };
@@ -181,7 +173,7 @@ export default function MiseAJourBudget() {
   // View line history
   const viewHistory = (line: any) => {
     setSelectedLine(line);
-    setActiveTab("history");
+    setActiveTab('history');
   };
 
   // Recent modifications (last 30 days)
@@ -253,9 +245,7 @@ export default function MiseAJourBudget() {
           <Card>
             <CardHeader>
               <CardTitle>Lignes budgétaires</CardTitle>
-              <CardDescription>
-                Sélectionnez une ligne pour l'ajuster
-              </CardDescription>
+              <CardDescription>Sélectionnez une ligne pour l'ajuster</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Search */}
@@ -296,7 +286,8 @@ export default function MiseAJourBudget() {
                         </TableRow>
                       ) : (
                         filteredLines.map((line: any) => {
-                          const variation = (line.dotation_modifiee || 0) - (line.dotation_initiale || 0);
+                          const variation =
+                            (line.dotation_modifiee || 0) - (line.dotation_initiale || 0);
                           return (
                             <TableRow key={line.id}>
                               <TableCell className="font-mono text-sm">
@@ -306,15 +297,18 @@ export default function MiseAJourBudget() {
                                 {line.label}
                               </TableCell>
                               <TableCell className="text-right">
-                                {formatMontant(line.dotation_initiale)}
+                                {formatCurrency(line.dotation_initiale)}
                               </TableCell>
                               <TableCell className="text-right font-medium">
-                                {formatMontant(line.dotation_modifiee || line.dotation_initiale)}
+                                {formatCurrency(line.dotation_modifiee || line.dotation_initiale)}
                               </TableCell>
                               <TableCell className="text-right">
                                 {variation !== 0 && (
-                                  <span className={variation > 0 ? "text-green-600" : "text-red-600"}>
-                                    {variation > 0 ? "+" : ""}{formatMontant(variation)}
+                                  <span
+                                    className={variation > 0 ? 'text-green-600' : 'text-red-600'}
+                                  >
+                                    {variation > 0 ? '+' : ''}
+                                    {formatCurrency(variation)}
                                   </span>
                                 )}
                               </TableCell>
@@ -323,7 +317,7 @@ export default function MiseAJourBudget() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => openAdjustDialog(line, "increase")}
+                                    onClick={() => openAdjustDialog(line, 'increase')}
                                     disabled={isReadOnly}
                                     title="Augmenter"
                                     className="text-green-600 hover:text-green-700"
@@ -333,7 +327,7 @@ export default function MiseAJourBudget() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => openAdjustDialog(line, "decrease")}
+                                    onClick={() => openAdjustDialog(line, 'decrease')}
                                     disabled={isReadOnly}
                                     title="Diminuer"
                                     className="text-red-600 hover:text-red-700"
@@ -393,21 +387,19 @@ export default function MiseAJourBudget() {
                       <TableRow key={line.id}>
                         <TableCell>
                           {line.last_modified_at
-                            ? format(new Date(line.last_modified_at), "dd/MM/yyyy HH:mm", { locale: fr })
-                            : "-"}
+                            ? format(new Date(line.last_modified_at), 'dd/MM/yyyy HH:mm', {
+                                locale: fr,
+                              })
+                            : '-'}
                         </TableCell>
                         <TableCell className="font-mono text-sm">
                           {line.code_v2 || line.code}
                         </TableCell>
-                        <TableCell className="max-w-[200px] truncate">
-                          {line.label}
-                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate">{line.label}</TableCell>
                         <TableCell className="text-right">
-                          {formatMontant(line.dotation_modifiee || line.dotation_initiale)}
+                          {formatCurrency(line.dotation_modifiee || line.dotation_initiale)}
                         </TableCell>
-                        <TableCell>
-                          {line.last_modified_by_profile?.full_name || "-"}
-                        </TableCell>
+                        <TableCell>{line.last_modified_by_profile?.full_name || '-'}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -426,9 +418,7 @@ export default function MiseAJourBudget() {
                   <History className="h-5 w-5" />
                   Historique: {selectedLine.code_v2 || selectedLine.code}
                 </CardTitle>
-                <CardDescription>
-                  {selectedLine.label}
-                </CardDescription>
+                <CardDescription>{selectedLine.label}</CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoadingVersions ? (
@@ -438,10 +428,7 @@ export default function MiseAJourBudget() {
                 ) : versions && versions.length > 0 ? (
                   <div className="space-y-4">
                     {versions.map((version: any, _index: number) => (
-                      <div
-                        key={version.id}
-                        className="border rounded-lg p-4 space-y-2"
-                      >
+                      <div key={version.id} className="border rounded-lg p-4 space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Badge className={getChangeTypeColor(version.change_type)}>
@@ -452,7 +439,9 @@ export default function MiseAJourBudget() {
                             </span>
                           </div>
                           <span className="text-sm text-muted-foreground">
-                            {format(new Date(version.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
+                            {format(new Date(version.created_at), 'dd/MM/yyyy HH:mm', {
+                              locale: fr,
+                            })}
                           </span>
                         </div>
 
@@ -477,9 +466,7 @@ export default function MiseAJourBudget() {
                                       {formatValue(key, version.old_values[key])}
                                     </span>
                                   )}
-                                  <span className="text-green-600">
-                                    {formatValue(key, value)}
-                                  </span>
+                                  <span className="text-green-600">{formatValue(key, value)}</span>
                                 </span>
                               </div>
                             ))}
@@ -487,7 +474,7 @@ export default function MiseAJourBudget() {
                         )}
 
                         <div className="text-xs text-muted-foreground">
-                          Par: {version.created_by_profile?.full_name || "Système"}
+                          Par: {version.created_by_profile?.full_name || 'Système'}
                         </div>
                       </div>
                     ))}
@@ -509,7 +496,7 @@ export default function MiseAJourBudget() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {adjustmentType === "increase" ? (
+              {adjustmentType === 'increase' ? (
                 <>
                   <TrendingUp className="h-5 w-5 text-green-600" />
                   Augmenter la dotation
@@ -536,7 +523,9 @@ export default function MiseAJourBudget() {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Dotation actuelle:</span>
                 <span className="font-medium">
-                  {formatMontant(selectedLine?.dotation_modifiee || selectedLine?.dotation_initiale)}
+                  {formatCurrency(
+                    selectedLine?.dotation_modifiee || selectedLine?.dotation_initiale
+                  )}
                 </span>
               </div>
             </div>
@@ -544,23 +533,25 @@ export default function MiseAJourBudget() {
             {/* Amount */}
             <div className="grid gap-2">
               <Label htmlFor="amount">
-                Montant de l'{adjustmentType === "increase" ? "augmentation" : "diminution"} *
+                Montant de l'{adjustmentType === 'increase' ? 'augmentation' : 'diminution'} *
               </Label>
               <Input
                 id="amount"
                 type="number"
                 min={0}
-                value={formData.amount || ""}
-                onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                value={formData.amount || ''}
+                onChange={(e) =>
+                  setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
+                }
                 placeholder="0"
               />
               {formData.amount && formData.amount > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  Nouvelle dotation:{" "}
+                  Nouvelle dotation:{' '}
                   <span className="font-medium">
-                    {formatMontant(
+                    {formatCurrency(
                       (selectedLine?.dotation_modifiee || selectedLine?.dotation_initiale || 0) +
-                        (adjustmentType === "increase" ? formData.amount : -formData.amount)
+                        (adjustmentType === 'increase' ? formData.amount : -formData.amount)
                     )}
                   </span>
                 </p>
@@ -572,7 +563,7 @@ export default function MiseAJourBudget() {
               <Label htmlFor="reason">Justification *</Label>
               <Textarea
                 id="reason"
-                value={formData.reason || ""}
+                value={formData.reason || ''}
                 onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                 placeholder="Expliquez la raison de cet ajustement..."
                 rows={3}
@@ -587,10 +578,14 @@ export default function MiseAJourBudget() {
             <Button
               onClick={handleAdjust}
               disabled={isModifying || !formData.amount || !formData.reason}
-              className={adjustmentType === "increase" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
+              className={
+                adjustmentType === 'increase'
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-red-600 hover:bg-red-700'
+              }
             >
               {isModifying && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {adjustmentType === "increase" ? (
+              {adjustmentType === 'increase' ? (
                 <>
                   <Plus className="h-4 w-4 mr-2" />
                   Augmenter

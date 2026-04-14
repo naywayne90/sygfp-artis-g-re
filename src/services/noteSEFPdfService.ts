@@ -23,6 +23,7 @@ import {
 import { ValidationDG, VALIDATION_STATUS_LABELS } from '@/hooks/useValidationDG';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
 import logoArti from '@/assets/logo-arti.jpg';
 
 // ============================================================================
@@ -171,14 +172,6 @@ function formatDateShort(date: string | Date | null): string {
 }
 
 /**
- * Formatte un montant en FCFA
- */
-function formatMontant(montant: number | null): string {
-  if (!montant) return '-';
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-}
-
-/**
  * Tronque le texte si trop long
  */
 function truncateText(text: string | null, maxLength: number): string {
@@ -276,7 +269,7 @@ async function generatePage1(
         'Direction',
         note.direction?.sigle || note.direction?.label || '-',
         'Urgence',
-        note.urgence ? 'OUI' : 'Non',
+        note.urgence === 'haute' || note.urgence === 'urgente' ? 'OUI' : 'Non',
       ],
       [
         'Demandeur',
@@ -284,7 +277,7 @@ async function generatePage1(
           ? `${note.demandeur.first_name || ''} ${note.demandeur.last_name || ''}`.trim() || '-'
           : '-',
         'Montant',
-        formatMontant(note.montant_estime),
+        formatCurrency(note.montant_estime),
       ],
       ['Objet', { content: note.objet || '-', colSpan: 3 }],
       [

@@ -133,7 +133,7 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
     ].join(';');
 
     const content = `${headers}\n${example}`;
-    const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['﻿' + content], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `modele_budget_${exercice}.csv`;
@@ -528,7 +528,7 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
     ];
 
     const content = lines.join('\n');
-    const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['﻿' + content], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `rapport_erreurs_${exercice}.csv`;

@@ -48,6 +48,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useExercice } from '@/contexts/ExerciceContext';
+import { formatCurrency } from '@/lib/utils';
 
 interface ExecutionKPIDashboardProps {
   compact?: boolean;
@@ -63,8 +64,6 @@ const COLORS = {
 };
 
 const PIE_COLORS = ['#10b981', '#f59e0b', '#ef4444', '#6b7280'];
-
-const formatMontant = (montant: number) => new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
 const formatMontantCompact = (montant: number) => {
   if (montant >= 1_000_000_000) {
@@ -585,7 +584,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
                       <XAxis dataKey="mois" />
                       <YAxis tickFormatter={(val) => formatMontantCompact(val)} />
                       <Tooltip
-                        formatter={(value: number) => formatMontant(value)}
+                        formatter={(value: number) => formatCurrency(value)}
                         labelFormatter={(label) => `Mois: ${label}`}
                       />
                       <Legend />
@@ -671,7 +670,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
                       <div className="flex justify-between mb-1">
                         <span className="text-sm">Dotation totale</span>
                         <span className="font-bold">
-                          {formatMontant(kpis?.budget.dotation || 0)}
+                          {formatCurrency(kpis?.budget.dotation || 0)}
                         </span>
                       </div>
                     </div>
@@ -679,7 +678,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
                       <div className="flex justify-between mb-1">
                         <span className="text-sm text-muted-foreground">Montant engagé</span>
                         <span className="font-medium">
-                          {formatMontant(kpis?.budget.engage || 0)}
+                          {formatCurrency(kpis?.budget.engage || 0)}
                         </span>
                       </div>
                       <Progress value={kpis?.budget.tauxExecution || 0} className="h-3" />
@@ -691,7 +690,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
                       <div className="flex justify-between">
                         <span className="text-sm font-medium">Disponible</span>
                         <span className="font-bold text-success">
-                          {formatMontant(kpis?.budget.disponible || 0)}
+                          {formatCurrency(kpis?.budget.disponible || 0)}
                         </span>
                       </div>
                     </div>
@@ -747,7 +746,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right font-bold">
-                            {formatMontant(dossier.montant_estime || 0)}
+                            {formatCurrency(dossier.montant_estime || 0)}
                           </TableCell>
                         </TableRow>
                       ))}

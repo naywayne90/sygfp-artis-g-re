@@ -58,7 +58,7 @@ import {
   Lock,
   Unlock,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 
 interface NoteAEFImputeDialogProps {
   open: boolean;
@@ -262,9 +262,6 @@ export function NoteAEFImputeDialog({
     }
   };
 
-  const formatMontant = (montant: number) =>
-    new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-
   if (!note) return null;
 
   return (
@@ -305,7 +302,7 @@ export function NoteAEFImputeDialog({
                   </div>
                   <div>
                     <span className="text-muted-foreground">Montant à imputer:</span>
-                    <p className="font-bold text-primary text-lg">{formatMontant(montantNote)}</p>
+                    <p className="font-bold text-primary text-lg">{formatCurrency(montantNote)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -383,7 +380,7 @@ export function NoteAEFImputeDialog({
                   />
                   <Label htmlFor="onlySufficient" className="text-sm cursor-pointer">
                     Afficher uniquement les lignes avec disponible suffisant (
-                    {formatMontant(montantNote)})
+                    {formatCurrency(montantNote)})
                   </Label>
                 </div>
               </CardContent>
@@ -463,10 +460,10 @@ export function NoteAEFImputeDialog({
                                 </Badge>
                               </TableCell>
                               <TableCell className="text-right font-mono text-sm">
-                                {formatMontant(line.dotation_actuelle)}
+                                {formatCurrency(line.dotation_actuelle)}
                               </TableCell>
                               <TableCell className="text-right font-mono text-sm text-orange-600">
-                                {formatMontant(line.total_engage)}
+                                {formatCurrency(line.total_engage)}
                               </TableCell>
                               <TableCell
                                 className={cn(
@@ -478,7 +475,7 @@ export function NoteAEFImputeDialog({
                                       : 'text-green-600'
                                 )}
                               >
-                                {formatMontant(line.disponible_net)}
+                                {formatCurrency(line.disponible_net)}
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
@@ -564,18 +561,18 @@ export function NoteAEFImputeDialog({
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-3 text-center">
                     <div className="bg-muted/50 rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">Dotation</p>
-                      <p className="font-bold">{formatMontant(selectedLine.dotation_actuelle)}</p>
+                      <p className="font-bold">{formatCurrency(selectedLine.dotation_actuelle)}</p>
                     </div>
                     <div className="bg-muted/50 rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">Engagé</p>
                       <p className="font-bold text-orange-600">
-                        {formatMontant(selectedLine.total_engage)}
+                        {formatCurrency(selectedLine.total_engage)}
                       </p>
                     </div>
                     <div className="bg-muted/50 rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">Réservé</p>
                       <p className="font-bold text-amber-600">
-                        {formatMontant(selectedLine.montant_reserve)}
+                        {formatCurrency(selectedLine.montant_reserve)}
                       </p>
                     </div>
                     <div
@@ -593,12 +590,12 @@ export function NoteAEFImputeDialog({
                           selectedLine.disponible_net >= 0 ? 'text-green-600' : 'text-destructive'
                         )}
                       >
-                        {formatMontant(selectedLine.disponible_net)}
+                        {formatCurrency(selectedLine.disponible_net)}
                       </p>
                     </div>
                     <div className="bg-primary/10 rounded-lg p-2 border-2 border-primary">
                       <p className="text-xs text-muted-foreground">À imputer</p>
-                      <p className="font-bold text-primary">{formatMontant(montantNote)}</p>
+                      <p className="font-bold text-primary">{formatCurrency(montantNote)}</p>
                     </div>
                     <div
                       className={cn(
@@ -615,7 +612,7 @@ export function NoteAEFImputeDialog({
                           disponibleApres >= 0 ? 'text-green-600' : 'text-destructive'
                         )}
                       >
-                        {formatMontant(disponibleApres)}
+                        {formatCurrency(disponibleApres)}
                       </p>
                     </div>
                   </div>
@@ -651,10 +648,10 @@ export function NoteAEFImputeDialog({
                       <AlertTitle>Disponible insuffisant</AlertTitle>
                       <AlertDescription className="space-y-3">
                         <p>
-                          Le montant à imputer ({formatMontant(montantNote)}) dépasse le disponible
+                          Le montant à imputer ({formatCurrency(montantNote)}) dépasse le disponible
                           net de{' '}
                           <strong>
-                            {formatMontant(Math.abs(selectedLine.disponible_net - montantNote))}
+                            {formatCurrency(Math.abs(selectedLine.disponible_net - montantNote))}
                           </strong>
                           .
                         </p>

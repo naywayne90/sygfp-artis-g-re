@@ -22,7 +22,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { PieChartIcon, BarChart3, Building2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import type { ChartData } from '@/hooks/useDashboardData';
 
 // ============================================================================
@@ -81,10 +81,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
       {label && <p className="font-medium text-sm mb-2">{label}</p>}
       {payload.map((entry, index) => (
         <div key={index} className="flex items-center gap-2 text-sm">
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: entry.color }}
-          />
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
           <span className="text-muted-foreground">{entry.name}:</span>
           <span className="font-medium">{entry.value.toLocaleString('fr-FR')}</span>
         </div>
@@ -136,7 +133,10 @@ function StatusPieChart({ data, isLoading }: StatusPieChartProps) {
           labelLine={false}
         >
           {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.color || CHART_COLORS[index % CHART_COLORS.length]} />
+            <Cell
+              key={`cell-${index}`}
+              fill={entry.color || CHART_COLORS[index % CHART_COLORS.length]}
+            />
           ))}
         </Pie>
         <Tooltip content={<CustomTooltip />} />
@@ -201,18 +201,8 @@ function MonthlyBarChart({ data, isLoading }: MonthlyBarChartProps) {
         <YAxis tick={{ fontSize: 12 }} />
         <Tooltip content={<CustomTooltip />} />
         <Legend />
-        <Bar
-          dataKey="notes"
-          name="Notes"
-          fill={COLORS.primary}
-          radius={[4, 4, 0, 0]}
-        />
-        <Bar
-          dataKey="dossiers"
-          name="Dossiers"
-          fill={COLORS.secondary}
-          radius={[4, 4, 0, 0]}
-        />
+        <Bar dataKey="notes" name="Notes" fill={COLORS.primary} radius={[4, 4, 0, 0]} />
+        <Bar dataKey="dossiers" name="Dossiers" fill={COLORS.secondary} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -244,13 +234,6 @@ function AmountLineChart({ data, isLoading }: AmountLineChartProps) {
     );
   }
 
-  // Formatter les montants en millions
-  const formatMontant = (value: number) => {
-    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-    if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
-    return value.toString();
-  };
-
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -262,10 +245,8 @@ function AmountLineChart({ data, isLoading }: AmountLineChartProps) {
         </defs>
         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
         <XAxis dataKey="mois" tick={{ fontSize: 12 }} />
-        <YAxis tickFormatter={formatMontant} tick={{ fontSize: 12 }} />
-        <Tooltip
-          formatter={(value: number) => [`${formatMontant(value)} FCFA`, 'Montant']}
-        />
+        <YAxis tickFormatter={(value: number) => formatCurrency(value)} tick={{ fontSize: 12 }} />
+        <Tooltip formatter={(value: number) => [formatCurrency(value), 'Montant']} />
         <Area
           type="monotone"
           dataKey="montant"
@@ -314,11 +295,7 @@ function DirectionBarChart({ data, isLoading }: DirectionBarChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <BarChart
-        data={data}
-        layout="vertical"
-        margin={{ top: 20, right: 30, left: 60, bottom: 5 }}
-      >
+      <BarChart data={data} layout="vertical" margin={{ top: 20, right: 30, left: 60, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
         <XAxis type="number" tick={{ fontSize: 12 }} />
         <YAxis dataKey="direction" type="category" tick={{ fontSize: 12 }} width={50} />
@@ -333,11 +310,7 @@ function DirectionBarChart({ data, isLoading }: DirectionBarChartProps) {
 // COMPOSANT PRINCIPAL
 // ============================================================================
 
-export function DashboardCharts({
-  data,
-  isLoading,
-  className,
-}: DashboardChartsProps) {
+export function DashboardCharts({ data, isLoading, className }: DashboardChartsProps) {
   return (
     <div className={cn('grid gap-6 lg:grid-cols-2', className)}>
       {/* Graphique 1: Répartition par statut */}
@@ -347,15 +320,10 @@ export function DashboardCharts({
             <PieChartIcon className="h-4 w-4 text-blue-600" />
             Répartition par statut
           </CardTitle>
-          <CardDescription>
-            Distribution des notes SEF selon leur statut
-          </CardDescription>
+          <CardDescription>Distribution des notes SEF selon leur statut</CardDescription>
         </CardHeader>
         <CardContent>
-          <StatusPieChart
-            data={data?.repartitionStatut || []}
-            isLoading={isLoading}
-          />
+          <StatusPieChart data={data?.repartitionStatut || []} isLoading={isLoading} />
         </CardContent>
       </Card>
 
@@ -366,9 +334,7 @@ export function DashboardCharts({
             <BarChart3 className="h-4 w-4 text-purple-600" />
             Évolution mensuelle
           </CardTitle>
-          <CardDescription>
-            Nombre de notes et dossiers créés par mois
-          </CardDescription>
+          <CardDescription>Nombre de notes et dossiers créés par mois</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="count" className="w-full">
@@ -377,16 +343,10 @@ export function DashboardCharts({
               <TabsTrigger value="amount">Montants</TabsTrigger>
             </TabsList>
             <TabsContent value="count">
-              <MonthlyBarChart
-                data={data?.evolutionMensuelle || []}
-                isLoading={isLoading}
-              />
+              <MonthlyBarChart data={data?.evolutionMensuelle || []} isLoading={isLoading} />
             </TabsContent>
             <TabsContent value="amount">
-              <AmountLineChart
-                data={data?.evolutionMensuelle || []}
-                isLoading={isLoading}
-              />
+              <AmountLineChart data={data?.evolutionMensuelle || []} isLoading={isLoading} />
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -399,15 +359,10 @@ export function DashboardCharts({
             <Building2 className="h-4 w-4 text-orange-600" />
             Répartition par direction
           </CardTitle>
-          <CardDescription>
-            Nombre de notes par direction (Top 10)
-          </CardDescription>
+          <CardDescription>Nombre de notes par direction (Top 10)</CardDescription>
         </CardHeader>
         <CardContent>
-          <DirectionBarChart
-            data={data?.repartitionDirection || []}
-            isLoading={isLoading}
-          />
+          <DirectionBarChart data={data?.repartitionDirection || []} isLoading={isLoading} />
         </CardContent>
       </Card>
     </div>

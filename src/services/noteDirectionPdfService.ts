@@ -201,7 +201,7 @@ async function generatePage1(
 
   doc.setFontSize(fonts.small);
   doc.setTextColor(...colors.gray);
-  doc.text("REPUBLIQUE DE COTE D'IVOIRE", pageWidth / 2, yPos + 4, { align: 'center' });
+  doc.text("RÉPUBLIQUE DE CÔTE D'IVOIRE", pageWidth / 2, yPos + 4, { align: 'center' });
   doc.setFont('helvetica', 'italic');
   doc.text('Union - Discipline - Travail', pageWidth / 2, yPos + 9, { align: 'center' });
   doc.setFont('helvetica', 'normal');
@@ -484,7 +484,7 @@ async function generatePage2(
 
   doc.setFontSize(fonts.small);
   doc.setTextColor(...colors.gray);
-  doc.text("Scannez ce QR Code pour verifier l'authenticite", pageWidth / 2, qrY - 5, {
+  doc.text("Scannez ce QR Code pour vérifier l'authenticité", pageWidth / 2, qrY - 5, {
     align: 'center',
   });
 
@@ -500,7 +500,7 @@ async function generatePage2(
   doc.text(verificationUrl, pageWidth / 2, qrY + qrSize + 5, { align: 'center' });
 
   doc.text(
-    'Ce document est authentifie electroniquement. Toute falsification est passible de poursuites.',
+    'Ce document est authentifié électroniquement. Toute falsification est passible de poursuites.',
     pageWidth / 2,
     qrY + qrSize + 12,
     { align: 'center' }

@@ -30,7 +30,7 @@ import {
   LotMarche,
   PassationMarche,
 } from '@/hooks/usePassationsMarche';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import {
   BarChart3,
   CheckCircle2,
@@ -170,9 +170,6 @@ export function EvaluationCOJO({
   const evaluatedCount = currentSoumissionnaires.filter((s) => s.note_technique !== null).length;
   const hasRetenu = currentSoumissionnaires.some((s) => s.statut === 'retenu');
 
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
-
   // Handlers
   const handleConformer = async (soumId: string) => {
     await onUpdateSoumissionnaire({ id: soumId, statut: 'conforme' });
@@ -258,7 +255,7 @@ export function EvaluationCOJO({
     const retenu = evaluations.find((e) => e.soumissionnaire.statut === 'retenu');
     if (retenu) {
       lines.push(``, `ATTRIBUTAIRE PROPOSE: ${retenu.soumissionnaire.raison_sociale}`);
-      lines.push(`Offre financiere: ${formatMontant(retenu.soumissionnaire.offre_financiere)}`);
+      lines.push(`Offre financiere: ${formatCurrency(retenu.soumissionnaire.offre_financiere)}`);
       lines.push(`Note finale: ${retenu.noteFinale?.toFixed(2) ?? 'N/A'}`);
     }
 
@@ -392,7 +389,7 @@ export function EvaluationCOJO({
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm">
-                        {formatMontant(s.offre_financiere)}
+                        {formatCurrency(s.offre_financiere)}
                       </TableCell>
                       <TableCell className="text-center text-xs">
                         {s.date_depot ? new Date(s.date_depot).toLocaleDateString('fr-FR') : '-'}
@@ -547,7 +544,7 @@ export function EvaluationCOJO({
                                 <div>
                                   <p className="font-medium text-sm">{s.raison_sociale}</p>
                                   <p className="text-xs text-muted-foreground">
-                                    Offre: {formatMontant(s.offre_financiere)}
+                                    Offre: {formatCurrency(s.offre_financiere)}
                                   </p>
                                 </div>
                               </div>
@@ -764,7 +761,7 @@ export function EvaluationCOJO({
                               <div>
                                 <p className="font-medium text-sm">{s.raison_sociale}</p>
                                 <p className="text-xs text-muted-foreground">
-                                  Offre: {formatMontant(s.offre_financiere)}
+                                  Offre: {formatCurrency(s.offre_financiere)}
                                 </p>
                               </div>
                             </div>
@@ -845,7 +842,7 @@ export function EvaluationCOJO({
                     <div>
                       <span className="text-muted-foreground">Offre financiere :</span>{' '}
                       <span className="font-bold">
-                        {formatMontant(retenu.soumissionnaire.offre_financiere)}
+                        {formatCurrency(retenu.soumissionnaire.offre_financiere)}
                       </span>
                     </div>
                     <div>

@@ -36,6 +36,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { formatCurrency } from '@/lib/utils';
 
 interface ExerciceInitWizardProps {
   open: boolean;
@@ -326,9 +327,6 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
     }
   };
 
-  const formatMontant = (montant: number) =>
-    new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-
   return (
     <Dialog
       open={open}
@@ -404,7 +402,7 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                           <p className="font-semibold">Exercice {ex.annee}</p>
                           <p className="text-sm text-muted-foreground">
                             {ex.budget_lignes_count || 0} lignes •{' '}
-                            {formatMontant(ex.budget_total || 0)}
+                            {formatCurrency(ex.budget_total || 0)}
                           </p>
                         </div>
                       </div>
@@ -637,7 +635,7 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                       </CardHeader>
                       <CardContent className="text-sm">
                         <p>{sourceExercice.budget_lignes_count || 0} lignes budgétaires</p>
-                        <p>{formatMontant(sourceExercice.budget_total || 0)}</p>
+                        <p>{formatCurrency(sourceExercice.budget_total || 0)}</p>
                       </CardContent>
                     </Card>
                   )}
@@ -694,7 +692,7 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                   </div>
                   <div className="mt-4 pt-4 border-t border-primary/20 text-center">
                     <p className="text-2xl font-semibold">
-                      {formatMontant(budgetSummary?.dotation_totale || 0)}
+                      {formatCurrency(budgetSummary?.dotation_totale || 0)}
                     </p>
                     <p className="text-sm text-muted-foreground">Dotation totale</p>
                   </div>

@@ -24,7 +24,7 @@ import { Separator } from '@/components/ui/separator';
 import { useExpressionsBesoin, MarcheValide, URGENCE_OPTIONS } from '@/hooks/useExpressionsBesoin';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { Briefcase, Calendar, Loader2, Search } from 'lucide-react';
-import { formatMontant } from '@/lib/config/sygfp-constants';
+import { formatCurrency } from '@/lib/utils';
 
 interface ExpressionBesoinFormProps {
   open: boolean;
@@ -176,7 +176,7 @@ export function ExpressionBesoinForm({
                               </p>
                             )}
                           </div>
-                          <Badge variant="outline">{formatMontant(marche.montant)}</Badge>
+                          <Badge variant="outline">{formatCurrency(marche.montant)}</Badge>
                         </div>
                       </div>
                     ))
@@ -212,7 +212,7 @@ export function ExpressionBesoinForm({
                     </div>
                     <div>
                       <span className="text-muted-foreground">Montant:</span>{' '}
-                      <span className="font-medium">{formatMontant(selectedMarche.montant)}</span>
+                      <span className="font-medium">{formatCurrency(selectedMarche.montant)}</span>
                     </div>
                     <div className="col-span-2">
                       <span className="text-muted-foreground">Objet:</span>{' '}

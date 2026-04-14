@@ -20,13 +20,7 @@ import {
 } from '@/components/ui/table';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useTableauFinancier, useDirections } from '@/hooks/useTableauFinancier';
-
-const formatMontant = (montant: number) =>
-  new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
-    maximumFractionDigits: 0,
-  }).format(montant);
+import { formatCurrency } from '@/lib/utils';
 
 const formatTaux = (taux: number) =>
   new Intl.NumberFormat('fr-FR', {
@@ -218,16 +212,16 @@ export default function DashboardFinancier() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm">
-                        {formatMontant(row.budget_initial || 0)}
+                        {formatCurrency(row.budget_initial || 0)}
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm">
-                        {formatMontant(row.total_engagements || 0)}
+                        {formatCurrency(row.total_engagements || 0)}
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm">
-                        {formatMontant(row.total_liquidations || 0)}
+                        {formatCurrency(row.total_liquidations || 0)}
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm">
-                        {formatMontant(row.total_ordonnancements || 0)}
+                        {formatCurrency(row.total_ordonnancements || 0)}
                       </TableCell>
                       <TableCell>
                         <ProgressBar value={row.taux_engagement || 0} />
@@ -245,16 +239,16 @@ export default function DashboardFinancier() {
                   <TableRow className="bg-muted/50 font-bold border-t-2">
                     <TableCell className="font-bold">TOTAL</TableCell>
                     <TableCell className="text-right font-mono text-sm font-bold">
-                      {formatMontant(totals.budget_initial)}
+                      {formatCurrency(totals.budget_initial)}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm font-bold">
-                      {formatMontant(totals.total_engagements)}
+                      {formatCurrency(totals.total_engagements)}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm font-bold">
-                      {formatMontant(totals.total_liquidations)}
+                      {formatCurrency(totals.total_liquidations)}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm font-bold">
-                      {formatMontant(totals.total_ordonnancements)}
+                      {formatCurrency(totals.total_ordonnancements)}
                     </TableCell>
                     <TableCell>
                       <ProgressBar value={totals.taux_engagement} />
@@ -311,7 +305,7 @@ function KPICard({ title, value, taux, icon, isLoading, color }: KPICardProps) {
           <span className="text-sm font-medium text-muted-foreground">{title}</span>
           {icon}
         </div>
-        <p className="text-2xl font-bold">{formatMontant(value)}</p>
+        <p className="text-2xl font-bold">{formatCurrency(value)}</p>
         {taux !== undefined && (
           <p className={`text-xs mt-1 ${getTauxTextColor(taux)}`}>Taux: {formatTaux(taux)}</p>
         )}

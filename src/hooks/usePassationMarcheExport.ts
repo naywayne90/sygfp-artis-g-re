@@ -15,6 +15,7 @@ import { generatePDFFooter, generateSignatureTable } from '@/lib/pdf/pdfFooter';
 import { PDF_COLORS, PDF_FONTS, PDF_MARGINS, PDF_PAGE, TABLE_STYLES } from '@/lib/pdf/pdfStyles';
 import type { PassationMarche, LotMarche, Soumissionnaire } from '@/hooks/usePassationsMarche';
 import { MODES_PASSATION, STATUTS } from '@/hooks/usePassationsMarche';
+import { formatCurrency } from '@/lib/utils';
 import logoArtiUrl from '@/assets/logo-arti.jpg';
 
 // ---------------------------------------------------------------------------
@@ -22,8 +23,8 @@ import logoArtiUrl from '@/assets/logo-arti.jpg';
 // ---------------------------------------------------------------------------
 
 function fmtCurrency(n: number | null): string {
-  if (!n) return '-';
-  return new Intl.NumberFormat('fr-FR').format(n) + ' FCFA';
+  if (n == null) return '-';
+  return formatCurrency(n);
 }
 
 function fmtDate(iso: string | null): string {

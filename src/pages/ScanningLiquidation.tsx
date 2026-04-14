@@ -117,11 +117,6 @@ interface DirectionOption {
   label: string;
 }
 
-const formatMontant = (montant: number | null | undefined) => {
-  if (montant === null || montant === undefined) return '-';
-  return formatCurrency(montant);
-};
-
 const getDocumentStatusBadge = (providedRequired: number, totalRequired: number) => {
   if (totalRequired === 0 || providedRequired === totalRequired) {
     return (
@@ -958,11 +953,11 @@ export default function ScanningLiquidation() {
                                     <AlertTriangle className="h-3 w-3 mr-1" />0 FCFA
                                   </Badge>
                                 ) : (
-                                  <span className="font-medium">{formatMontant(liq.montant)}</span>
+                                  <span className="font-medium">{formatCurrency(liq.montant)}</span>
                                 )}
                               </TableCell>
                               <TableCell className="text-right hidden md:table-cell font-medium text-primary">
-                                {formatMontant(liq.net_a_payer)}
+                                {formatCurrency(liq.net_a_payer)}
                               </TableCell>
                               {/* #8 — Réf. Facture */}
                               <TableCell className="hidden lg:table-cell text-muted-foreground text-sm">
@@ -1037,13 +1032,13 @@ export default function ScanningLiquidation() {
                     <div className="text-muted-foreground">
                       Total Montant :{' '}
                       <span className="font-semibold text-foreground">
-                        {formatMontant(soumisLiquidations.reduce((sum, l) => sum + l.montant, 0))}
+                        {formatCurrency(soumisLiquidations.reduce((sum, l) => sum + l.montant, 0))}
                       </span>
                     </div>
                     <div className="text-muted-foreground">
                       Total Net à payer :{' '}
                       <span className="font-semibold text-primary">
-                        {formatMontant(
+                        {formatCurrency(
                           soumisLiquidations.reduce((sum, l) => sum + (l.net_a_payer || 0), 0)
                         )}
                       </span>
@@ -1113,10 +1108,10 @@ export default function ScanningLiquidation() {
                         </TableCell>
                         <TableCell>{liq.engagement_fournisseur || '-'}</TableCell>
                         <TableCell className="text-right font-medium">
-                          {formatMontant(liq.montant)}
+                          {formatCurrency(liq.montant)}
                         </TableCell>
                         <TableCell className="text-right hidden md:table-cell font-medium text-primary">
-                          {formatMontant(liq.net_a_payer)}
+                          {formatCurrency(liq.net_a_payer)}
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge className="bg-success/10 text-success border-success/20 gap-1">
@@ -1183,12 +1178,12 @@ export default function ScanningLiquidation() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Montant</p>
-                    <p className="font-medium">{formatMontant(selectedLiquidation.montant)}</p>
+                    <p className="font-medium">{formatCurrency(selectedLiquidation.montant)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Net à payer</p>
                     <p className="font-medium text-primary">
-                      {formatMontant(selectedLiquidation.net_a_payer)}
+                      {formatCurrency(selectedLiquidation.net_a_payer)}
                     </p>
                   </div>
                   <div>
@@ -1217,7 +1212,7 @@ export default function ScanningLiquidation() {
                   </span>
                   {getEngagementStatusBadge(selectedLiquidation.engagement_statut)}
                   <span className="text-sm text-muted-foreground ml-auto">
-                    Montant: {formatMontant(selectedLiquidation.engagement_montant)}
+                    Montant: {formatCurrency(selectedLiquidation.engagement_montant)}
                   </span>
                 </div>
 

@@ -16,7 +16,6 @@ export interface DashboardKPIs {
   // Notes SEF
   notesSEF: {
     total: number;
-    brouillon: number;
     soumis: number;
     aValider: number;
     valide: number;
@@ -98,7 +97,6 @@ export interface DashboardData {
 // ============================================================================
 
 const STATUS_COLORS: Record<string, string> = {
-  brouillon: '#9CA3AF',
   soumis: '#3B82F6',
   a_valider: '#F59E0B',
   valide: '#10B981',
@@ -189,9 +187,8 @@ async function fetchNotesStats(exercice: number) {
 
   const notes = notesSEF || [];
 
-  // Compter par statut
+  // Compter par statut (pas de brouillon : tout est soumis des la creation)
   const statuts = {
-    brouillon: 0,
     soumis: 0,
     a_valider: 0,
     valide: 0,
@@ -407,7 +404,6 @@ function transformRPCData(rpcData: unknown): DashboardData {
 
 function buildRepartitionStatut(notesSEF: DashboardKPIs['notesSEF']) {
   return [
-    { name: 'Soumis (initial)', value: notesSEF.brouillon, color: STATUS_COLORS.brouillon },
     { name: 'Soumis', value: notesSEF.soumis, color: STATUS_COLORS.soumis },
     { name: 'À valider', value: notesSEF.aValider, color: STATUS_COLORS.a_valider },
     { name: 'Validé', value: notesSEF.valide, color: STATUS_COLORS.valide },

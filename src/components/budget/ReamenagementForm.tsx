@@ -6,7 +6,7 @@
  * avec validation du disponible et workflow d'approbation.
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,14 +14,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
 import {
   Command,
   CommandEmpty,
@@ -29,12 +29,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   ArrowRight,
   AlertCircle,
@@ -44,14 +40,14 @@ import {
   ArrowRightLeft,
   Minus,
   Plus,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import { cn, formatCurrency } from '@/lib/utils';
 import {
   useImputationsDisponibles,
   useBudgetImputation,
   useCreateReamenagement,
-} from "@/hooks/useReamenagementBudgetaire";
-import { useExercice } from "@/contexts/ExerciceContext";
+} from '@/hooks/useReamenagementBudgetaire';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 interface ReamenagementFormProps {
   open: boolean;
@@ -59,22 +55,15 @@ interface ReamenagementFormProps {
   onSuccess?: () => void;
 }
 
-const formatMontant = (montant: number) =>
-  new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
-
-export function ReamenagementForm({
-  open,
-  onOpenChange,
-  onSuccess,
-}: ReamenagementFormProps) {
+export function ReamenagementForm({ open, onOpenChange, onSuccess }: ReamenagementFormProps) {
   const { exerciceId } = useExercice();
 
   // Form state
-  const [sourceImputation, setSourceImputation] = useState("");
-  const [destinationImputation, setDestinationImputation] = useState("");
-  const [montant, setMontant] = useState<number | "">("");
-  const [motif, setMotif] = useState("");
-  const [referenceNote, setReferenceNote] = useState("");
+  const [sourceImputation, setSourceImputation] = useState('');
+  const [destinationImputation, setDestinationImputation] = useState('');
+  const [montant, setMontant] = useState<number | ''>('');
+  const [motif, setMotif] = useState('');
+  const [referenceNote, setReferenceNote] = useState('');
   const [openSourceCombo, setOpenSourceCombo] = useState(false);
   const [openDestCombo, setOpenDestCombo] = useState(false);
 
@@ -104,8 +93,7 @@ export function ReamenagementForm({
 
   // Validation
   const disponibleSource = sourceBudget?.disponible || 0;
-  const isValidMontant =
-    typeof montant === "number" && montant > 0 && montant <= disponibleSource;
+  const isValidMontant = typeof montant === 'number' && montant > 0 && montant <= disponibleSource;
   const isValid =
     sourceImputation &&
     destinationImputation &&
@@ -117,7 +105,7 @@ export function ReamenagementForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isValid || typeof montant !== "number") return;
+    if (!isValid || typeof montant !== 'number') return;
 
     await createMutation.mutateAsync({
       imputationSource: sourceImputation,
@@ -129,11 +117,11 @@ export function ReamenagementForm({
     });
 
     // Reset form
-    setSourceImputation("");
-    setDestinationImputation("");
-    setMontant("");
-    setMotif("");
-    setReferenceNote("");
+    setSourceImputation('');
+    setDestinationImputation('');
+    setMontant('');
+    setMotif('');
+    setReferenceNote('');
 
     onSuccess?.();
     onOpenChange(false);
@@ -142,11 +130,11 @@ export function ReamenagementForm({
   // Reset form on close
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      setSourceImputation("");
-      setDestinationImputation("");
-      setMontant("");
-      setMotif("");
-      setReferenceNote("");
+      setSourceImputation('');
+      setDestinationImputation('');
+      setMontant('');
+      setMotif('');
+      setReferenceNote('');
     }
     onOpenChange(newOpen);
   };
@@ -210,10 +198,8 @@ export function ReamenagementForm({
                           >
                             <Check
                               className={cn(
-                                "mr-2 h-4 w-4",
-                                sourceImputation === imp.code
-                                  ? "opacity-100"
-                                  : "opacity-0"
+                                'mr-2 h-4 w-4',
+                                sourceImputation === imp.code ? 'opacity-100' : 'opacity-0'
                               )}
                             />
                             <div className="flex flex-col">
@@ -243,30 +229,28 @@ export function ReamenagementForm({
                     <div className="grid grid-cols-3 gap-2 text-sm">
                       <div>
                         <p className="text-muted-foreground">Budget actuel</p>
-                        <p className="font-medium">
-                          {formatMontant(sourceBudget.budget_actuel)}
-                        </p>
+                        <p className="font-medium">{formatCurrency(sourceBudget.budget_actuel)}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Engagements</p>
                         <p className="font-medium text-warning">
-                          {formatMontant(sourceBudget.cumul_engagements)}
+                          {formatCurrency(sourceBudget.cumul_engagements)}
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Disponible</p>
                         <p className="font-bold text-success">
-                          {formatMontant(sourceBudget.disponible)}
+                          {formatCurrency(sourceBudget.disponible)}
                         </p>
                       </div>
                     </div>
-                    {typeof montant === "number" && montant > 0 && (
+                    {typeof montant === 'number' && montant > 0 && (
                       <div className="pt-2 border-t">
                         <div className="flex items-center gap-2 text-red-600">
                           <Minus className="h-4 w-4" />
                           <span>Après transfert: </span>
                           <span className="font-bold">
-                            {formatMontant(sourceBudget.disponible - montant)}
+                            {formatCurrency(sourceBudget.disponible - montant)}
                           </span>
                         </div>
                       </div>
@@ -327,10 +311,8 @@ export function ReamenagementForm({
                           >
                             <Check
                               className={cn(
-                                "mr-2 h-4 w-4",
-                                destinationImputation === imp.code
-                                  ? "opacity-100"
-                                  : "opacity-0"
+                                'mr-2 h-4 w-4',
+                                destinationImputation === imp.code ? 'opacity-100' : 'opacity-0'
                               )}
                             />
                             <div className="flex flex-col">
@@ -360,30 +342,28 @@ export function ReamenagementForm({
                     <div className="grid grid-cols-3 gap-2 text-sm">
                       <div>
                         <p className="text-muted-foreground">Budget actuel</p>
-                        <p className="font-medium">
-                          {formatMontant(destBudget.budget_actuel)}
-                        </p>
+                        <p className="font-medium">{formatCurrency(destBudget.budget_actuel)}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Engagements</p>
                         <p className="font-medium text-warning">
-                          {formatMontant(destBudget.cumul_engagements)}
+                          {formatCurrency(destBudget.cumul_engagements)}
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Disponible</p>
                         <p className="font-bold text-success">
-                          {formatMontant(destBudget.disponible)}
+                          {formatCurrency(destBudget.disponible)}
                         </p>
                       </div>
                     </div>
-                    {typeof montant === "number" && montant > 0 && (
+                    {typeof montant === 'number' && montant > 0 && (
                       <div className="pt-2 border-t">
                         <div className="flex items-center gap-2 text-green-600">
                           <Plus className="h-4 w-4" />
                           <span>Après transfert: </span>
                           <span className="font-bold">
-                            {formatMontant(destBudget.disponible + montant)}
+                            {formatCurrency(destBudget.disponible + montant)}
                           </span>
                         </div>
                       </div>
@@ -405,16 +385,14 @@ export function ReamenagementForm({
               min="1"
               max={disponibleSource}
               value={montant}
-              onChange={(e) =>
-                setMontant(e.target.value ? parseFloat(e.target.value) : "")
-              }
+              onChange={(e) => setMontant(e.target.value ? parseFloat(e.target.value) : '')}
               placeholder="0"
             />
-            {sourceImputation && typeof montant === "number" && montant > disponibleSource && (
+            {sourceImputation && typeof montant === 'number' && montant > disponibleSource && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Le montant dépasse le disponible ({formatMontant(disponibleSource)})
+                  Le montant dépasse le disponible ({formatCurrency(disponibleSource)})
                 </AlertDescription>
               </Alert>
             )}
@@ -449,13 +427,13 @@ export function ReamenagementForm({
           </div>
 
           {/* Summary */}
-          {isValid && typeof montant === "number" && (
+          {isValid && typeof montant === 'number' && (
             <Alert>
               <ArrowRightLeft className="h-4 w-4" />
               <AlertTitle>Résumé du réaménagement</AlertTitle>
               <AlertDescription className="space-y-1">
                 <p>
-                  Transfert de <strong>{formatMontant(montant)}</strong>
+                  Transfert de <strong>{formatCurrency(montant)}</strong>
                 </p>
                 <p>
                   <Badge variant="outline" className="mr-1 font-mono">
@@ -474,11 +452,7 @@ export function ReamenagementForm({
           )}
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Annuler
             </Button>
             <Button type="submit" disabled={!isValid || createMutation.isPending}>
@@ -488,7 +462,7 @@ export function ReamenagementForm({
                   Envoi en cours...
                 </>
               ) : (
-                "Soumettre la demande"
+                'Soumettre la demande'
               )}
             </Button>
           </DialogFooter>

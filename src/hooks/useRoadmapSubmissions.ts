@@ -12,7 +12,7 @@ import { useAuditLog } from '@/hooks/useAuditLog';
 import { useExercice } from '@/contexts/ExerciceContext';
 
 // Types
-export type SubmissionStatus = 'brouillon' | 'soumis' | 'en_revision' | 'valide' | 'rejete';
+export type SubmissionStatus = 'soumis' | 'en_revision' | 'valide' | 'rejete';
 
 export interface RoadmapSubmission {
   id: string;
@@ -109,7 +109,6 @@ export interface SubmissionFilters {
 
 export interface SubmissionStats {
   total: number;
-  brouillon: number;
   soumis: number;
   en_revision: number;
   valide: number;
@@ -187,7 +186,6 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
 
       const stats: SubmissionStats = {
         total: data.length,
-        brouillon: data.filter((s) => s.status === 'brouillon').length,
         soumis: data.filter((s) => s.status === 'soumis').length,
         en_revision: data.filter((s) => s.status === 'en_revision').length,
         valide: data.filter((s) => s.status === 'valide').length,
@@ -311,7 +309,6 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
     submissions: submissionsQuery.data ?? [],
     stats: statsQuery.data ?? {
       total: 0,
-      brouillon: 0,
       soumis: 0,
       en_revision: 0,
       valide: 0,

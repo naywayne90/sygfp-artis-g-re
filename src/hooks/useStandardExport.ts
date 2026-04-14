@@ -1,14 +1,13 @@
-// @ts-nocheck - Audit log property access
 /**
  * Hook pour l'export standardisé SYGFP
  * Fournit des fonctions d'export avec contexte automatique (exercice, utilisateur)
  */
 
-import { useState, useCallback } from "react";
-import { toast } from "sonner";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useRBAC } from "@/contexts/RBACContext";
-import { useAuditLog } from "@/hooks/useAuditLog";
+import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useRBAC } from '@/contexts/RBACContext';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import {
   exportToExcel,
   exportToCSV,
@@ -16,8 +15,8 @@ import {
   ExportColumn,
   ExportOptions,
   ExportResult,
-} from "@/lib/export";
-import { getExportTemplate, getModuleTemplates } from "@/lib/export";
+} from '@/lib/export';
+import { getExportTemplate, getModuleTemplates } from '@/lib/export';
 
 interface UseStandardExportOptions {
   module: string;
@@ -89,7 +88,7 @@ export function useStandardExport(options: UseStandardExportOptions) {
       if (options.logExport !== false) {
         try {
           await log({
-            action: "export",
+            action: 'export',
             entity_type: options.module,
             details: {
               format,
@@ -100,7 +99,7 @@ export function useStandardExport(options: UseStandardExportOptions) {
             },
           });
         } catch (error) {
-          console.error("Failed to log export:", error);
+          console.error('Failed to log export:', error);
         }
       }
     },
@@ -111,8 +110,8 @@ export function useStandardExport(options: UseStandardExportOptions) {
   const toExcel = useCallback(
     async ({ data, columns, templateId, filters }: ExportParams): Promise<ExportResult> => {
       if (!data || data.length === 0) {
-        toast.error("Aucune donnée à exporter");
-        return { success: false, error: "Aucune donnée à exporter", rowCount: 0 };
+        toast.error('Aucune donnée à exporter');
+        return { success: false, error: 'Aucune donnée à exporter', rowCount: 0 };
       }
 
       setIsExporting(true);
@@ -126,14 +125,14 @@ export function useStandardExport(options: UseStandardExportOptions) {
 
         if (result.success) {
           toast.success(`${result.rowCount} lignes exportées en Excel`);
-          await logExportAction("excel", result.rowCount || 0, filters);
+          await logExportAction('excel', result.rowCount || 0, filters);
         } else {
           toast.error(result.error || "Erreur lors de l'export Excel");
         }
 
         return result;
       } catch (error) {
-        console.error("Excel export error:", error);
+        console.error('Excel export error:', error);
         toast.error("Erreur lors de l'export Excel");
         return { success: false, error: String(error) };
       } finally {
@@ -147,8 +146,8 @@ export function useStandardExport(options: UseStandardExportOptions) {
   const toCsv = useCallback(
     async ({ data, columns, templateId, filters }: ExportParams): Promise<ExportResult> => {
       if (!data || data.length === 0) {
-        toast.error("Aucune donnée à exporter");
-        return { success: false, error: "Aucune donnée à exporter", rowCount: 0 };
+        toast.error('Aucune donnée à exporter');
+        return { success: false, error: 'Aucune donnée à exporter', rowCount: 0 };
       }
 
       setIsExporting(true);
@@ -162,14 +161,14 @@ export function useStandardExport(options: UseStandardExportOptions) {
 
         if (result.success) {
           toast.success(`${result.rowCount} lignes exportées en CSV`);
-          await logExportAction("csv", result.rowCount || 0, filters);
+          await logExportAction('csv', result.rowCount || 0, filters);
         } else {
           toast.error(result.error || "Erreur lors de l'export CSV");
         }
 
         return result;
       } catch (error) {
-        console.error("CSV export error:", error);
+        console.error('CSV export error:', error);
         toast.error("Erreur lors de l'export CSV");
         return { success: false, error: String(error) };
       } finally {
@@ -183,8 +182,8 @@ export function useStandardExport(options: UseStandardExportOptions) {
   const toPdf = useCallback(
     async ({ data, columns, templateId, filters }: ExportParams): Promise<ExportResult> => {
       if (!data || data.length === 0) {
-        toast.error("Aucune donnée à exporter");
-        return { success: false, error: "Aucune donnée à exporter", rowCount: 0 };
+        toast.error('Aucune donnée à exporter');
+        return { success: false, error: 'Aucune donnée à exporter', rowCount: 0 };
       }
 
       setIsExporting(true);
@@ -197,15 +196,15 @@ export function useStandardExport(options: UseStandardExportOptions) {
         const result = exportToPDF(data, exportColumns, buildExportOptions(filters));
 
         if (result.success) {
-          toast.success("Document PDF généré");
-          await logExportAction("pdf", result.rowCount || 0, filters);
+          toast.success('Document PDF généré');
+          await logExportAction('pdf', result.rowCount || 0, filters);
         } else {
           toast.error(result.error || "Erreur lors de l'export PDF");
         }
 
         return result;
       } catch (error) {
-        console.error("PDF export error:", error);
+        console.error('PDF export error:', error);
         toast.error("Erreur lors de l'export PDF");
         return { success: false, error: String(error) };
       } finally {

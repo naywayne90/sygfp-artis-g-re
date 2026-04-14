@@ -28,7 +28,7 @@ import {
 } from '@/hooks/useExpressionsBesoin';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { AttachmentService } from '@/services/attachmentService';
-import { formatMontant } from '@/lib/config/sygfp-constants';
+import { formatCurrency } from '@/lib/utils';
 import { ArticlesTableEditor, type ArticleLigne } from './ArticlesTableEditor';
 import { CreditCard, Calendar, Loader2, Search, Plus, Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -364,7 +364,7 @@ export function ExpressionBesoinFromImputationForm({
                               </p>
                             )}
                           </div>
-                          <Badge variant="outline">{formatMontant(imputation.montant)}</Badge>
+                          <Badge variant="outline">{formatCurrency(imputation.montant)}</Badge>
                         </div>
                       </div>
                     ))
@@ -424,7 +424,7 @@ export function ExpressionBesoinFromImputationForm({
                     <div className="col-span-2">
                       <span className="text-muted-foreground">Budget imputé:</span>{' '}
                       <span className="font-bold text-primary text-base">
-                        {formatMontant(selectedImputation.montant)}
+                        {formatCurrency(selectedImputation.montant)}
                       </span>
                     </div>
                     <div className="col-span-2">

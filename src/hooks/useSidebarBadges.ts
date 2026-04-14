@@ -50,7 +50,7 @@ export interface SidebarBadges {
 
   // Feuille de Route
   roadmapSoumissions: number;
-  roadmapPlansBrouillon: number;
+  roadmapPlansSoumis: number;
   roadmapTachesEnRetard: number;
 
   // Total global (pour indicateur header)
@@ -186,16 +186,14 @@ export function useSidebarBadges() {
           .eq('statut', 'soumis'),
 
         // Roadmap: Soumissions en attente
-        supabase
-          .from('roadmap_submissions')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'soumis'),
+        // Note: table roadmap_submissions n'existe pas encore en prod → skip pour éviter 404 console
+        Promise.resolve({ count: 0, data: [], error: null }),
 
-        // Roadmap: Plans brouillon
+        // Roadmap: Plans soumis
         supabase
           .from('plans_travail')
           .select('id', { count: 'exact', head: true })
-          .eq('statut', 'brouillon'),
+          .eq('statut', 'soumis'),
 
         // Roadmap: Tâches en retard
         supabase
@@ -248,7 +246,7 @@ export function useSidebarBadges() {
       const scanningEngagements = scanningEngRes.count || 0;
       const scanningLiquidations = scanningLiqRes.count || 0;
       const roadmapSoumissions = roadmapSoumissionsRes.count || 0;
-      const roadmapPlansBrouillon = roadmapPlansRes.count || 0;
+      const roadmapPlansSoumis = roadmapPlansRes.count || 0;
       const roadmapTachesEnRetard = roadmapTachesRes.count || 0;
 
       // Total global pour l'indicateur header
@@ -285,7 +283,7 @@ export function useSidebarBadges() {
         scanningEngagements,
         scanningLiquidations,
         roadmapSoumissions,
-        roadmapPlansBrouillon,
+        roadmapPlansSoumis,
         roadmapTachesEnRetard,
         totalATraiter,
         lastUpdated: new Date(),

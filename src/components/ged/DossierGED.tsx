@@ -1,33 +1,43 @@
-import { useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Upload, 
-  Download, 
-  Trash2, 
-  Eye, 
-  FileText, 
-  File, 
-  FileImage, 
+import { useState, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Upload,
+  Download,
+  Trash2,
+  Eye,
+  FileText,
+  File,
+  FileImage,
   Loader2,
   CheckCircle2,
   AlertCircle,
   Grid,
   List,
   FolderOpen,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useDocumentUpload, extractFilename } from "@/hooks/useDocumentUpload";
-import { useDocumentPermissions } from "@/hooks/useDocumentPermissions";
-import { useDocumentCompleteness } from "@/hooks/useDocumentCompleteness";
-import { DocumentPreview } from "./DocumentPreview";
-import { DocumentChecklist } from "./DocumentChecklist";
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useDocumentUpload, extractFilename } from '@/hooks/useDocumentUpload';
+import { useDocumentPermissions } from '@/hooks/useDocumentPermissions';
+import { useDocumentCompleteness } from '@/hooks/useDocumentCompleteness';
+import { DocumentPreview } from './DocumentPreview';
+import { DocumentChecklist } from './DocumentChecklist';
 
 interface DossierGEDProps {
   entityType: string;
@@ -56,15 +66,16 @@ export function DossierGED({
   const [selectedType, setSelectedType] = useState<string>('');
   const [previewDoc, setPreviewDoc] = useState<{ key: string; name: string } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [deleteConfirmKey, setDeleteConfirmKey] = useState<string | null>(null);
 
   // Hooks
-  const { 
-    files, 
-    isLoading, 
-    upload, 
-    uploadProgress, 
-    isUploading, 
-    deleteFile, 
+  const {
+    files,
+    isLoading,
+    upload,
+    uploadProgress,
+    isUploading,
+    deleteFile,
     isDeleting,
     download,
     getPreviewUrl,
@@ -76,7 +87,7 @@ export function DossierGED({
   });
 
   const { uploadableTypes, checkPermission } = useDocumentPermissions();
-  
+
   const completeness = useDocumentCompleteness({
     dossierId,
     etape: etape || '',
@@ -85,26 +96,32 @@ export function DossierGED({
   });
 
   // Handlers
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    if (!readOnly && selectedType) setIsDragging(true);
-  }, [readOnly, selectedType]);
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      if (!readOnly && selectedType) setIsDragging(true);
+    },
+    [readOnly, selectedType]
+  );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (readOnly || !selectedType) return;
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      if (readOnly || !selectedType) return;
 
-    const droppedFiles = Array.from(e.dataTransfer.files);
-    for (const file of droppedFiles) {
-      upload({ file, typePiece: selectedType, reference });
-    }
-  }, [readOnly, selectedType, upload, reference]);
+      const droppedFiles = Array.from(e.dataTransfer.files);
+      for (const file of droppedFiles) {
+        upload({ file, typePiece: selectedType, reference });
+      }
+    },
+    [readOnly, selectedType, upload, reference]
+  );
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -125,9 +142,7 @@ export function DossierGED({
   };
 
   const handleDelete = (key: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) {
-      deleteFile(key);
-    }
+    setDeleteConfirmKey(key);
   };
 
   // File icon helper
@@ -150,7 +165,7 @@ export function DossierGED({
   };
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn('space-y-4', className)}>
       {/* Header with actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -178,10 +193,12 @@ export function DossierGED({
 
       {/* Completeness indicator */}
       {showChecklist && etape && (
-        <Card className={cn(
-          "border-l-4",
-          completeness.isComplete ? "border-l-green-500" : "border-l-amber-500"
-        )}>
+        <Card
+          className={cn(
+            'border-l-4',
+            completeness.isComplete ? 'border-l-green-500' : 'border-l-amber-500'
+          )}
+        >
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -191,8 +208,8 @@ export function DossierGED({
                   <AlertCircle className="h-5 w-5 text-amber-500" />
                 )}
                 <span className="font-medium">
-                  {completeness.isComplete 
-                    ? "Tous les documents requis sont présents" 
+                  {completeness.isComplete
+                    ? 'Tous les documents requis sont présents'
                     : `${completeness.missingDocuments.length} document(s) manquant(s)`}
                 </span>
               </div>
@@ -202,7 +219,7 @@ export function DossierGED({
             </div>
             {!completeness.isComplete && (
               <p className="text-sm text-muted-foreground mt-1">
-                Manquants: {completeness.missingDocuments.join(", ")}
+                Manquants: {completeness.missingDocuments.join(', ')}
               </p>
             )}
           </CardContent>
@@ -212,9 +229,7 @@ export function DossierGED({
       <Tabs defaultValue="documents">
         <TabsList>
           <TabsTrigger value="documents">Documents ({files.length})</TabsTrigger>
-          {showChecklist && etape && (
-            <TabsTrigger value="checklist">Checklist</TabsTrigger>
-          )}
+          {showChecklist && etape && <TabsTrigger value="checklist">Checklist</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="documents" className="space-y-4">
@@ -230,7 +245,7 @@ export function DossierGED({
                   <option value="">Sélectionner le type de document...</option>
                   {uploadableTypes.map((type) => (
                     <option key={type.code} value={type.code}>
-                      {type.label} {type.obligatoire ? "(obligatoire)" : ""}
+                      {type.label} {type.obligatoire ? '(obligatoire)' : ''}
                     </option>
                   ))}
                 </select>
@@ -238,17 +253,17 @@ export function DossierGED({
 
               <div
                 className={cn(
-                  "border-2 border-dashed rounded-lg p-6 text-center transition-colors",
-                  isDragging && "border-primary bg-primary/5",
-                  !selectedType && "opacity-50 cursor-not-allowed",
-                  selectedType && "cursor-pointer hover:border-primary/50"
+                  'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
+                  isDragging && 'border-primary bg-primary/5',
+                  !selectedType && 'opacity-50 cursor-not-allowed',
+                  selectedType && 'cursor-pointer hover:border-primary/50'
                 )}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => {
                   if (selectedType) {
-                    document.getElementById("ged-file-input")?.click();
+                    document.getElementById('ged-file-input')?.click();
                   }
                 }}
               >
@@ -265,14 +280,16 @@ export function DossierGED({
                   <div className="space-y-2">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
                     <Progress value={uploadProgress} className="max-w-xs mx-auto" />
-                    <p className="text-sm text-muted-foreground">Upload en cours... {uploadProgress}%</p>
+                    <p className="text-sm text-muted-foreground">
+                      Upload en cours... {uploadProgress}%
+                    </p>
                   </div>
                 ) : (
                   <>
                     <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
                     <p className="text-sm text-muted-foreground mt-2">
-                      {selectedType 
-                        ? "Glissez vos fichiers ici ou cliquez pour parcourir" 
+                      {selectedType
+                        ? 'Glissez vos fichiers ici ou cliquez pour parcourir'
                         : "Sélectionnez d'abord un type de document"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -300,7 +317,7 @@ export function DossierGED({
                 {files.map((file) => {
                   const filename = extractFilename(file.key);
                   const canDelete = checkPermission('delete', '', true);
-                  
+
                   return (
                     <Card key={file.key} className="bg-muted/30">
                       <CardContent className="p-3 flex items-center justify-between">
@@ -309,7 +326,10 @@ export function DossierGED({
                           <div className="min-w-0 flex-1">
                             <p className="font-medium text-sm truncate">{filename}</p>
                             <p className="text-xs text-muted-foreground">
-                              {formatSize(file.size)} • {format(new Date(file.lastModified), "dd MMM yyyy HH:mm", { locale: fr })}
+                              {formatSize(file.size)} •{' '}
+                              {format(new Date(file.lastModified), 'dd MMM yyyy HH:mm', {
+                                locale: fr,
+                              })}
                             </p>
                           </div>
                         </div>
@@ -351,10 +371,10 @@ export function DossierGED({
               {files.map((file) => {
                 const filename = extractFilename(file.key);
                 const canDelete = checkPermission('delete', '', true);
-                
+
                 return (
-                  <Card 
-                    key={file.key} 
+                  <Card
+                    key={file.key}
                     className="cursor-pointer hover:border-primary/50 transition-colors"
                     onClick={() => handlePreview(file.key, filename)}
                   >
@@ -402,9 +422,13 @@ export function DossierGED({
           <TabsContent value="checklist">
             <DocumentChecklist
               documents={completeness.documents}
-              onUpload={!readOnly ? (typeDocument, file) => {
-                upload({ file, typePiece: typeDocument, reference });
-              } : undefined}
+              onUpload={
+                !readOnly
+                  ? (typeDocument, file) => {
+                      upload({ file, typePiece: typeDocument, reference });
+                    }
+                  : undefined
+              }
               isUploading={isUploading}
             />
           </TabsContent>
@@ -421,6 +445,36 @@ export function DossierGED({
           onDownload={() => handleDownload(previewDoc.key, previewDoc.name)}
         />
       )}
+
+      <AlertDialog
+        open={!!deleteConfirmKey}
+        onOpenChange={(open) => {
+          if (!open) setDeleteConfirmKey(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer ce document ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer ce document ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteConfirmKey) {
+                  deleteFile(deleteConfirmKey);
+                  setDeleteConfirmKey(null);
+                }
+              }}
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

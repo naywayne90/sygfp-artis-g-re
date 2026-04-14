@@ -2,12 +2,12 @@
  * DashboardMissions - Dashboard spécialisé Chargé de Mission (CM)
  * Focalisé sur: Missions transversales, Projets spéciaux, Coordination
  */
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Briefcase,
   Target,
@@ -23,10 +23,10 @@ import {
   Building2,
   ArrowRight,
   TrendingUp,
-} from "lucide-react";
-import { useDirectionDashboard } from "@/hooks/dashboard/useDirectionDashboard";
-import { formatMontant } from "@/lib/config/sygfp-constants";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import { useDirectionDashboard } from '@/hooks/dashboard/useDirectionDashboard';
+import { cn, formatCurrency } from '@/lib/utils';
+import { formatMontant } from '@/lib/config/sygfp-constants';
 
 interface DashboardMissionsProps {
   directionId: string;
@@ -40,8 +40,7 @@ export function DashboardMissions({
   directionNom,
 }: DashboardMissionsProps) {
   const navigate = useNavigate();
-  const { kpis, alertes, dossiersRecents, isLoading, refetch } =
-    useDirectionDashboard(directionId);
+  const { kpis, alertes, dossiersRecents, isLoading, refetch } = useDirectionDashboard(directionId);
 
   if (isLoading) {
     return <DashboardMissionsSkeleton />;
@@ -55,21 +54,21 @@ export function DashboardMissions({
     budgetMissions: 75000000,
     budgetUtilise: 42000000,
     prochaineMission: {
-      titre: "Audit des procédures DAAF",
-      date: "15 Fév 2026",
-      lieu: "Libreville",
-      statut: "en_preparation",
+      titre: 'Audit des procédures DAAF',
+      date: '15 Fév 2026',
+      lieu: 'Libreville',
+      statut: 'en_preparation',
     },
     missionsParType: [
-      { type: "Audit", count: 6, color: "bg-purple-500" },
-      { type: "Formation", count: 4, color: "bg-blue-500" },
-      { type: "Inspection", count: 5, color: "bg-orange-500" },
-      { type: "Conseil", count: 5, color: "bg-green-500" },
+      { type: 'Audit', count: 6, color: 'bg-purple-500' },
+      { type: 'Formation', count: 4, color: 'bg-blue-500' },
+      { type: 'Inspection', count: 5, color: 'bg-orange-500' },
+      { type: 'Conseil', count: 5, color: 'bg-green-500' },
     ],
     projetsSpeciaux: [
-      { nom: "Digitalisation procédures", avancement: 75, priorite: "haute" },
-      { nom: "Formation agents terrain", avancement: 45, priorite: "moyenne" },
-      { nom: "Audit conformité 2026", avancement: 20, priorite: "haute" },
+      { nom: 'Digitalisation procédures', avancement: 75, priorite: 'haute' },
+      { nom: 'Formation agents terrain', avancement: 45, priorite: 'moyenne' },
+      { nom: 'Audit conformité 2026', avancement: 20, priorite: 'haute' },
     ],
   };
 
@@ -131,12 +130,8 @@ export function DashboardMissions({
             <Target className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-500">
-              {missionStats.missionsActives}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              En cours d'exécution
-            </p>
+            <div className="text-3xl font-bold text-orange-500">{missionStats.missionsActives}</div>
+            <p className="text-xs text-muted-foreground mt-1">En cours d'exécution</p>
           </CardContent>
         </Card>
 
@@ -147,12 +142,8 @@ export function DashboardMissions({
             <CheckCircle2 className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-success">
-              {missionStats.missionsTerminees}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Cette année
-            </p>
+            <div className="text-3xl font-bold text-success">{missionStats.missionsTerminees}</div>
+            <p className="text-xs text-muted-foreground mt-1">Cette année</p>
           </CardContent>
         </Card>
 
@@ -166,9 +157,7 @@ export function DashboardMissions({
             <div className="text-3xl font-bold text-warning">
               {missionStats.missionsEnPreparation}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              À venir
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">À venir</p>
           </CardContent>
         </Card>
 
@@ -179,9 +168,7 @@ export function DashboardMissions({
             <Plane className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold">
-              {formatMontant(missionStats.budgetUtilise)}
-            </div>
+            <div className="text-xl font-bold">{formatMontant(missionStats.budgetUtilise)}</div>
             <Progress value={tauxBudgetMission} className="h-2 mt-2" />
             <p className="text-xs text-muted-foreground mt-1">
               {tauxBudgetMission}% sur {formatMontant(missionStats.budgetMissions)}
@@ -202,9 +189,7 @@ export function DashboardMissions({
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <h3 className="font-semibold text-lg">
-                {missionStats.prochaineMission.titre}
-              </h3>
+              <h3 className="font-semibold text-lg">{missionStats.prochaineMission.titre}</h3>
               <div className="flex flex-wrap gap-4 text-sm">
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <Calendar className="h-4 w-4" />
@@ -234,7 +219,7 @@ export function DashboardMissions({
             <div className="space-y-3">
               {missionStats.missionsParType.map((type) => (
                 <div key={type.type} className="flex items-center gap-3">
-                  <div className={cn("w-3 h-3 rounded-full", type.color)} />
+                  <div className={cn('w-3 h-3 rounded-full', type.color)} />
                   <span className="flex-1 text-sm">{type.type}</span>
                   <Badge variant="secondary">{type.count}</Badge>
                 </div>
@@ -260,7 +245,7 @@ export function DashboardMissions({
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-sm">{projet.nom}</span>
                   <Badge
-                    variant={projet.priorite === "haute" ? "destructive" : "outline"}
+                    variant={projet.priorite === 'haute' ? 'destructive' : 'outline'}
                     className="text-xs"
                   >
                     Priorité {projet.priorite}
@@ -268,9 +253,7 @@ export function DashboardMissions({
                 </div>
                 <div className="flex items-center gap-3">
                   <Progress value={projet.avancement} className="h-2 flex-1" />
-                  <span className="text-sm font-medium w-12 text-right">
-                    {projet.avancement}%
-                  </span>
+                  <span className="text-sm font-medium w-12 text-right">{projet.avancement}%</span>
                 </div>
               </div>
             ))}
@@ -320,7 +303,7 @@ export function DashboardMissions({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/notes-sef?action=new")}
+              onClick={() => navigate('/notes-sef?action=new')}
             >
               <FileText className="h-4 w-4" />
               Nouvelle Demande
@@ -328,7 +311,7 @@ export function DashboardMissions({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/engagements")}
+              onClick={() => navigate('/engagements')}
             >
               <Briefcase className="h-4 w-4" />
               Mes Engagements
@@ -336,7 +319,7 @@ export function DashboardMissions({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/etats-execution")}
+              onClick={() => navigate('/etats-execution')}
             >
               <TrendingUp className="h-4 w-4" />
               Rapports
@@ -344,7 +327,7 @@ export function DashboardMissions({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/workflow-tasks")}
+              onClick={() => navigate('/workflow-tasks')}
             >
               <Clock className="h-4 w-4" />
               Tâches

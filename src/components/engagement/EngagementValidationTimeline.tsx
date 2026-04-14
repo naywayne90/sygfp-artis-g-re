@@ -64,10 +64,14 @@ export function EngagementValidationTimeline({
               {icon}
               {!compact && (
                 <span className={cn('text-[10px] mt-0.5 whitespace-nowrap', textColor)}>
-                  {step.role}
+                  {step.shortLabel ?? step.role}
                 </span>
               )}
-              {compact && <span className={cn('text-[9px] mt-0.5', textColor)}>{step.role}</span>}
+              {compact && (
+                <span className={cn('text-[9px] mt-0.5', textColor)}>
+                  {step.shortLabel ?? step.role}
+                </span>
+              )}
             </div>
             {index < VALIDATION_STEPS.length - 1 && (
               <div

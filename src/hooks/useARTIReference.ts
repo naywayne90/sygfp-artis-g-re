@@ -1,10 +1,10 @@
-import { useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * ARTI Reference Format: ARTI + ETAPE(1) + MM(2) + YY(2) + NNNN(4)
  * Example: ARTI001260001 = SEF, janvier 2026, premier document
- * 
+ *
  * Étapes:
  * 0 = SEF (Notes Sans Effet Financier)
  * 1 = AEF (Notes Avec Effet Financier)
@@ -15,20 +15,22 @@ import { supabase } from "@/integrations/supabase/client";
  * 6 = Liquidation
  * 7 = Ordonnancement
  * 8 = Règlement
+ * 9 = Virement
  */
 
-export type ARTIEtape = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type ARTIEtape = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export const ETAPE_LABELS: Record<ARTIEtape, string> = {
-  0: "SEF",
-  1: "AEF",
-  2: "Imputation",
-  3: "Expression Besoin",
-  4: "Passation Marché",
-  5: "Engagement",
-  6: "Liquidation",
-  7: "Ordonnancement",
-  8: "Règlement",
+  0: 'SEF',
+  1: 'AEF',
+  2: 'Imputation',
+  3: 'Expression Besoin',
+  4: 'Passation Marché',
+  5: 'Engagement',
+  6: 'Liquidation',
+  7: 'Ordonnancement',
+  8: 'Règlement',
+  9: 'Virement',
 };
 
 export interface ParsedARTIReference {
@@ -45,17 +47,14 @@ export const useARTIReference = () => {
    * Génère une nouvelle référence ARTI via la fonction SQL
    * Utilise un compteur atomique (safe concurrence)
    */
-  const generateReference = useCallback(async (
-    etape: ARTIEtape,
-    date?: Date
-  ): Promise<string> => {
-    const { data, error } = await supabase.rpc("generate_arti_reference", {
+  const generateReference = useCallback(async (etape: ARTIEtape, date?: Date): Promise<string> => {
+    const { data, error } = await supabase.rpc('generate_arti_reference', {
       p_etape: etape,
       p_date: date?.toISOString() || new Date().toISOString(),
     });
 
     if (error) {
-      console.error("Error generating ARTI reference:", error);
+      console.error('Error generating ARTI reference:', error);
       throw new Error(`Erreur lors de la génération de la référence ARTI: ${error.message}`);
     }
 
@@ -65,10 +64,8 @@ export const useARTIReference = () => {
   /**
    * Parse une référence ARTI existante
    */
-  const parseReference = useCallback(async (
-    reference: string
-  ): Promise<ParsedARTIReference> => {
-    const { data, error } = await supabase.rpc("parse_arti_reference", {
+  const parseReference = useCallback(async (reference: string): Promise<ParsedARTIReference> => {
+    const { data, error } = await supabase.rpc('parse_arti_reference', {
       p_reference: reference,
     });
 
@@ -125,38 +122,38 @@ export const useARTIReference = () => {
   /**
    * Synchronise le compteur après un import
    */
-  const syncCounterFromImport = useCallback(async (
-    etape: ARTIEtape,
-    mois: number,
-    annee: number,
-    maxNumero: number
-  ): Promise<boolean> => {
-    const { data, error } = await supabase.rpc("sync_arti_counter_from_import", {
-      p_etape: etape,
-      p_mois: mois,
-      p_annee: annee,
-      p_max_numero: maxNumero,
-    });
+  const syncCounterFromImport = useCallback(
+    async (etape: ARTIEtape, mois: number, annee: number, maxNumero: number): Promise<boolean> => {
+      const { data, error } = await supabase.rpc('sync_arti_counter_from_import', {
+        p_etape: etape,
+        p_mois: mois,
+        p_annee: annee,
+        p_max_numero: maxNumero,
+      });
 
-    if (error) {
-      console.error("Error syncing ARTI counter:", error);
-      return false;
-    }
+      if (error) {
+        console.error('Error syncing ARTI counter:', error);
+        return false;
+      }
 
-    return data === true;
-  }, []);
+      return data === true;
+    },
+    []
+  );
 
   /**
    * Lance le backfill des références manquantes (admin only)
    */
-  const backfillReferences = useCallback(async (): Promise<{
-    tableName: string;
-    recordsUpdated: number;
-  }[]> => {
-    const { data, error } = await supabase.rpc("backfill_arti_references");
+  const backfillReferences = useCallback(async (): Promise<
+    {
+      tableName: string;
+      recordsUpdated: number;
+    }[]
+  > => {
+    const { data, error } = await supabase.rpc('backfill_arti_references');
 
     if (error) {
-      console.error("Error backfilling ARTI references:", error);
+      console.error('Error backfilling ARTI references:', error);
       throw new Error(`Erreur lors du backfill: ${error.message}`);
     }
 
@@ -169,13 +166,16 @@ export const useARTIReference = () => {
   /**
    * Formate une référence pour l'affichage
    */
-  const formatReference = useCallback((reference: string): string => {
-    const parsed = parseReferenceLocal(reference);
-    if (!parsed.isValid) return reference;
+  const formatReference = useCallback(
+    (reference: string): string => {
+      const parsed = parseReferenceLocal(reference);
+      if (!parsed.isValid) return reference;
 
-    // Format: ARTI-0-01/26-0001
-    return `ARTI-${parsed.etape}-${String(parsed.mois).padStart(2, "0")}/${String(parsed.annee % 100).padStart(2, "0")}-${String(parsed.numero).padStart(4, "0")}`;
-  }, [parseReferenceLocal]);
+      // Format: ARTI-0-01/26-0001
+      return `ARTI-${parsed.etape}-${String(parsed.mois).padStart(2, '0')}/${String(parsed.annee % 100).padStart(2, '0')}-${String(parsed.numero).padStart(4, '0')}`;
+    },
+    [parseReferenceLocal]
+  );
 
   return {
     generateReference,

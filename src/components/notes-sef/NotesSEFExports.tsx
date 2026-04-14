@@ -192,7 +192,7 @@ export function NotesSEFExports({
       });
 
       // Construire le contenu CSV
-      const BOM = '\uFEFF'; // UTF-8 BOM
+      const BOM = '﻿'; // UTF-8 BOM
       const csvContent =
         BOM + [headers.join(';'), ...rows.map((row) => row.join(';'))].join('\r\n');
 

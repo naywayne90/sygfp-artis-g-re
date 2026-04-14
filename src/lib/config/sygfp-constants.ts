@@ -27,6 +27,7 @@ import {
   FileOutput,
   type LucideIcon,
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 // ============================================
 // 1. ÉTAPES DE LA CHAÎNE DE LA DÉPENSE
@@ -471,14 +472,11 @@ export const STATUT_CATEGORY_LABELS: Record<StatutCategoryType, string> = {
 // 6. FORMATAGE DES MONTANTS
 // ============================================
 
+/**
+ * @deprecated Utiliser formatCurrency de @/lib/utils directement
+ */
 export function formatMontant(montant: number | null | undefined, showCurrency = true): string {
-  if (montant === null || montant === undefined) return '0';
-  const formatted = new Intl.NumberFormat('fr-FR', {
-    style: 'decimal',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(montant);
-  return showCurrency ? formatted + ' FCFA' : formatted;
+  return formatCurrency(montant, { showSymbol: showCurrency });
 }
 
 export function formatMontantCompact(montant: number | null | undefined): string {
@@ -527,3 +525,54 @@ export function formatDateTime(date: string | Date | null | undefined): string {
     minute: '2-digit',
   }).format(d);
 }
+
+// ============================================
+// 8. CODES D'ÉTAPE ARTI — FORMAT PIVOT
+// ============================================
+
+/**
+ * Codes d'étape ARTI — Format Pivot de référence
+ * Chaque document de la chaîne de dépense a un code unique.
+ * Format : ARTI + {étape:2 chiffres} + {mois:2} + {année:2} + {séquence:4} = 14 caractères
+ * Exemple : ARTI0502260001 = Engagement n°1, février 2026
+ */
+export const ARTI_ETAPE_CODES = {
+  NOTE_SEF: 0,
+  NOTE_AEF: 1,
+  IMPUTATION: 2,
+  EXPRESSION_BESOIN: 3,
+  PASSATION_MARCHE: 4,
+  ENGAGEMENT: 5,
+  LIQUIDATION: 6,
+  ORDONNANCEMENT: 7,
+  REGLEMENT: 8,
+  VIREMENT: 9,
+} as const;
+
+export type ARTIEtapeCode = (typeof ARTI_ETAPE_CODES)[keyof typeof ARTI_ETAPE_CODES];
+
+export const ARTI_ETAPE_LABELS: Record<ARTIEtapeCode, string> = {
+  0: 'Note SEF',
+  1: 'Note AEF',
+  2: 'Imputation',
+  3: 'Expression de Besoin',
+  4: 'Passation de Marché',
+  5: 'Engagement',
+  6: 'Liquidation',
+  7: 'Ordonnancement',
+  8: 'Règlement',
+  9: 'Virement',
+};
+
+export const ARTI_ETAPE_SIGLES: Record<ARTIEtapeCode, string> = {
+  0: 'SEF',
+  1: 'AEF',
+  2: 'IMP',
+  3: 'EB',
+  4: 'PM',
+  5: 'ENG',
+  6: 'LIQ',
+  7: 'ORD',
+  8: 'REG',
+  9: 'VIR',
+};

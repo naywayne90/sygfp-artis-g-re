@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -10,23 +10,23 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Plus,
   Search,
@@ -35,50 +35,50 @@ import {
   ArrowRightLeft,
   Settings2,
   FileDown,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { TYPES_MOUVEMENTS, useApprovisionnement } from "@/hooks/useApprovisionnement";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { TYPES_MOUVEMENTS, useApprovisionnement } from '@/hooks/useApprovisionnement';
 
 const getTypeIcon = (type: string) => {
   switch (type) {
-    case "entree":
+    case 'entree':
       return <ArrowDownCircle className="h-4 w-4 text-green-600" />;
-    case "sortie":
+    case 'sortie':
       return <ArrowUpCircle className="h-4 w-4 text-red-600" />;
-    case "transfert":
+    case 'transfert':
       return <ArrowRightLeft className="h-4 w-4 text-blue-600" />;
-    case "ajustement":
+    case 'ajustement':
       return <Settings2 className="h-4 w-4 text-orange-600" />;
     default:
       return null;
   }
 };
 
-const getTypeBadgeVariant = (type: string): "default" | "secondary" | "destructive" | "outline" => {
+const getTypeBadgeVariant = (type: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
   switch (type) {
-    case "entree":
-      return "default";
-    case "sortie":
-      return "destructive";
+    case 'entree':
+      return 'default';
+    case 'sortie':
+      return 'destructive';
     default:
-      return "secondary";
+      return 'secondary';
   }
 };
 
 export function MouvementList() {
   const { articles, mouvements, loadingMouvements, createMouvement } = useApprovisionnement();
-  const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState<string>("all");
+  const [search, setSearch] = useState('');
+  const [filterType, setFilterType] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    type_mouvement: "entree" as "entree" | "sortie" | "transfert" | "ajustement",
-    article_id: "",
+    type_mouvement: 'entree' as 'entree' | 'sortie' | 'transfert' | 'ajustement',
+    article_id: '',
     quantite: 1,
-    motif: "",
-    reference_document: "",
-    destination: "",
-    beneficiaire: "",
+    motif: '',
+    reference_document: '',
+    destination: '',
+    beneficiaire: '',
   });
 
   const filteredMouvements = mouvements.filter((m) => {
@@ -87,19 +87,19 @@ export function MouvementList() {
       m.article?.libelle?.toLowerCase().includes(search.toLowerCase()) ||
       m.article?.code?.toLowerCase().includes(search.toLowerCase()) ||
       m.motif.toLowerCase().includes(search.toLowerCase());
-    const matchType = filterType === "all" || m.type_mouvement === filterType;
+    const matchType = filterType === 'all' || m.type_mouvement === filterType;
     return matchSearch && matchType;
   });
 
   const resetForm = () => {
     setFormData({
-      type_mouvement: "entree",
-      article_id: "",
+      type_mouvement: 'entree',
+      article_id: '',
       quantite: 1,
-      motif: "",
-      reference_document: "",
-      destination: "",
-      beneficiaire: "",
+      motif: '',
+      reference_document: '',
+      destination: '',
+      beneficiaire: '',
     });
   };
 
@@ -114,38 +114,38 @@ export function MouvementList() {
 
   const exportCSV = () => {
     const headers = [
-      "Numéro",
-      "Date",
-      "Type",
-      "Article (Code)",
-      "Article (Libellé)",
-      "Quantité",
-      "Stock avant",
-      "Stock après",
-      "Motif",
-      "Référence",
-      "Créé par",
+      'Numéro',
+      'Date',
+      'Type',
+      'Article (Code)',
+      'Article (Libellé)',
+      'Quantité',
+      'Stock avant',
+      'Stock après',
+      'Motif',
+      'Référence',
+      'Créé par',
     ];
     const rows = filteredMouvements.map((m) => [
       m.numero,
-      format(new Date(m.date_mouvement), "dd/MM/yyyy HH:mm"),
+      format(new Date(m.date_mouvement), 'dd/MM/yyyy HH:mm'),
       TYPES_MOUVEMENTS.find((t) => t.value === m.type_mouvement)?.label || m.type_mouvement,
-      m.article?.code || "",
-      m.article?.libelle || "",
+      m.article?.code || '',
+      m.article?.libelle || '',
       m.quantite,
       m.stock_avant,
       m.stock_apres,
       m.motif,
-      m.reference_document || "",
-      m.creator?.full_name || "",
+      m.reference_document || '',
+      m.creator?.full_name || '',
     ]);
 
-    const csv = [headers.join(";"), ...rows.map((r) => r.join(";"))].join("\n");
-    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    const csv = [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
-    a.download = `mouvements_stock_${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `mouvements_stock_${format(new Date(), 'yyyy-MM-dd')}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -219,7 +219,7 @@ export function MouvementList() {
                 <TableRow key={mouvement.id}>
                   <TableCell className="font-mono text-sm">{mouvement.numero}</TableCell>
                   <TableCell className="text-sm">
-                    {format(new Date(mouvement.date_mouvement), "dd/MM/yyyy HH:mm", { locale: fr })}
+                    {format(new Date(mouvement.date_mouvement), 'dd/MM/yyyy HH:mm', { locale: fr })}
                   </TableCell>
                   <TableCell>
                     <Badge
@@ -235,8 +235,8 @@ export function MouvementList() {
                     <div className="text-xs text-muted-foreground">{mouvement.article?.code}</div>
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    {mouvement.type_mouvement === "entree" && "+"}
-                    {mouvement.type_mouvement === "sortie" && "-"}
+                    {mouvement.type_mouvement === 'entree' && '+'}
+                    {mouvement.type_mouvement === 'sortie' && '-'}
                     {mouvement.quantite} {mouvement.article?.unite}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
@@ -247,7 +247,7 @@ export function MouvementList() {
                     {mouvement.motif}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {mouvement.creator?.full_name || "-"}
+                    {mouvement.creator?.full_name || '-'}
                   </TableCell>
                 </TableRow>
               ))}
@@ -276,7 +276,7 @@ export function MouvementList() {
                 onValueChange={(v) =>
                   setFormData({
                     ...formData,
-                    type_mouvement: v as "entree" | "sortie" | "transfert" | "ajustement",
+                    type_mouvement: v as 'entree' | 'sortie' | 'transfert' | 'ajustement',
                   })
                 }
               >
@@ -317,17 +317,17 @@ export function MouvementList() {
             </div>
             <div className="space-y-2">
               <Label>
-                {formData.type_mouvement === "ajustement" ? "Nouveau stock *" : "Quantité *"}
+                {formData.type_mouvement === 'ajustement' ? 'Nouveau stock *' : 'Quantité *'}
               </Label>
               <Input
                 type="number"
-                min={formData.type_mouvement === "ajustement" ? 0 : 1}
+                min={formData.type_mouvement === 'ajustement' ? 0 : 1}
                 value={formData.quantite}
                 onChange={(e) =>
                   setFormData({ ...formData, quantite: parseInt(e.target.value) || 0 })
                 }
               />
-              {formData.type_mouvement === "sortie" && selectedArticle && (
+              {formData.type_mouvement === 'sortie' && selectedArticle && (
                 <p className="text-sm text-muted-foreground">
                   Maximum disponible: {selectedArticle.stock_actuel}
                 </p>
@@ -350,7 +350,7 @@ export function MouvementList() {
                 placeholder="N° BL, Bon de sortie..."
               />
             </div>
-            {(formData.type_mouvement === "sortie" || formData.type_mouvement === "transfert") && (
+            {(formData.type_mouvement === 'sortie' || formData.type_mouvement === 'transfert') && (
               <>
                 <div className="space-y-2">
                   <Label>Bénéficiaire / Destinataire</Label>

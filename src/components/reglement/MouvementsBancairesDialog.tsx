@@ -8,29 +8,29 @@
  * - Voir le reste à payer
  */
 
-import { useState } from "react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { useState } from 'react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -38,15 +38,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Banknote,
   Building2,
@@ -57,14 +51,15 @@ import {
   Trash2,
   AlertCircle,
   Loader2,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   useMouvementsBancaires,
   useComptesBancaires,
   useAddMouvementBancaire,
   useDeleteMouvementBancaire,
   type MouvementBancaire,
-} from "@/hooks/usePaiementsPartiels";
+} from '@/hooks/usePaiementsPartiels';
+import { formatCurrency } from '@/lib/utils';
 
 interface MouvementsBancairesDialogProps {
   open: boolean;
@@ -74,9 +69,6 @@ interface MouvementsBancairesDialogProps {
   montantTotal: number;
   beneficiaire?: string;
 }
-
-const formatMontant = (montant: number) =>
-  new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
 
 export function MouvementsBancairesDialog({
   open,
@@ -88,13 +80,11 @@ export function MouvementsBancairesDialog({
 }: MouvementsBancairesDialogProps) {
   // State for new movement form
   const [showAddForm, setShowAddForm] = useState(false);
-  const [compteBancaire, setCompteBancaire] = useState("");
-  const [montant, setMontant] = useState<number | "">("");
-  const [reference, setReference] = useState("");
-  const [objet, setObjet] = useState("");
-  const [dateReglement, setDateReglement] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [compteBancaire, setCompteBancaire] = useState('');
+  const [montant, setMontant] = useState<number | ''>('');
+  const [reference, setReference] = useState('');
+  const [objet, setObjet] = useState('');
+  const [dateReglement, setDateReglement] = useState(new Date().toISOString().split('T')[0]);
 
   // Queries and mutations
   const { data: mouvements = [], isLoading: isLoadingMouvements } =
@@ -127,17 +117,17 @@ export function MouvementsBancairesDialog({
     });
 
     // Reset form
-    setCompteBancaire("");
-    setMontant("");
-    setReference("");
-    setObjet("");
-    setDateReglement(new Date().toISOString().split("T")[0]);
+    setCompteBancaire('');
+    setMontant('');
+    setReference('');
+    setObjet('');
+    setDateReglement(new Date().toISOString().split('T')[0]);
     setShowAddForm(false);
   };
 
   // Handle delete
   const handleDelete = async (mouvement: MouvementBancaire) => {
-    if (!confirm("Supprimer ce mouvement bancaire ?")) return;
+    if (!confirm('Supprimer ce mouvement bancaire ?')) return;
 
     await deleteMouvement.mutateAsync({
       mouvementId: mouvement.id,
@@ -145,7 +135,7 @@ export function MouvementsBancairesDialog({
     });
   };
 
-  const isValidMontant = typeof montant === "number" && montant > 0 && montant <= resteAPayer;
+  const isValidMontant = typeof montant === 'number' && montant > 0 && montant <= resteAPayer;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -167,27 +157,21 @@ export function MouvementsBancairesDialog({
             <Card className="bg-muted/50">
               <CardContent className="pt-4 text-center">
                 <p className="text-xs text-muted-foreground">Montant total</p>
-                <p className="text-lg font-bold">{formatMontant(montantTotal)}</p>
+                <p className="text-lg font-bold">{formatCurrency(montantTotal)}</p>
               </CardContent>
             </Card>
             <Card className="bg-success/10">
               <CardContent className="pt-4 text-center">
                 <p className="text-xs text-muted-foreground">Payé</p>
-                <p className="text-lg font-bold text-success">
-                  {formatMontant(totalPaye)}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {mouvements.length} mouvement(s)
-                </p>
+                <p className="text-lg font-bold text-success">{formatCurrency(totalPaye)}</p>
+                <p className="text-xs text-muted-foreground">{mouvements.length} mouvement(s)</p>
               </CardContent>
             </Card>
-            <Card className={isFullyPaid ? "bg-success/10" : "bg-warning/10"}>
+            <Card className={isFullyPaid ? 'bg-success/10' : 'bg-warning/10'}>
               <CardContent className="pt-4 text-center">
                 <p className="text-xs text-muted-foreground">Reste à payer</p>
-                <p
-                  className={`text-lg font-bold ${isFullyPaid ? "text-success" : "text-warning"}`}
-                >
-                  {formatMontant(resteAPayer)}
+                <p className={`text-lg font-bold ${isFullyPaid ? 'text-success' : 'text-warning'}`}>
+                  {formatCurrency(resteAPayer)}
                 </p>
               </CardContent>
             </Card>
@@ -235,14 +219,14 @@ export function MouvementsBancairesDialog({
                       <TableHead>Compte</TableHead>
                       <TableHead>Référence</TableHead>
                       <TableHead className="text-right">Montant</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
+                      <TableHead className="w-[50px]" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {mouvements.map((mouvement) => (
                       <TableRow key={mouvement.id}>
                         <TableCell>
-                          {format(new Date(mouvement.date_reglement), "dd/MM/yyyy", {
+                          {format(new Date(mouvement.date_reglement), 'dd/MM/yyyy', {
                             locale: fr,
                           })}
                         </TableCell>
@@ -255,9 +239,7 @@ export function MouvementsBancairesDialog({
                                   mouvement.compte_bancaire_code}
                               </p>
                               {mouvement.banque && (
-                                <p className="text-xs text-muted-foreground">
-                                  {mouvement.banque}
-                                </p>
+                                <p className="text-xs text-muted-foreground">{mouvement.banque}</p>
                               )}
                             </div>
                           </div>
@@ -271,7 +253,7 @@ export function MouvementsBancairesDialog({
                           )}
                         </TableCell>
                         <TableCell className="text-right font-bold text-success">
-                          {formatMontant(mouvement.montant)}
+                          {formatCurrency(mouvement.montant)}
                         </TableCell>
                         <TableCell>
                           <Button
@@ -306,7 +288,7 @@ export function MouvementsBancairesDialog({
               {!showAddForm ? (
                 <Button onClick={() => setShowAddForm(true)} className="w-full gap-2">
                   <Plus className="h-4 w-4" />
-                  Ajouter un mouvement ({formatMontant(resteAPayer)} restant)
+                  Ajouter un mouvement ({formatCurrency(resteAPayer)} restant)
                 </Button>
               ) : (
                 <Card>
@@ -316,7 +298,7 @@ export function MouvementsBancairesDialog({
                       Nouveau mouvement bancaire
                     </CardTitle>
                     <CardDescription>
-                      Montant maximum: {formatMontant(resteAPayer)}
+                      Montant maximum: {formatCurrency(resteAPayer)}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -354,11 +336,11 @@ export function MouvementsBancairesDialog({
                             max={resteAPayer}
                             value={montant}
                             onChange={(e) =>
-                              setMontant(e.target.value ? parseFloat(e.target.value) : "")
+                              setMontant(e.target.value ? parseFloat(e.target.value) : '')
                             }
                             placeholder="0"
                           />
-                          {typeof montant === "number" && montant > resteAPayer && (
+                          {typeof montant === 'number' && montant > resteAPayer && (
                             <p className="text-xs text-destructive">
                               Le montant dépasse le reste à payer
                             </p>
@@ -398,17 +380,17 @@ export function MouvementsBancairesDialog({
                       </div>
 
                       {/* Summary */}
-                      {compteBancaire && typeof montant === "number" && montant > 0 && (
+                      {compteBancaire && typeof montant === 'number' && montant > 0 && (
                         <Alert>
                           <AlertCircle className="h-4 w-4" />
                           <AlertDescription>
-                            Paiement de <strong>{formatMontant(montant)}</strong> depuis{" "}
+                            Paiement de <strong>{formatCurrency(montant)}</strong> depuis{' '}
                             <strong>
-                              {comptesBancaires.find((c) => c.code === compteBancaire)
-                                ?.libelle || compteBancaire}
+                              {comptesBancaires.find((c) => c.code === compteBancaire)?.libelle ||
+                                compteBancaire}
                             </strong>
-                            . Nouveau reste à payer:{" "}
-                            <strong>{formatMontant(resteAPayer - montant)}</strong>
+                            . Nouveau reste à payer:{' '}
+                            <strong>{formatCurrency(resteAPayer - montant)}</strong>
                           </AlertDescription>
                         </Alert>
                       )}

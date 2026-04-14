@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * PermissionGuard - Composant de protection basé sur les permissions
  *
@@ -9,17 +8,23 @@
  * Règle : "l'UI n'affiche jamais un bouton interdit"
  */
 
-import { usePermissions } from "@/hooks/usePermissions";
-import { useRBAC } from "@/hooks/useRBAC";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { ModuleCode, WorkflowStep, AppRole, ProfilFonctionnel, RoleHierarchique } from "@/lib/rbac/types";
+import { usePermissions } from '@/hooks/usePermissions';
+import { useRBAC } from '@/hooks/useRBAC';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import type {
+  ModuleCode,
+  WorkflowStep,
+  AppRole,
+  ProfilFonctionnel,
+  RoleHierarchique,
+} from '@/lib/rbac/types';
 
 // ============================================
 // TYPES
 // ============================================
 
-type PermissionAction = "create" | "read" | "update" | "delete" | "validate" | "export";
+type PermissionAction = 'create' | 'read' | 'update' | 'delete' | 'validate' | 'export';
 
 // Legacy props (backward compatibility)
 interface LegacyPermissionGuardProps {
@@ -46,7 +51,7 @@ interface LegacyPermissionGuardProps {
 // RBAC Module props
 interface ModulePermissionGuardProps {
   module: ModuleCode;
-  action: Exclude<PermissionAction, "validate">;
+  action: Exclude<PermissionAction, 'validate'>;
   createdBy?: string;
   children: React.ReactNode;
   fallback?: React.ReactNode;
@@ -68,7 +73,7 @@ interface ModulePermissionGuardProps {
 // RBAC Step props
 interface StepPermissionGuardProps {
   step: WorkflowStep;
-  action: "validate";
+  action: 'validate';
   children: React.ReactNode;
   fallback?: React.ReactNode;
   showDisabled?: boolean;
@@ -143,16 +148,13 @@ type PermissionGuardProps =
 // ============================================
 
 export function PermissionGuard(props: PermissionGuardProps) {
-  const {
-    _children,
-    _fallback = null,
-  } = props;
+  const { _children, _fallback = null } = props;
 
   // Detect if using legacy mode
-  const isLegacyMode = "permission" in props || "permissions" in props;
+  const isLegacyMode = 'permission' in props || 'permissions' in props;
 
   if (isLegacyMode) {
-    return <LegacyPermissionGuard {...props as LegacyPermissionGuardProps} />;
+    return <LegacyPermissionGuard {...(props as LegacyPermissionGuardProps)} />;
   }
 
   return <RBACPermissionGuard {...props} />;
@@ -170,7 +172,14 @@ function LegacyPermissionGuard({
   fallback = null,
   showDelegationBadge = false,
 }: LegacyPermissionGuardProps) {
-  const { hasPermission, hasAnyPermission, hasAllPermissions, isViaDelegation, isLoading, isAdmin } = usePermissions();
+  const {
+    hasPermission,
+    hasAnyPermission,
+    hasAllPermissions,
+    isViaDelegation,
+    isLoading,
+    isAdmin,
+  } = usePermissions();
 
   // Admin bypass
   if (isAdmin) {
@@ -204,7 +213,10 @@ function LegacyPermissionGuard({
           <TooltipTrigger asChild>
             <span className="inline-flex items-center gap-1">
               {children}
-              <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 bg-amber-50 text-amber-700 border-amber-200">
+              <Badge
+                variant="outline"
+                className="text-[10px] px-1 py-0 h-4 bg-amber-50 text-amber-700 border-amber-200"
+              >
                 Délég.
               </Badge>
             </span>
@@ -242,34 +254,34 @@ function RBACPermissionGuard(props: Exclude<PermissionGuardProps, LegacyPermissi
   // Calculate permission
   let hasPermission = false;
 
-  if ("adminOnly" in props && props.adminOnly) {
+  if ('adminOnly' in props && props.adminOnly) {
     hasPermission = rbac.isAdmin;
-  } else if ("requireRole" in props && props.requireRole) {
+  } else if ('requireRole' in props && props.requireRole) {
     hasPermission = rbac.hasRole(props.requireRole);
-  } else if ("requireAnyRole" in props && props.requireAnyRole) {
+  } else if ('requireAnyRole' in props && props.requireAnyRole) {
     hasPermission = rbac.hasAnyRole(props.requireAnyRole);
-  } else if ("requireProfil" in props && props.requireProfil) {
+  } else if ('requireProfil' in props && props.requireProfil) {
     hasPermission = rbac.hasProfil(props.requireProfil);
-  } else if ("requireMinLevel" in props && props.requireMinLevel) {
+  } else if ('requireMinLevel' in props && props.requireMinLevel) {
     hasPermission = rbac.hasMinLevel(props.requireMinLevel);
-  } else if ("step" in props && props.step && props.action === "validate") {
+  } else if ('step' in props && props.step && props.action === 'validate') {
     hasPermission = rbac.canValidate(props.step);
-  } else if ("module" in props && props.module) {
+  } else if ('module' in props && props.module) {
     const { module, action, createdBy } = props;
     switch (action) {
-      case "create":
+      case 'create':
         hasPermission = rbac.canCreate(module);
         break;
-      case "read":
+      case 'read':
         hasPermission = rbac.canRead(module);
         break;
-      case "update":
+      case 'update':
         hasPermission = rbac.canUpdate(module, createdBy);
         break;
-      case "delete":
+      case 'delete':
         hasPermission = rbac.canDelete(module, createdBy);
         break;
-      case "export":
+      case 'export':
         hasPermission = rbac.canExport(module);
         break;
       default:
@@ -289,9 +301,7 @@ function RBACPermissionGuard(props: Exclude<PermissionGuardProps, LegacyPermissi
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-not-allowed">
-              <span className="pointer-events-none opacity-50">
-                {children}
-              </span>
+              <span className="pointer-events-none opacity-50">{children}</span>
             </span>
           </TooltipTrigger>
           <TooltipContent>
@@ -470,7 +480,14 @@ export function DirectorOrAbove({
 
 // Hook helper pour utiliser les permissions dans la logique (legacy)
 export function usePermissionCheck() {
-  const { hasPermission, hasAnyPermission, _hasAllPermissions, isViaDelegation, isLoading, isAdmin } = usePermissions();
+  const {
+    hasPermission,
+    hasAnyPermission,
+    _hasAllPermissions,
+    isViaDelegation,
+    isLoading,
+    isAdmin,
+  } = usePermissions();
   const rbac = useRBAC();
 
   const canPerform = (permission: string): boolean => {
@@ -488,19 +505,19 @@ export function usePermissionCheck() {
   // New RBAC-based checks
   const checkModuleAction = (
     module: ModuleCode,
-    action: Exclude<PermissionAction, "validate">,
+    action: Exclude<PermissionAction, 'validate'>,
     createdBy?: string
   ): boolean => {
     switch (action) {
-      case "create":
+      case 'create':
         return rbac.canCreate(module);
-      case "read":
+      case 'read':
         return rbac.canRead(module);
-      case "update":
+      case 'update':
         return rbac.canUpdate(module, createdBy);
-      case "delete":
+      case 'delete':
         return rbac.canDelete(module, createdBy);
-      case "export":
+      case 'export':
         return rbac.canExport(module);
       default:
         return false;

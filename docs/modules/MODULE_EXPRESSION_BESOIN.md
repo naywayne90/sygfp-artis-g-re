@@ -8,6 +8,18 @@ Le module **Expression de Besoin (EB)** formalise les besoins operationnels a pa
 
 **Chaine** : Note SEF > Note AEF > Imputation > **Expression Besoin** > Passation Marche > Engagement > Liquidation > Ordonnancement > Reglement
 
+## Codification ARTI
+
+| Propriété            | Valeur                                                 |
+| -------------------- | ------------------------------------------------------ |
+| **Code étape**       | 3 (03 en format 14 chars)                              |
+| **Sigle**            | EB                                                     |
+| **Format référence** | `ARTI03MMYYNNNN` (14 chars)                            |
+| **Exemple**          | `ARTI0302260001` = EB n°1, février 2026                |
+| **Colonne DB**       | `expressions_besoin.numero`                            |
+| **Génération**       | Trigger BEFORE INSERT via `generate_arti_reference(3)` |
+| **Compteur**         | `arti_reference_counters` (étape=3, par mois)          |
+
 ## 2. Routes et acces
 
 | Route                                                | Page                                        | Roles |

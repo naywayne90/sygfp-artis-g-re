@@ -61,6 +61,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { formatCurrency } from '@/lib/utils';
 
 // Constants for file upload validation
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -132,11 +133,6 @@ const getOriginBadge = (note: NoteAEF) => {
       Via Note SEF
     </Badge>
   );
-};
-
-const formatMontant = (montant: number | null) => {
-  if (montant === null || montant === undefined) return '0 FCFA';
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
 
 const formatDate = (dateStr: string | null) => {
@@ -874,7 +870,7 @@ export default function NoteAEFDetail() {
                       Montant estimé
                     </label>
                     <p className="mt-1 text-lg font-semibold">
-                      {formatMontant(note.montant_estime)}
+                      {formatCurrency(note.montant_estime)}
                     </p>
                   </div>
                   <div>
@@ -1030,12 +1026,12 @@ export default function NoteAEFDetail() {
                         <label className="text-sm font-medium text-muted-foreground">
                           Dotation
                         </label>
-                        <p className="mt-1 font-semibold">{formatMontant(budgetData.dotation)}</p>
+                        <p className="mt-1 font-semibold">{formatCurrency(budgetData.dotation)}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Engagé</label>
                         <p className="mt-1 font-semibold text-orange-600">
-                          {formatMontant(budgetData.totalEngaged)}
+                          {formatCurrency(budgetData.totalEngaged)}
                         </p>
                       </div>
                     </div>
@@ -1066,7 +1062,7 @@ export default function NoteAEFDetail() {
                   <div className="space-y-6">
                     <div className="text-center">
                       <p className="text-3xl font-bold text-green-600">
-                        {formatMontant(budgetData.disponible)}
+                        {formatCurrency(budgetData.disponible)}
                       </p>
                       <p className="text-sm text-muted-foreground mt-1">Montant disponible</p>
                     </div>
@@ -1081,14 +1077,14 @@ export default function NoteAEFDetail() {
                       />
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>0 FCFA</span>
-                        <span>{formatMontant(budgetData.dotation)}</span>
+                        <span>{formatCurrency(budgetData.dotation)}</span>
                       </div>
                     </div>
                     {note.montant_estime && budgetData.disponible < note.montant_estime && (
                       <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
                         <AlertTriangle className="h-4 w-4 shrink-0" />
                         <span>
-                          Le montant estimé ({formatMontant(note.montant_estime)}) dépasse le
+                          Le montant estimé ({formatCurrency(note.montant_estime)}) dépasse le
                           disponible
                         </span>
                       </div>

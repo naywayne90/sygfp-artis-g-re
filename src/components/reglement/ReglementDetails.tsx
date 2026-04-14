@@ -66,6 +66,7 @@ import { MouvementsBancairesDialog } from './MouvementsBancairesDialog';
 import { ReglementReceiptDialog } from './ReglementReceipt';
 import { useRBAC } from '@/hooks/useRBAC';
 import { supabase } from '@/integrations/supabase/client';
+import { formatCurrency } from '@/lib/utils';
 
 interface ReglementAttachment {
   id: string;
@@ -92,10 +93,6 @@ interface PaymentHistoryItem {
 interface ReglementDetailsProps {
   reglement: ReglementWithRelations;
 }
-
-const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-};
 
 const formatFileSize = (bytes: number | null) => {
   if (!bytes) return '-';
@@ -352,10 +349,7 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
       )}
 
       {/* Dossier step timeline */}
-      <DossierStepTimeline
-        currentStep="reglement"
-        compact
-      />
+      <DossierStepTimeline currentStep="reglement" compact />
 
       {/* Tabs */}
       <Tabs defaultValue="details" className="w-full">
@@ -405,7 +399,7 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
                   <div>
                     <p className="text-sm text-muted-foreground">Montant paye</p>
                     <p className="text-xl font-bold text-success">
-                      {formatMontant(reglement.montant)}
+                      {formatCurrency(reglement.montant)}
                     </p>
                   </div>
                   <div>
@@ -481,12 +475,12 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
                   </div>
                   <Progress value={progressPaiement} className="h-3" />
                   <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                    <span>Paye: {formatMontant(montantPaye)}</span>
-                    <span>Total: {formatMontant(montantOrdonnance)}</span>
+                    <span>Paye: {formatCurrency(montantPaye)}</span>
+                    <span>Total: {formatCurrency(montantOrdonnance)}</span>
                   </div>
                   {!isFullyPaid && (
                     <p className="mt-2 text-sm font-medium text-warning">
-                      Restant a payer: {formatMontant(restantAPayer)}
+                      Restant a payer: {formatCurrency(restantAPayer)}
                     </p>
                   )}
                 </div>
@@ -670,7 +664,7 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-right font-medium">
-                              {formatMontant(payment.montant)}
+                              {formatCurrency(payment.montant)}
                             </TableCell>
                             <TableCell className="text-sm text-muted-foreground">
                               {payment.reference_paiement || '-'}
@@ -700,7 +694,7 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
                     </span>
                     <span className="font-medium">
                       Total:{' '}
-                      {formatMontant(
+                      {formatCurrency(
                         paymentHistory
                           .filter((p) => p.statut !== 'rejete')
                           .reduce((sum, p) => sum + p.montant, 0)

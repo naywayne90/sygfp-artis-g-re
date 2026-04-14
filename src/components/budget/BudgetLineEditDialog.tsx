@@ -1,9 +1,8 @@
-// @ts-nocheck
 /**
  * BudgetLineEditDialog - Dialogue de modification d'une ligne budgétaire avec diff view
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,20 +10,20 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -32,7 +31,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,21 +41,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Save,
-  ArrowRight,
-  Loader2,
-  AlertTriangle,
-  FileEdit,
-  Eye,
-} from "lucide-react";
-import { useBudgetLineVersions, ModificationData } from "@/hooks/useBudgetLineVersions";
-import { BudgetLineWithRelations } from "@/hooks/useBudgetLines";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { FundingSourceSelect } from "@/components/shared/FundingSourceSelect";
+} from '@/components/ui/alert-dialog';
+import { Save, ArrowRight, Loader2, AlertTriangle, FileEdit, Eye } from 'lucide-react';
+import { useBudgetLineVersions, ModificationData } from '@/hooks/useBudgetLineVersions';
+import { BudgetLineWithRelations } from '@/hooks/useBudgetLines';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { FundingSourceSelect } from '@/components/shared/FundingSourceSelect';
 
 interface BudgetLineEditDialogProps {
   open: boolean;
@@ -73,7 +65,7 @@ interface ChangePreview {
 }
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("fr-FR").format(amount) + " FCFA";
+  return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
 };
 
 export function BudgetLineEditDialog({
@@ -86,32 +78,35 @@ export function BudgetLineEditDialog({
 
   // Form state
   const [formData, setFormData] = useState<ModificationData>({});
-  const [reason, setReason] = useState("");
+  const [reason, setReason] = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [changes, setChanges] = useState<ChangePreview[]>([]);
 
   // Fetch reference data
   const { data: directions } = useQuery({
-    queryKey: ["directions-select"],
+    queryKey: ['directions-select'],
     queryFn: async () => {
-      const { data } = await supabase.from("directions").select("id, code, label").order("code");
+      const { data } = await supabase.from('directions').select('id, code, label').order('code');
       return data || [];
     },
   });
 
   const { data: objectifs } = useQuery({
-    queryKey: ["objectifs-select"],
+    queryKey: ['objectifs-select'],
     queryFn: async () => {
-      const { data } = await supabase.from("objectifs_strategiques").select("id, code, libelle").order("code");
+      const { data } = await supabase
+        .from('objectifs_strategiques')
+        .select('id, code, libelle')
+        .order('code');
       return data || [];
     },
   });
 
   const { data: missions } = useQuery({
-    queryKey: ["missions-select"],
+    queryKey: ['missions-select'],
     queryFn: async () => {
-      const { data } = await supabase.from("missions").select("id, code, libelle").order("code");
+      const { data } = await supabase.from('missions').select('id, code, libelle').order('code');
       return data || [];
     },
   });
@@ -128,7 +123,7 @@ export function BudgetLineEditDialog({
         mission_id: budgetLine.mission_id || undefined,
         commentaire: budgetLine.commentaire || undefined,
       });
-      setReason("");
+      setReason('');
       setShowPreview(false);
     }
   }, [budgetLine, open]);
@@ -142,8 +137,8 @@ export function BudgetLineEditDialog({
     // Label
     if (formData.label !== budgetLine.label) {
       changeList.push({
-        field: "label",
-        label: "Libellé",
+        field: 'label',
+        label: 'Libellé',
         oldValue: budgetLine.label,
         newValue: formData.label,
       });
@@ -152,8 +147,8 @@ export function BudgetLineEditDialog({
     // Dotation
     if (formData.dotation_initiale !== budgetLine.dotation_initiale) {
       changeList.push({
-        field: "dotation_initiale",
-        label: "Dotation initiale",
+        field: 'dotation_initiale',
+        label: 'Dotation initiale',
         oldValue: formatCurrency(budgetLine.dotation_initiale),
         newValue: formatCurrency(formData.dotation_initiale || 0),
       });
@@ -162,10 +157,10 @@ export function BudgetLineEditDialog({
     // Source financement
     if (formData.source_financement !== (budgetLine.source_financement || undefined)) {
       changeList.push({
-        field: "source_financement",
-        label: "Source de financement",
-        oldValue: budgetLine.source_financement || "-",
-        newValue: formData.source_financement || "-",
+        field: 'source_financement',
+        label: 'Source de financement',
+        oldValue: budgetLine.source_financement || '-',
+        newValue: formData.source_financement || '-',
       });
     }
 
@@ -174,10 +169,10 @@ export function BudgetLineEditDialog({
       const oldDir = directions?.find((d) => d.id === budgetLine.direction_id);
       const newDir = directions?.find((d) => d.id === formData.direction_id);
       changeList.push({
-        field: "direction_id",
-        label: "Direction",
-        oldValue: oldDir ? `${oldDir.code} - ${oldDir.label}` : "-",
-        newValue: newDir ? `${newDir.code} - ${newDir.label}` : "-",
+        field: 'direction_id',
+        label: 'Direction',
+        oldValue: oldDir ? `${oldDir.code} - ${oldDir.label}` : '-',
+        newValue: newDir ? `${newDir.code} - ${newDir.label}` : '-',
       });
     }
 
@@ -186,10 +181,10 @@ export function BudgetLineEditDialog({
       const oldOs = objectifs?.find((o) => o.id === budgetLine.os_id);
       const newOs = objectifs?.find((o) => o.id === formData.os_id);
       changeList.push({
-        field: "os_id",
-        label: "Objectif Stratégique",
-        oldValue: oldOs ? `${oldOs.code} - ${oldOs.libelle}` : "-",
-        newValue: newOs ? `${newOs.code} - ${newOs.libelle}` : "-",
+        field: 'os_id',
+        label: 'Objectif Stratégique',
+        oldValue: oldOs ? `${oldOs.code} - ${oldOs.libelle}` : '-',
+        newValue: newOs ? `${newOs.code} - ${newOs.libelle}` : '-',
       });
     }
 
@@ -198,20 +193,20 @@ export function BudgetLineEditDialog({
       const oldMission = missions?.find((m) => m.id === budgetLine.mission_id);
       const newMission = missions?.find((m) => m.id === formData.mission_id);
       changeList.push({
-        field: "mission_id",
-        label: "Mission",
-        oldValue: oldMission ? `${oldMission.code} - ${oldMission.libelle}` : "-",
-        newValue: newMission ? `${newMission.code} - ${newMission.libelle}` : "-",
+        field: 'mission_id',
+        label: 'Mission',
+        oldValue: oldMission ? `${oldMission.code} - ${oldMission.libelle}` : '-',
+        newValue: newMission ? `${newMission.code} - ${newMission.libelle}` : '-',
       });
     }
 
     // Commentaire
     if (formData.commentaire !== (budgetLine.commentaire || undefined)) {
       changeList.push({
-        field: "commentaire",
-        label: "Commentaire",
-        oldValue: budgetLine.commentaire || "-",
-        newValue: formData.commentaire || "-",
+        field: 'commentaire',
+        label: 'Commentaire',
+        oldValue: budgetLine.commentaire || '-',
+        newValue: formData.commentaire || '-',
       });
     }
 
@@ -221,7 +216,7 @@ export function BudgetLineEditDialog({
   const handlePreview = () => {
     const calculatedChanges = calculateChanges();
     if (calculatedChanges.length === 0) {
-      toast.error("Aucune modification détectée");
+      toast.error('Aucune modification détectée');
       return;
     }
     setChanges(calculatedChanges);
@@ -281,7 +276,7 @@ export function BudgetLineEditDialog({
                 <Label htmlFor="label">Libellé *</Label>
                 <Input
                   id="label"
-                  value={formData.label || ""}
+                  value={formData.label || ''}
                   onChange={(e) => setFormData({ ...formData, label: e.target.value })}
                   placeholder="Libellé de la ligne"
                 />
@@ -316,7 +311,7 @@ export function BudgetLineEditDialog({
                 <div className="space-y-2">
                   <Label>Direction</Label>
                   <Select
-                    value={formData.direction_id || ""}
+                    value={formData.direction_id || ''}
                     onValueChange={(v) => setFormData({ ...formData, direction_id: v || null })}
                   >
                     <SelectTrigger>
@@ -338,7 +333,7 @@ export function BudgetLineEditDialog({
                 <div className="space-y-2">
                   <Label>Objectif Stratégique</Label>
                   <Select
-                    value={formData.os_id || ""}
+                    value={formData.os_id || ''}
                     onValueChange={(v) => setFormData({ ...formData, os_id: v || null })}
                   >
                     <SelectTrigger>
@@ -358,7 +353,7 @@ export function BudgetLineEditDialog({
                 <div className="space-y-2">
                   <Label>Mission</Label>
                   <Select
-                    value={formData.mission_id || ""}
+                    value={formData.mission_id || ''}
                     onValueChange={(v) => setFormData({ ...formData, mission_id: v || null })}
                   >
                     <SelectTrigger>
@@ -380,7 +375,7 @@ export function BudgetLineEditDialog({
                 <Label htmlFor="commentaire">Commentaire</Label>
                 <Textarea
                   id="commentaire"
-                  value={formData.commentaire || ""}
+                  value={formData.commentaire || ''}
                   onChange={(e) => setFormData({ ...formData, commentaire: e.target.value })}
                   placeholder="Notes ou commentaires..."
                   rows={2}
@@ -491,7 +486,7 @@ export function BudgetLineEditDialog({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer les modifications</AlertDialogTitle>
             <AlertDialogDescription>
-              Vous allez modifier <strong>{changes.length}</strong> champ(s) sur la ligne{" "}
+              Vous allez modifier <strong>{changes.length}</strong> champ(s) sur la ligne{' '}
               <strong>{budgetLine.code}</strong>.
               <br />
               <br />
@@ -507,7 +502,7 @@ export function BudgetLineEditDialog({
                   Enregistrement...
                 </>
               ) : (
-                "Confirmer"
+                'Confirmer'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

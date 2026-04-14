@@ -51,7 +51,12 @@ export interface ExpressionBesoin {
   differe_by: string | null;
   deadline_correction: string | null;
   current_validation_step: number | null;
+  etape_validation: number | null;
   validation_status: string | null;
+  visa_cb_user_id: string | null;
+  visa_cb_date: string | null;
+  visa_daaf_user_id: string | null;
+  visa_daaf_date: string | null;
   // Nouveaux champs
   lieu_livraison: string | null;
   delai_livraison: string | null;
@@ -76,7 +81,15 @@ export interface ExpressionBesoin {
     montant: number | null;
     code_imputation: string | null;
     note_aef_id?: string | null;
-    budget_line?: { id: string; code: string; label: string } | null;
+    budget_line?: {
+      id: string;
+      code: string;
+      label: string;
+      dotation_initiale: number | null;
+      dotation_modifiee: number | null;
+      total_engage: number | null;
+      montant_reserve: number | null;
+    } | null;
   } | null;
   dossier?: {
     id: string;
@@ -86,6 +99,7 @@ export interface ExpressionBesoin {
   creator?: { id: string; full_name: string | null } | null;
   validator?: { id: string; full_name: string | null } | null;
   verifier?: { id: string; full_name: string | null } | null;
+  visa_cb_profile?: { id: string; full_name: string | null } | null;
   validations?: ExpressionBesoinValidation[];
   attachments?: ExpressionBesoinAttachment[];
 }
@@ -244,20 +258,42 @@ export function useExpressionsBesoin(filters?: ExpressionBesoinFilters) {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      let query = supabase
-        .from('expressions_besoin')
-        .select(
-          `
+      // Requête enrichie avec verifier, visa CB, imputation+budget_line
+      const richSelect = `
           id, numero, objet, montant_estime, urgence, statut, exercice,
           created_at, submitted_at, validated_at, verified_at, verified_by,
+          current_validation_step, etape_validation,
+          visa_cb_user_id, visa_cb_date, visa_daaf_user_id, visa_daaf_date,
+          direction_id, marche_id, imputation_id, dossier_id,
+          rejection_reason, date_differe, motif_differe, deadline_correction,
+          direction:directions(id, code, label, sigle),
+          marche:marches!expressions_besoin_marche_id_fkey(id, numero),
+          creator:profiles!expressions_besoin_created_by_fkey(id, full_name),
+          verifier:profiles!expressions_besoin_verified_by_fkey(id, full_name),
+          visa_cb_profile:profiles!expressions_besoin_visa_cb_user_id_fkey(id, full_name),
+          imputation:imputations!expressions_besoin_imputation_id_fkey(
+            id, reference, objet, montant, code_imputation,
+            budget_line:budget_lines(id, code, label, dotation_initiale, dotation_modifiee, total_engage, montant_reserve)
+          )
+        `;
+
+      // Requête lean fallback (sans FK qui pourraient ne pas exister)
+      const leanSelect = `
+          id, numero, objet, montant_estime, urgence, statut, exercice,
+          created_at, submitted_at, validated_at, verified_at, verified_by,
+          current_validation_step, etape_validation,
+          visa_cb_user_id, visa_cb_date,
           direction_id, marche_id, imputation_id, dossier_id,
           rejection_reason, date_differe, motif_differe, deadline_correction,
           direction:directions(id, code, label, sigle),
           marche:marches!expressions_besoin_marche_id_fkey(id, numero),
           creator:profiles!expressions_besoin_created_by_fkey(id, full_name)
-        `,
-          { count: 'exact' }
-        )
+        `;
+
+      // Essayer la requête enrichie d'abord, fallback sur lean
+      let query = supabase
+        .from('expressions_besoin')
+        .select(richSelect, { count: 'exact' })
         .eq('exercice', exercice || new Date().getFullYear())
         .order('created_at', { ascending: false })
         .range(from, to);
@@ -274,7 +310,32 @@ export function useExpressionsBesoin(filters?: ExpressionBesoinFilters) {
       }
 
       const { data, error, count } = await query;
-      if (error) throw error;
+
+      // Fallback sur la requête lean si la requête enrichie échoue (FK manquante)
+      if (error) {
+        console.warn('Requête enrichie EB échouée, fallback lean:', error.message);
+        let fallbackQuery = supabase
+          .from('expressions_besoin')
+          .select(leanSelect, { count: 'exact' })
+          .eq('exercice', exercice || new Date().getFullYear())
+          .order('created_at', { ascending: false })
+          .range(from, to);
+
+        if (filters?.statut) {
+          fallbackQuery = fallbackQuery.eq('statut', filters.statut);
+        }
+        if (filters?.search?.trim()) {
+          const term = `%${filters.search.trim()}%`;
+          fallbackQuery = fallbackQuery.or(`objet.ilike.${term},numero.ilike.${term}`);
+        }
+
+        const { data: fbData, error: fbError, count: fbCount } = await fallbackQuery;
+        if (fbError) throw fbError;
+        return {
+          items: fbData as unknown as ExpressionBesoin[],
+          totalCount: fbCount ?? 0,
+        };
+      }
 
       return {
         items: data as unknown as ExpressionBesoin[],
@@ -343,6 +404,7 @@ export function useExpressionsBesoin(filters?: ExpressionBesoinFilters) {
       const { data: existingEBs } = await supabase
         .from('expressions_besoin')
         .select('imputation_id')
+        .eq('exercice', exercice || new Date().getFullYear())
         .not('imputation_id', 'is', null);
 
       const usedImputationIds = new Set(existingEBs?.map((eb) => eb.imputation_id) || []);

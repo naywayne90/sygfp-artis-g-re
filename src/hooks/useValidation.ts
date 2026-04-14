@@ -1,4 +1,3 @@
-// @ts-nocheck - Dynamic table names
 /**
  * Hook de validation pour les entités SYGFP
  * Gère les actions : Valider, Différer, Rejeter
@@ -39,7 +38,9 @@ export function useValidation(entityType: ValidationEntityType) {
   // Mutation pour valider une entité
   const validateMutation = useMutation({
     mutationFn: async (entityId: string): Promise<ValidationResult> => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const table = ENTITY_TABLE_MAP[entityType];
@@ -93,7 +94,9 @@ export function useValidation(entityType: ValidationEntityType) {
       entityId: string;
       data: DiffereFormData;
     }): Promise<ValidationResult> => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const table = ENTITY_TABLE_MAP[entityType];
@@ -113,10 +116,7 @@ export function useValidation(entityType: ValidationEntityType) {
         updateData.date_reprise_prevue = data.dateReprisePrevue.toISOString().split('T')[0];
       }
 
-      const { error } = await supabase
-        .from(table)
-        .update(updateData)
-        .eq('id', entityId);
+      const { error } = await supabase.from(table).update(updateData).eq('id', entityId);
 
       if (error) throw error;
 
@@ -160,7 +160,9 @@ export function useValidation(entityType: ValidationEntityType) {
       entityId: string;
       data: RejetFormData;
     }): Promise<ValidationResult> => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const table = ENTITY_TABLE_MAP[entityType];

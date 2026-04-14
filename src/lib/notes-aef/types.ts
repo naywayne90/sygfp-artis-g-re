@@ -61,7 +61,6 @@ export interface NoteAEFEntity {
 
 export interface NoteAEFCounts {
   total: number;
-  brouillon: number;
   soumis: number;
   a_valider: number;
   a_imputer: number;

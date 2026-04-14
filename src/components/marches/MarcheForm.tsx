@@ -32,6 +32,7 @@ import {
   MarcheFormData,
   Prestataire,
 } from '@/hooks/useMarches';
+import { formatCurrency } from '@/lib/utils';
 
 interface NoteImputation {
   id: string;
@@ -120,9 +121,6 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
     }
   };
 
-  const formatMontant = (montant: number) =>
-    new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-
   const needsJustification = formData.type_procedure === 'gre_a_gre';
 
   return (
@@ -163,7 +161,7 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
               </div>
               <div>
                 <span className="text-muted-foreground">Montant estimé:</span>
-                <p className="font-medium">{formatMontant(selectedNote.montant_estime || 0)}</p>
+                <p className="font-medium">{formatCurrency(selectedNote.montant_estime || 0)}</p>
               </div>
             </div>
           </CardContent>
@@ -457,7 +455,7 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
             </div>
             <div className="flex items-end">
               <p className="text-2xl font-bold text-primary">
-                {formatMontant(formData.montant || 0)}
+                {formatCurrency(formData.montant || 0)}
               </p>
             </div>
           </div>

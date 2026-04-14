@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -9,14 +9,14 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -24,41 +24,42 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { useTresorerie, TYPES_COMPTE, CompteBancaire } from "@/hooks/useTresorerie";
-import { Plus, Edit, Landmark } from "lucide-react";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { useTresorerie, TYPES_COMPTE, CompteBancaire } from '@/hooks/useTresorerie';
+import { Plus, Edit, Landmark } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 export function CompteBancaireList() {
   const { comptes, createCompte, updateCompte } = useTresorerie();
   const [open, setOpen] = useState(false);
   const [editingCompte, setEditingCompte] = useState<CompteBancaire | null>(null);
   const [form, setForm] = useState({
-    code: "",
-    libelle: "",
-    banque: "",
-    numero_compte: "",
-    iban: "",
-    bic: "",
+    code: '',
+    libelle: '',
+    banque: '',
+    numero_compte: '',
+    iban: '',
+    bic: '',
     solde_initial: 0,
-    type_compte: "courant",
-    devise: "XOF",
+    type_compte: 'courant',
+    devise: 'XOF',
     est_actif: true,
   });
 
   const resetForm = () => {
     setForm({
-      code: "",
-      libelle: "",
-      banque: "",
-      numero_compte: "",
-      iban: "",
-      bic: "",
+      code: '',
+      libelle: '',
+      banque: '',
+      numero_compte: '',
+      iban: '',
+      bic: '',
       solde_initial: 0,
-      type_compte: "courant",
-      devise: "XOF",
+      type_compte: 'courant',
+      devise: 'XOF',
       est_actif: true,
     });
     setEditingCompte(null);
@@ -69,10 +70,10 @@ export function CompteBancaireList() {
     setForm({
       code: compte.code,
       libelle: compte.libelle,
-      banque: compte.banque || "",
-      numero_compte: compte.numero_compte || "",
-      iban: compte.iban || "",
-      bic: compte.bic || "",
+      banque: compte.banque || '',
+      numero_compte: compte.numero_compte || '',
+      iban: compte.iban || '',
+      bic: compte.bic || '',
       solde_initial: compte.solde_initial,
       type_compte: compte.type_compte,
       devise: compte.devise,
@@ -91,14 +92,6 @@ export function CompteBancaireList() {
     resetForm();
   };
 
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "decimal",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(montant) + " FCFA";
-  };
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -106,7 +99,13 @@ export function CompteBancaireList() {
           <Landmark className="h-5 w-5" />
           Comptes bancaires
         </CardTitle>
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
+        <Dialog
+          open={open}
+          onOpenChange={(o) => {
+            setOpen(o);
+            if (!o) resetForm();
+          }}
+        >
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
@@ -115,7 +114,9 @@ export function CompteBancaireList() {
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>{editingCompte ? "Modifier le compte" : "Nouveau compte bancaire"}</DialogTitle>
+              <DialogTitle>
+                {editingCompte ? 'Modifier le compte' : 'Nouveau compte bancaire'}
+              </DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
@@ -130,13 +131,18 @@ export function CompteBancaireList() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="type_compte">Type *</Label>
-                  <Select value={form.type_compte} onValueChange={(v) => setForm({ ...form, type_compte: v })}>
+                  <Select
+                    value={form.type_compte}
+                    onValueChange={(v) => setForm({ ...form, type_compte: v })}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {TYPES_COMPTE.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                        <SelectItem key={t.value} value={t.value}>
+                          {t.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -217,11 +223,17 @@ export function CompteBancaireList() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => { setOpen(false); resetForm(); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setOpen(false);
+                  resetForm();
+                }}
+              >
                 Annuler
               </Button>
               <Button onClick={handleSubmit} disabled={!form.code || !form.libelle}>
-                {editingCompte ? "Modifier" : "Créer"}
+                {editingCompte ? 'Modifier' : 'Créer'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -253,18 +265,19 @@ export function CompteBancaireList() {
                 <TableRow key={compte.id}>
                   <TableCell className="font-mono">{compte.code}</TableCell>
                   <TableCell className="font-medium">{compte.libelle}</TableCell>
-                  <TableCell>{compte.banque || "-"}</TableCell>
+                  <TableCell>{compte.banque || '-'}</TableCell>
                   <TableCell>
-                    {TYPES_COMPTE.find(t => t.value === compte.type_compte)?.label || compte.type_compte}
+                    {TYPES_COMPTE.find((t) => t.value === compte.type_compte)?.label ||
+                      compte.type_compte}
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    <span className={compte.solde_actuel < 0 ? "text-destructive" : "text-success"}>
-                      {formatMontant(compte.solde_actuel)}
+                    <span className={compte.solde_actuel < 0 ? 'text-destructive' : 'text-success'}>
+                      {formatCurrency(compte.solde_actuel)}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={compte.est_actif ? "default" : "secondary"}>
-                      {compte.est_actif ? "Actif" : "Inactif"}
+                    <Badge variant={compte.est_actif ? 'default' : 'secondary'}>
+                      {compte.est_actif ? 'Actif' : 'Inactif'}
                     </Badge>
                   </TableCell>
                   <TableCell>

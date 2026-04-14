@@ -107,13 +107,13 @@ export function usePlansTravail(directionId?: string) {
     },
   });
 
-  // Workflow: Soumettre un plan (brouillon → soumis)
+  // Workflow: Soumettre un plan (soumis → valide)
   const submitPlan = useMutation({
     mutationFn: async (id: string) => {
       const plan = query.data?.find((p) => p.id === id);
       if (!plan) throw new Error('Plan non trouvé');
-      if (plan.statut !== 'brouillon' && plan.statut !== 'rejete') {
-        throw new Error('Seul un plan en brouillon ou rejeté peut être soumis');
+      if (plan.statut !== 'soumis' && plan.statut !== 'rejete') {
+        throw new Error('Seul un plan soumis ou rejeté peut être soumis');
       }
       const { error } = await supabaseUntyped
         .from('plans_travail')

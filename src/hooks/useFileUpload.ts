@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Hook de gestion d'upload de fichiers pour SYGFP
  * Gère l'upload vers R2/Supabase avec progression et validation
@@ -61,7 +60,11 @@ export function useFileUpload({
   const [error, setError] = useState<string | null>(null);
 
   // Query pour récupérer les fichiers existants
-  const { data: files = [], isLoading: isLoadingFiles, refetch } = useQuery({
+  const {
+    data: files = [],
+    isLoading: isLoadingFiles,
+    refetch,
+  } = useQuery({
     queryKey: ['file-uploads', entityType, entityId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -73,46 +76,53 @@ export function useFileUpload({
 
       if (error) throw error;
 
-      return (data || []).map((att): UploadedFile => ({
-        id: att.id,
-        numero: att.numero || 1,
-        filename: att.filename,
-        originalName: att.original_name,
-        size: att.size,
-        mimeType: att.content_type,
-        storagePath: att.storage_path,
-        uploadedAt: att.uploaded_at,
-      }));
+      return (data || []).map(
+        (att): UploadedFile => ({
+          id: att.id,
+          numero: att.numero || 1,
+          filename: att.filename,
+          originalName: att.original_name,
+          size: att.size,
+          mimeType: att.content_type,
+          storagePath: att.storage_path,
+          uploadedAt: att.uploaded_at,
+        })
+      );
     },
     enabled: !!entityType && !!entityId,
   });
 
   // Validation du fichier
-  const validateFile = useCallback((file: File): FileUploadError | null => {
-    // Vérifier la taille
-    if (file.size > maxSizeBytes) {
-      return {
-        type: 'size',
-        message: `Le fichier dépasse la taille maximum de ${formatFileSize(maxSizeBytes)}`,
-      };
-    }
+  const validateFile = useCallback(
+    (file: File): FileUploadError | null => {
+      // Vérifier la taille
+      if (file.size > maxSizeBytes) {
+        return {
+          type: 'size',
+          message: `Le fichier dépasse la taille maximum de ${formatFileSize(maxSizeBytes)}`,
+        };
+      }
 
-    // Vérifier le type
-    const acceptedTypes = Object.keys(ACCEPTED_FILE_TYPES);
-    if (!acceptedTypes.includes(file.type)) {
-      return {
-        type: 'type',
-        message: 'Type de fichier non accepté. Utilisez PDF, Word, Excel ou images (JPG, PNG)',
-      };
-    }
+      // Vérifier le type
+      const acceptedTypes = Object.keys(ACCEPTED_FILE_TYPES);
+      if (!acceptedTypes.includes(file.type)) {
+        return {
+          type: 'type',
+          message: 'Type de fichier non accepté. Utilisez PDF, Word, Excel ou images (JPG, PNG)',
+        };
+      }
 
-    return null;
-  }, [maxSizeBytes]);
+      return null;
+    },
+    [maxSizeBytes]
+  );
 
   // Mutation pour upload
   const uploadMutation = useMutation({
     mutationFn: async ({ file, numero }: { file: File; numero: number }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Validation
@@ -208,10 +218,7 @@ export function useFileUpload({
       }
 
       // Supprimer de la base
-      const { error: dbError } = await supabase
-        .from('attachments')
-        .delete()
-        .eq('id', attachmentId);
+      const { error: dbError } = await supabase.from('attachments').delete().eq('id', attachmentId);
 
       if (dbError) throw dbError;
 
@@ -227,20 +234,29 @@ export function useFileUpload({
   });
 
   // Fonction d'upload
-  const uploadFile = useCallback(async (file: File, numero: number) => {
-    setError(null);
-    await uploadMutation.mutateAsync({ file, numero });
-  }, [uploadMutation]);
+  const uploadFile = useCallback(
+    async (file: File, numero: number) => {
+      setError(null);
+      await uploadMutation.mutateAsync({ file, numero });
+    },
+    [uploadMutation]
+  );
 
   // Fonction de suppression
-  const deleteFile = useCallback(async (attachmentId: string) => {
-    await deleteMutation.mutateAsync(attachmentId);
-  }, [deleteMutation]);
+  const deleteFile = useCallback(
+    async (attachmentId: string) => {
+      await deleteMutation.mutateAsync(attachmentId);
+    },
+    [deleteMutation]
+  );
 
   // Obtenir le fichier pour un numéro donné
-  const getFileByNumero = useCallback((numero: number): UploadedFile | undefined => {
-    return files.find((f) => f.numero === numero);
-  }, [files]);
+  const getFileByNumero = useCallback(
+    (numero: number): UploadedFile | undefined => {
+      return files.find((f) => f.numero === numero);
+    },
+    [files]
+  );
 
   return {
     files,

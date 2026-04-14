@@ -3,20 +3,11 @@ import { Badge } from '@/components/ui/badge';
 import { ExportButtons } from './ExportButtons';
 import { EtapeStats } from '@/hooks/useEtatsExecution';
 import { FileText, FileCheck, ClipboardCheck, CreditCard, Banknote } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface EtatParEtapeProps {
   data: EtapeStats[];
 }
-
-const formatMontant = (montant: number) => {
-  if (montant >= 1000000000) {
-    return (montant / 1000000000).toFixed(2) + ' Mds';
-  }
-  if (montant >= 1000000) {
-    return (montant / 1000000).toFixed(1) + ' M';
-  }
-  return new Intl.NumberFormat('fr-FR').format(montant);
-};
 
 const ETAPE_ICONS: Record<string, React.ReactNode> = {
   notes_aef: <FileText className="h-5 w-5" />,
@@ -111,7 +102,7 @@ export function EtatParEtape({ data }: EtatParEtapeProps) {
               <div className="mt-4 pt-4 border-t border-current/10">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Montant total</span>
-                  <span className="font-bold">{formatMontant(etape.montant_total)} FCFA</span>
+                  <span className="font-bold">{formatCurrency(etape.montant_total)}</span>
                 </div>
               </div>
             </div>
@@ -144,7 +135,7 @@ export function EtatParEtape({ data }: EtatParEtapeProps) {
                   <td className="py-3 px-4 text-center text-destructive">{etape.rejete}</td>
                   <td className="py-3 px-4 text-center text-amber-600">{etape.differe}</td>
                   <td className="py-3 px-4 text-right font-mono">
-                    {formatMontant(etape.montant_total)}
+                    {formatCurrency(etape.montant_total)}
                   </td>
                 </tr>
               ))}
@@ -171,7 +162,7 @@ export function EtatParEtape({ data }: EtatParEtapeProps) {
                   {data.reduce((sum, e) => sum + e.differe, 0)}
                 </td>
                 <td className="py-3 px-4 text-right font-mono">
-                  {formatMontant(data.reduce((sum, e) => sum + e.montant_total, 0))}
+                  {formatCurrency(data.reduce((sum, e) => sum + e.montant_total, 0))}
                 </td>
               </tr>
             </tfoot>

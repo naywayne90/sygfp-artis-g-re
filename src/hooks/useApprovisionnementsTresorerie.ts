@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * useApprovisionnementsTresorerie - Hook pour gérer les approvisionnements de trésorerie
  *
@@ -9,17 +8,18 @@
  * - Création avec mise à jour automatique des soldes
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useCallback } from "react";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useCallback } from 'react';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { formatCurrency } from '@/lib/utils';
 
 // ============================================
 // TYPES
 // ============================================
 
-export type ApprovisionnementType = "BANK" | "CASH";
+export type ApprovisionnementType = 'BANK' | 'CASH';
 
 export interface Approvisionnement {
   id: string;
@@ -37,7 +37,7 @@ export interface Approvisionnement {
   pj_url: string | null;
   pj_filename: string | null;
   exercice: number;
-  statut: "brouillon" | "valide" | "annule";
+  statut: 'soumis' | 'valide' | 'annule';
   created_at: string;
   created_by: string | null;
   validated_at: string | null;
@@ -70,7 +70,7 @@ export interface ApprovisionnementFilters {
   compte_bancaire_id?: string;
   caisse_id?: string;
   origine_fonds_id?: string;
-  statut?: "brouillon" | "valide" | "annule" | "all";
+  statut?: 'soumis' | 'valide' | 'annule' | 'all';
   date_debut?: string;
   date_fin?: string;
   search?: string;
@@ -89,7 +89,7 @@ export interface CreateApprovisionnementData {
   description?: string;
   pj_url?: string;
   pj_filename?: string;
-  statut?: "brouillon" | "valide";
+  statut?: 'soumis' | 'valide';
 }
 
 // ============================================
@@ -111,52 +111,54 @@ export function useApprovisionnementsTresorerie(filters?: ApprovisionnementFilte
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["approvisionnements-tresorerie", filters, exerciceAnnee],
+    queryKey: ['approvisionnements-tresorerie', filters, exerciceAnnee],
     queryFn: async () => {
       let query = supabase
-        .from("approvisionnements")
-        .select(`
+        .from('approvisionnements')
+        .select(
+          `
           *,
           compte_bancaire:comptes_bancaires(id, code, libelle, banque),
           caisse:caisses(id, code, libelle),
           origine_fonds:funding_sources(id, code, libelle),
           createur:profiles!approvisionnements_created_by_fkey(id, full_name)
-        `)
-        .eq("exercice", exerciceAnnee)
-        .order("date_operation", { ascending: false })
-        .order("created_at", { ascending: false });
+        `
+        )
+        .eq('exercice', exerciceAnnee)
+        .order('date_operation', { ascending: false })
+        .order('created_at', { ascending: false });
 
       // Filtrer par type
       if (filters?.type) {
-        query = query.eq("type", filters.type);
+        query = query.eq('type', filters.type);
       }
 
       // Filtrer par compte bancaire
       if (filters?.compte_bancaire_id) {
-        query = query.eq("compte_bancaire_id", filters.compte_bancaire_id);
+        query = query.eq('compte_bancaire_id', filters.compte_bancaire_id);
       }
 
       // Filtrer par caisse
       if (filters?.caisse_id) {
-        query = query.eq("caisse_id", filters.caisse_id);
+        query = query.eq('caisse_id', filters.caisse_id);
       }
 
       // Filtrer par origine des fonds
       if (filters?.origine_fonds_id) {
-        query = query.eq("origine_fonds_id", filters.origine_fonds_id);
+        query = query.eq('origine_fonds_id', filters.origine_fonds_id);
       }
 
       // Filtrer par statut
-      if (filters?.statut && filters.statut !== "all") {
-        query = query.eq("statut", filters.statut);
+      if (filters?.statut && filters.statut !== 'all') {
+        query = query.eq('statut', filters.statut);
       }
 
       // Filtrer par période
       if (filters?.date_debut) {
-        query = query.gte("date_operation", filters.date_debut);
+        query = query.gte('date_operation', filters.date_debut);
       }
       if (filters?.date_fin) {
-        query = query.lte("date_operation", filters.date_fin);
+        query = query.lte('date_operation', filters.date_fin);
       }
 
       const { data, error } = await query;
@@ -186,8 +188,8 @@ export function useApprovisionnementsTresorerie(filters?: ApprovisionnementFilte
     total: approvisionnements?.length || 0,
     montantTotal: approvisionnements?.reduce((sum, a) => sum + a.montant, 0) || 0,
     parType: {
-      BANK: approvisionnements?.filter((a) => a.type === "BANK").length || 0,
-      CASH: approvisionnements?.filter((a) => a.type === "CASH").length || 0,
+      BANK: approvisionnements?.filter((a) => a.type === 'BANK').length || 0,
+      CASH: approvisionnements?.filter((a) => a.type === 'CASH').length || 0,
     },
   };
 
@@ -201,23 +203,23 @@ export function useApprovisionnementsTresorerie(filters?: ApprovisionnementFilte
       const userId = (await supabase.auth.getUser()).data.user?.id;
 
       // Validation
-      if (data.type === "BANK" && !data.compte_bancaire_id) {
-        throw new Error("Veuillez sélectionner un compte bancaire");
+      if (data.type === 'BANK' && !data.compte_bancaire_id) {
+        throw new Error('Veuillez sélectionner un compte bancaire');
       }
-      if (data.type === "CASH" && !data.caisse_id) {
-        throw new Error("Veuillez sélectionner une caisse");
+      if (data.type === 'CASH' && !data.caisse_id) {
+        throw new Error('Veuillez sélectionner une caisse');
       }
       if (data.montant <= 0) {
-        throw new Error("Le montant doit être supérieur à 0");
+        throw new Error('Le montant doit être supérieur à 0');
       }
 
       const { data: result, error } = await supabase
-        .from("approvisionnements")
+        .from('approvisionnements')
         .insert([
           {
             type: data.type,
-            compte_bancaire_id: data.type === "BANK" ? data.compte_bancaire_id : null,
-            caisse_id: data.type === "CASH" ? data.caisse_id : null,
+            compte_bancaire_id: data.type === 'BANK' ? data.compte_bancaire_id : null,
+            caisse_id: data.type === 'CASH' ? data.caisse_id : null,
             montant: data.montant,
             date_operation: data.date_operation,
             date_valeur: data.date_valeur || null,
@@ -228,18 +230,20 @@ export function useApprovisionnementsTresorerie(filters?: ApprovisionnementFilte
             pj_url: data.pj_url || null,
             pj_filename: data.pj_filename || null,
             exercice: exerciceAnnee,
-            statut: data.statut || "valide",
+            statut: data.statut || 'valide',
             created_by: userId,
-            validated_at: data.statut === "valide" ? new Date().toISOString() : null,
-            validated_by: data.statut === "valide" ? userId : null,
+            validated_at: data.statut === 'valide' ? new Date().toISOString() : null,
+            validated_by: data.statut === 'valide' ? userId : null,
           },
         ])
-        .select(`
+        .select(
+          `
           *,
           compte_bancaire:comptes_bancaires(id, code, libelle, banque),
           caisse:caisses(id, code, libelle),
           origine_fonds:funding_sources(id, code, libelle)
-        `)
+        `
+        )
         .single();
 
       if (error) throw error;
@@ -247,9 +251,9 @@ export function useApprovisionnementsTresorerie(filters?: ApprovisionnementFilte
     },
     onSuccess: (data) => {
       toast.success(`Approvisionnement ${data.numero} créé`);
-      queryClient.invalidateQueries({ queryKey: ["approvisionnements-tresorerie"] });
-      queryClient.invalidateQueries({ queryKey: ["comptes-bancaires"] });
-      queryClient.invalidateQueries({ queryKey: ["caisses"] });
+      queryClient.invalidateQueries({ queryKey: ['approvisionnements-tresorerie'] });
+      queryClient.invalidateQueries({ queryKey: ['comptes-bancaires'] });
+      queryClient.invalidateQueries({ queryKey: ['caisses'] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -260,9 +264,9 @@ export function useApprovisionnementsTresorerie(filters?: ApprovisionnementFilte
   const annulerApprovisionnement = useMutation({
     mutationFn: async (id: string) => {
       const { data, error } = await supabase
-        .from("approvisionnements")
-        .update({ statut: "annule" })
-        .eq("id", id)
+        .from('approvisionnements')
+        .update({ statut: 'annule' })
+        .eq('id', id)
         .select()
         .single();
 
@@ -270,8 +274,8 @@ export function useApprovisionnementsTresorerie(filters?: ApprovisionnementFilte
       return data;
     },
     onSuccess: () => {
-      toast.success("Approvisionnement annulé");
-      queryClient.invalidateQueries({ queryKey: ["approvisionnements-tresorerie"] });
+      toast.success('Approvisionnement annulé');
+      queryClient.invalidateQueries({ queryKey: ['approvisionnements-tresorerie'] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -285,68 +289,60 @@ export function useApprovisionnementsTresorerie(filters?: ApprovisionnementFilte
   // Export Excel/CSV
   const exportToExcel = useCallback(() => {
     if (!approvisionnements || approvisionnements.length === 0) {
-      toast.error("Aucune donnée à exporter");
+      toast.error('Aucune donnée à exporter');
       return;
     }
 
     const headers = [
-      "Numéro",
-      "Type",
-      "Date Opération",
-      "Date Valeur",
-      "Compte/Caisse",
-      "Origine Fonds",
-      "Montant",
-      "Référence Pièce",
-      "Description",
-      "Statut",
-      "Créé par",
-      "Date création",
-    ].join(";");
+      'Numéro',
+      'Type',
+      'Date Opération',
+      'Date Valeur',
+      'Compte/Caisse',
+      'Origine Fonds',
+      'Montant',
+      'Référence Pièce',
+      'Description',
+      'Statut',
+      'Créé par',
+      'Date création',
+    ].join(';');
 
     const rows = approvisionnements.map((a) =>
       [
         a.numero,
-        a.type === "BANK" ? "Banque" : "Caisse",
-        new Date(a.date_operation).toLocaleDateString("fr-FR"),
-        a.date_valeur ? new Date(a.date_valeur).toLocaleDateString("fr-FR") : "",
-        a.type === "BANK"
+        a.type === 'BANK' ? 'Banque' : 'Caisse',
+        new Date(a.date_operation).toLocaleDateString('fr-FR'),
+        a.date_valeur ? new Date(a.date_valeur).toLocaleDateString('fr-FR') : '',
+        a.type === 'BANK'
           ? `${a.compte_bancaire?.code} - ${a.compte_bancaire?.libelle}`
           : `${a.caisse?.code} - ${a.caisse?.libelle}`,
-        a.origine_fonds?.libelle || a.origine_fonds_code || "",
+        a.origine_fonds?.libelle || a.origine_fonds_code || '',
         a.montant,
-        a.reference_piece || "",
-        a.description || "",
+        a.reference_piece || '',
+        a.description || '',
         a.statut,
-        a.createur?.full_name || "",
-        new Date(a.created_at).toLocaleDateString("fr-FR"),
+        a.createur?.full_name || '',
+        new Date(a.created_at).toLocaleDateString('fr-FR'),
       ]
         .map((c) => `"${c}"`)
-        .join(";")
+        .join(';')
     );
 
-    const content = [headers, ...rows].join("\n");
-    const blob = new Blob(["\ufeff" + content], {
-      type: "text/csv;charset=utf-8;",
+    const content = [headers, ...rows].join('\n');
+    const blob = new Blob(['﻿' + content], {
+      type: 'text/csv;charset=utf-8;',
     });
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `approvisionnements_${exerciceAnnee}_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `approvisionnements_${exerciceAnnee}_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
     toast.success(`Export de ${approvisionnements.length} approvisionnement(s) réussi`);
   }, [approvisionnements, exerciceAnnee]);
 
-  // Formater montant
-  const formatMontant = useCallback((montant: number, devise?: string) => {
-    return (
-      new Intl.NumberFormat("fr-FR", {
-        style: "decimal",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(montant) + ` ${devise || "FCFA"}`
-    );
-  }, []);
+  // Formater montant (délègue à formatCurrency)
+  const formatMontant = formatCurrency;
 
   // ============================================
   // RETURN

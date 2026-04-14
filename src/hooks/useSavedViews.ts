@@ -1,7 +1,6 @@
-// @ts-nocheck - Table not in generated types
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export interface SavedViewFilters {
   search?: string;
@@ -48,20 +47,20 @@ export function useSavedViews() {
 
   // Get current user's saved views
   const { data: savedViews = [], isLoading } = useQuery({
-    queryKey: ["saved-views"],
+    queryKey: ['saved-views'],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return [];
 
       const { data, error } = await supabase
-        .from("saved_views")
-        .select("*")
+        .from('saved_views')
+        .select('*')
         .or(`user_id.eq.${userData.user.id},is_shared.eq.true`)
-        .order("name", { ascending: true });
+        .order('name', { ascending: true });
 
       if (error) {
         // If table doesn't exist, return empty array
-        if (error.code === "42P01") return [];
+        if (error.code === '42P01') return [];
         throw error;
       }
 
@@ -82,18 +81,18 @@ export function useSavedViews() {
   const createView = useMutation({
     mutationFn: async (input: CreateSavedViewInput) => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("Non authentifié");
+      if (!userData.user) throw new Error('Non authentifié');
 
       // If setting as default, clear other defaults first
       if (input.is_default) {
         await supabase
-          .from("saved_views")
+          .from('saved_views')
           .update({ is_default: false })
-          .eq("user_id", userData.user.id);
+          .eq('user_id', userData.user.id);
       }
 
       const { data, error } = await supabase
-        .from("saved_views")
+        .from('saved_views')
         .insert({
           user_id: userData.user.id,
           name: input.name,
@@ -109,30 +108,27 @@ export function useSavedViews() {
       return data as SavedView;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["saved-views"] });
-      toast.success("Vue sauvegardée");
+      queryClient.invalidateQueries({ queryKey: ['saved-views'] });
+      toast.success('Vue sauvegardée');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la sauvegarde");
+      toast.error(error.message || 'Erreur lors de la sauvegarde');
     },
   });
 
   // Update a saved view
   const updateView = useMutation({
-    mutationFn: async ({
-      id,
-      ...updates
-    }: Partial<CreateSavedViewInput> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: Partial<CreateSavedViewInput> & { id: string }) => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("Non authentifié");
+      if (!userData.user) throw new Error('Non authentifié');
 
       // If setting as default, clear other defaults first
       if (updates.is_default) {
         await supabase
-          .from("saved_views")
+          .from('saved_views')
           .update({ is_default: false })
-          .eq("user_id", userData.user.id)
-          .neq("id", id);
+          .eq('user_id', userData.user.id)
+          .neq('id', id);
       }
 
       const updateData: any = {};
@@ -143,10 +139,10 @@ export function useSavedViews() {
       if (updates.is_shared !== undefined) updateData.is_shared = updates.is_shared;
 
       const { data, error } = await supabase
-        .from("saved_views")
+        .from('saved_views')
         .update(updateData)
-        .eq("id", id)
-        .eq("user_id", userData.user.id)
+        .eq('id', id)
+        .eq('user_id', userData.user.id)
         .select()
         .single();
 
@@ -154,11 +150,11 @@ export function useSavedViews() {
       return data as SavedView;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["saved-views"] });
-      toast.success("Vue mise à jour");
+      queryClient.invalidateQueries({ queryKey: ['saved-views'] });
+      toast.success('Vue mise à jour');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la mise à jour");
+      toast.error(error.message || 'Erreur lors de la mise à jour');
     },
   });
 
@@ -166,22 +162,22 @@ export function useSavedViews() {
   const deleteView = useMutation({
     mutationFn: async (id: string) => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("Non authentifié");
+      if (!userData.user) throw new Error('Non authentifié');
 
       const { error } = await supabase
-        .from("saved_views")
+        .from('saved_views')
         .delete()
-        .eq("id", id)
-        .eq("user_id", userData.user.id);
+        .eq('id', id)
+        .eq('user_id', userData.user.id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["saved-views"] });
-      toast.success("Vue supprimée");
+      queryClient.invalidateQueries({ queryKey: ['saved-views'] });
+      toast.success('Vue supprimée');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la suppression");
+      toast.error(error.message || 'Erreur lors de la suppression');
     },
   });
 
@@ -189,29 +185,29 @@ export function useSavedViews() {
   const setDefaultView = useMutation({
     mutationFn: async (id: string) => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("Non authentifié");
+      if (!userData.user) throw new Error('Non authentifié');
 
       // Clear all defaults
       await supabase
-        .from("saved_views")
+        .from('saved_views')
         .update({ is_default: false })
-        .eq("user_id", userData.user.id);
+        .eq('user_id', userData.user.id);
 
       // Set new default
       const { error } = await supabase
-        .from("saved_views")
+        .from('saved_views')
         .update({ is_default: true })
-        .eq("id", id)
-        .eq("user_id", userData.user.id);
+        .eq('id', id)
+        .eq('user_id', userData.user.id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["saved-views"] });
-      toast.success("Vue par défaut définie");
+      queryClient.invalidateQueries({ queryKey: ['saved-views'] });
+      toast.success('Vue par défaut définie');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la définition");
+      toast.error(error.message || 'Erreur lors de la définition');
     },
   });
 
@@ -221,24 +217,24 @@ export function useSavedViews() {
   // Predefined quick views (no database storage needed)
   const predefinedViews: Array<{ name: string; icon: string; filters: SavedViewFilters }> = [
     {
-      name: "Mes dossiers à traiter",
-      icon: "user",
-      filters: { mes_dossiers: true, statut: "en_cours" },
+      name: 'Mes dossiers à traiter',
+      icon: 'user',
+      filters: { mes_dossiers: true, statut: 'en_cours' },
     },
     {
-      name: "Dossiers en retard",
-      icon: "alert",
+      name: 'Dossiers en retard',
+      icon: 'alert',
       filters: { en_retard: true },
     },
     {
-      name: "En attente de validation",
-      icon: "clock",
-      filters: { etape: "en_validation" },
+      name: 'En attente de validation',
+      icon: 'clock',
+      filters: { etape: 'en_validation' },
     },
     {
-      name: "Dossiers soldés",
-      icon: "check",
-      filters: { statut: "solde" },
+      name: 'Dossiers soldés',
+      icon: 'check',
+      filters: { statut: 'solde' },
     },
   ];
 

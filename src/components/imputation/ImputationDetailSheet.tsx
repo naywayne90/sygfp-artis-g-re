@@ -23,6 +23,7 @@ import { ChaineDepenseCompact } from '@/components/workflow/ChaineDepenseCompact
 import { ImputationRejectDialog } from '@/components/imputation/ImputationRejectDialog';
 import { ImputationDeferDialog } from '@/components/imputation/ImputationDeferDialog';
 import { ImputationValidationDialog } from '@/components/imputation/ImputationValidationDialog';
+import { formatCurrency } from '@/lib/utils';
 import { formatMontant } from '@/lib/config/sygfp-constants';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -54,6 +55,10 @@ import {
   AlertTriangle,
   Tag,
   Lock,
+  User,
+  Shield,
+  BadgeCheck,
+  CalendarClock,
 } from 'lucide-react';
 
 // ============================================
@@ -75,7 +80,7 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex justify-between py-1.5 border-b border-dashed last:border-0">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="text-sm font-medium text-right max-w-[60%]">{value || '\u2014'}</span>
+      <span className="text-sm font-medium text-right max-w-[60%]">{value || '—'}</span>
     </div>
   );
 }
@@ -83,20 +88,24 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 const getStatusBadge = (status: string | null) => {
   const variants: Record<string, { label: string; className: string }> = {
     soumis: {
-      label: 'Soumis',
+      label: 'Soumise — en attente visa CB',
       className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     },
+    vise: {
+      label: 'Visée CB — en attente DG',
+      className: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+    },
     a_valider: {
-      label: '\u00C0 valider',
+      label: 'À valider',
       className: 'bg-warning/10 text-warning border-warning/20',
     },
-    valide: { label: 'Valid\u00E9e', className: 'bg-success/10 text-success border-success/20' },
+    valide: { label: 'Validée DG', className: 'bg-success/10 text-success border-success/20' },
     rejete: {
-      label: 'Rejet\u00E9e',
+      label: 'Rejetée',
       className: 'bg-destructive/10 text-destructive border-destructive/20',
     },
     differe: {
-      label: 'Diff\u00E9r\u00E9e',
+      label: 'Différée',
       className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     },
   };
@@ -109,17 +118,17 @@ const getStatusBadge = (status: string | null) => {
 };
 
 const formatDateTime = (dateStr: string | null) => {
-  if (!dateStr) return '\u2014';
-  return format(new Date(dateStr), "dd MMM yyyy '\u00E0' HH:mm", { locale: fr });
+  if (!dateStr) return '—';
+  return format(new Date(dateStr), "dd MMM yyyy 'à' HH:mm", { locale: fr });
 };
 
 const formatDate = (dateStr: string | null) => {
-  if (!dateStr) return '\u2014';
+  if (!dateStr) return '—';
   return format(new Date(dateStr), 'dd MMM yyyy', { locale: fr });
 };
 
 const formatFileSize = (bytes: number | null) => {
-  if (!bytes) return '\u2014';
+  if (!bytes) return '—';
   if (bytes < 1024) return `${bytes} o`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
@@ -142,8 +151,12 @@ const getHistoryIcon = (action: string) => {
     case 'submit':
     case 'soumission':
       return <Send className="h-4 w-4 text-indigo-500" />;
+    case 'visa_cb':
+    case 'viser':
+      return <Shield className="h-4 w-4 text-indigo-600" />;
     case 'validate':
     case 'validation':
+    case 'validate_dg':
       return <CheckCircle className="h-4 w-4 text-green-500" />;
     case 'reject':
     case 'rejet':
@@ -164,8 +177,8 @@ const getHistoryIcon = (action: string) => {
 const getPersonName = (
   profile: { first_name: string | null; last_name: string | null } | null | undefined
 ) => {
-  if (!profile) return '\u2014';
-  return `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || '\u2014';
+  if (!profile) return '—';
+  return `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || '—';
 };
 
 /** Compute completedSteps for ChaineDepenseCompact based on imputation statut */
@@ -173,6 +186,8 @@ const getCompletedSteps = (statut: string): number[] => {
   switch (statut) {
     case 'valide':
       return [1, 2, 3]; // SEF + AEF + Imputation
+    case 'vise':
+      return [1, 2]; // SEF + AEF done, visa CB OK but DG pending
     case 'a_valider':
     case 'soumis':
       return [1, 2]; // SEF + AEF done
@@ -208,7 +223,7 @@ function TabInformations({
               type="IMPUTATION"
               dateValidation={imputation.validated_at || undefined}
               validateur={
-                getPersonName(imputation.validated_by_profile) !== '\u2014'
+                getPersonName(imputation.validated_by_profile) !== '—'
                   ? getPersonName(imputation.validated_by_profile)
                   : undefined
               }
@@ -225,7 +240,7 @@ function TabInformations({
           </CardHeader>
           <CardContent className="space-y-0">
             <InfoRow
-              label="R\u00E9f\u00E9rence"
+              label="Référence"
               value={
                 imputation.reference ? (
                   <span className="font-mono text-primary">{imputation.reference}</span>
@@ -237,12 +252,7 @@ function TabInformations({
               label="Direction"
               value={imputation.direction?.sigle || imputation.direction?.label}
             />
-            <InfoRow
-              label="CB cr\u00E9ateur"
-              value={getPersonName(imputation.created_by_profile)}
-            />
             <InfoRow label="Statut" value={getStatusBadge(imputation.statut)} />
-            <InfoRow label="Cr\u00E9\u00E9e le" value={formatDateTime(imputation.created_at)} />
             <InfoRow label="Exercice" value={imputation.exercice} />
             <InfoRow
               label="Code imputation"
@@ -265,6 +275,69 @@ function TabInformations({
           </CardContent>
         </Card>
 
+        {/* Traçabilité — Étape 1 : Création (DAAF) */}
+        <Card className="border-blue-200 dark:border-blue-800">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2 text-blue-700 dark:text-blue-400">
+              <User className="h-4 w-4" />
+              Étape 1 — Création (Ordonnateur)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-0">
+            <InfoRow
+              label="Imputé par"
+              value={
+                <span className="font-medium">{getPersonName(imputation.created_by_profile)}</span>
+              }
+            />
+            <InfoRow label="Date de création" value={formatDateTime(imputation.created_at)} />
+          </CardContent>
+        </Card>
+
+        {/* Traçabilité — Étape 2 : Visa CB */}
+        {(imputation.statut === 'vise' || imputation.statut === 'valide' || imputation.vise_at) && (
+          <Card className="border-indigo-200 dark:border-indigo-800 bg-indigo-50/30 dark:bg-indigo-950/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                <Shield className="h-4 w-4" />
+                Étape 2 — Visa Contrôleur Budgétaire
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-0">
+              <InfoRow
+                label="Visé par"
+                value={
+                  <span className="font-medium">{getPersonName(imputation.vise_by_profile)}</span>
+                }
+              />
+              <InfoRow label="Date du visa" value={formatDateTime(imputation.vise_at)} />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Traçabilité — Étape 3 : Validation DG */}
+        {imputation.statut === 'valide' && imputation.validated_at && (
+          <Card className="border-green-200 dark:border-green-800 bg-green-50/30 dark:bg-green-950/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-green-700 dark:text-green-400">
+                <BadgeCheck className="h-4 w-4" />
+                Étape 3 — Validation Directeur Général
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-0">
+              <InfoRow
+                label="Validé par"
+                value={
+                  <span className="font-medium">
+                    {getPersonName(imputation.validated_by_profile)}
+                  </span>
+                }
+              />
+              <InfoRow label="Date de validation" value={formatDateTime(imputation.validated_at)} />
+            </CardContent>
+          </Card>
+        )}
+
         {/* NAEF source */}
         {imputation.note_aef && (
           <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20">
@@ -276,10 +349,10 @@ function TabInformations({
             </CardHeader>
             <CardContent className="space-y-2">
               <InfoRow
-                label="N\u00B0 AEF"
+                label="N° AEF"
                 value={
                   <span className="font-mono text-blue-600">
-                    {imputation.note_aef.numero || '\u2014'}
+                    {imputation.note_aef.numero || '—'}
                   </span>
                 }
               />
@@ -336,43 +409,64 @@ function TabInformations({
 
         {/* Motif rejet */}
         {imputation.statut === 'rejete' && imputation.motif_rejet && (
-          <Card className="border-destructive/20">
+          <Card className="border-destructive/20 bg-destructive/5">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2 text-destructive">
                 <AlertTriangle className="h-4 w-4" />
-                Motif de rejet
+                Rejet
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm">{imputation.motif_rejet}</p>
-              {imputation.rejected_at && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Rejet\u00E9e le {formatDateTime(imputation.rejected_at)}
-                </p>
-              )}
+            <CardContent className="space-y-0">
+              <InfoRow
+                label="Rejeté par"
+                value={
+                  <span className="font-medium text-destructive">
+                    {getPersonName(imputation.rejected_by_profile)}
+                  </span>
+                }
+              />
+              <InfoRow label="Date du rejet" value={formatDateTime(imputation.rejected_at)} />
+              <div className="mt-2 pt-2 border-t border-dashed">
+                <p className="text-xs text-muted-foreground mb-1">Motif :</p>
+                <p className="text-sm">{imputation.motif_rejet}</p>
+              </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Motif diff\u00E9r\u00E9 */}
+        {/* Motif différé */}
         {imputation.statut === 'differe' && imputation.motif_differe && (
-          <Card className="border-orange-200 dark:border-orange-800">
+          <Card className="border-orange-200 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-950/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2 text-orange-600">
-                <Clock className="h-4 w-4" />
+                <CalendarClock className="h-4 w-4" />
                 Report
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1">
-              <p className="text-sm">{imputation.motif_differe}</p>
-              {(imputation as unknown as Record<string, unknown>).date_differe && (
-                <p className="text-xs text-muted-foreground">
-                  Date de reprise :{' '}
-                  {formatDate(
-                    (imputation as unknown as Record<string, unknown>).date_differe as string
-                  )}
-                </p>
+            <CardContent className="space-y-0">
+              <InfoRow
+                label="Différé par"
+                value={
+                  <span className="font-medium text-orange-600">
+                    {getPersonName(imputation.differed_by_profile)}
+                  </span>
+                }
+              />
+              <InfoRow label="Date du report" value={formatDateTime(imputation.differed_at)} />
+              {imputation.date_differe && (
+                <InfoRow
+                  label="Date de reprise prévue"
+                  value={
+                    <span className="font-medium text-orange-700">
+                      {formatDate(imputation.date_differe)}
+                    </span>
+                  }
+                />
               )}
+              <div className="mt-2 pt-2 border-t border-dashed">
+                <p className="text-xs text-muted-foreground mb-1">Motif :</p>
+                <p className="text-sm">{imputation.motif_differe}</p>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -432,12 +526,12 @@ function TabBudget({
   return (
     <ScrollArea className="h-[calc(100vh-180px)]">
       <div className="space-y-4 pr-4">
-        {/* Ligne budg\u00E9taire */}
+        {/* Ligne budgétaire */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-primary" />
-              Ligne budg\u00E9taire
+              Ligne budgétaire
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -452,7 +546,7 @@ function TabBudget({
                   label="Code"
                   value={<span className="font-mono">{budgetLine.code}</span>}
                 />
-                <InfoRow label="Libell\u00E9" value={budgetLine.label} />
+                <InfoRow label="Libellé" value={budgetLine.label} />
               </div>
             ) : imputation.budget_line ? (
               <div className="space-y-0">
@@ -460,22 +554,22 @@ function TabBudget({
                   label="Code"
                   value={<span className="font-mono">{imputation.budget_line.code}</span>}
                 />
-                <InfoRow label="Libell\u00E9" value={imputation.budget_line.label} />
+                <InfoRow label="Libellé" value={imputation.budget_line.label} />
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-6 text-center gap-2">
                 <CreditCard className="h-8 w-8 text-muted-foreground/40" />
-                <p className="text-sm text-muted-foreground">Aucune ligne budg\u00E9taire</p>
+                <p className="text-sm text-muted-foreground">Aucune ligne budgétaire</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Disponibilit\u00E9 */}
+        {/* Disponibilité */}
         {budgetLine && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Disponibilit\u00E9 budg\u00E9taire</CardTitle>
+              <CardTitle className="text-sm">Disponibilité budgétaire</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <InfoRow
@@ -483,7 +577,7 @@ function TabBudget({
                 value={<span className="font-mono">{formatMontant(dotation)}</span>}
               />
               <InfoRow
-                label="Engag\u00E9 avant"
+                label="Engagé avant"
                 value={
                   <span className="font-mono text-orange-600">{formatMontant(totalEngage)}</span>
                 }
@@ -496,7 +590,7 @@ function TabBudget({
               />
               <Separator />
               <InfoRow
-                label="Disponible apr\u00E8s"
+                label="Disponible après"
                 value={
                   <span
                     className={`font-mono font-bold ${disponibleApres >= 0 ? 'text-green-600' : 'text-destructive'}`}
@@ -532,7 +626,7 @@ function TabBudget({
             ) : (
               <div className="space-y-0">
                 <InfoRow
-                  label="Objectif strat\u00E9gique"
+                  label="Objectif stratégique"
                   value={
                     nomenclatures.os
                       ? `${nomenclatures.os.code || ''} - ${nomenclatures.os.libelle}`
@@ -556,7 +650,7 @@ function TabBudget({
                   }
                 />
                 <InfoRow
-                  label="Activit\u00E9"
+                  label="Activité"
                   value={
                     nomenclatures.activite
                       ? `${nomenclatures.activite.code || ''} - ${nomenclatures.activite.libelle}`
@@ -616,7 +710,7 @@ function TabPieces({ pieces, isLoading }: { pieces: Attachment[]; isLoading: boo
     } catch {
       toast({
         title: 'Erreur',
-        description: 'Impossible de t\u00E9l\u00E9charger le fichier',
+        description: 'Impossible de télécharger le fichier',
         variant: 'destructive',
       });
     }
@@ -626,7 +720,7 @@ function TabPieces({ pieces, isLoading }: { pieces: Attachment[]; isLoading: boo
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin mr-2" />
-        <span className="text-muted-foreground">Chargement des pi\u00E8ces jointes...</span>
+        <span className="text-muted-foreground">Chargement des pièces jointes...</span>
       </div>
     );
   }
@@ -635,7 +729,7 @@ function TabPieces({ pieces, isLoading }: { pieces: Attachment[]; isLoading: boo
     <ScrollArea className="h-[calc(100vh-180px)]">
       <div className="space-y-4 pr-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Pi\u00E8ces jointes (NAEF source)</span>
+          <span className="text-sm text-muted-foreground">Pièces jointes (NAEF source)</span>
           <Badge variant="secondary" className="gap-1">
             <Paperclip className="h-3 w-3" />
             {pieces.length}
@@ -647,7 +741,7 @@ function TabPieces({ pieces, isLoading }: { pieces: Attachment[]; isLoading: boo
         {pieces.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
             <Paperclip className="h-10 w-10 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">Aucune pi\u00E8ce jointe</p>
+            <p className="text-sm text-muted-foreground">Aucune pièce jointe</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -670,7 +764,7 @@ function TabPieces({ pieces, isLoading }: { pieces: Attachment[]; isLoading: boo
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDownload(piece)}
-                  title="T\u00E9l\u00E9charger"
+                  title="Télécharger"
                 >
                   <Download className="h-4 w-4" />
                 </Button>
@@ -713,10 +807,10 @@ function TabChaineHistorique({
   return (
     <ScrollArea className="h-[calc(100vh-180px)]">
       <div className="space-y-4 pr-4">
-        {/* Cha\u00EEne de la d\u00E9pense */}
+        {/* Chaîne de la dépense */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Cha\u00EEne de la d\u00E9pense</CardTitle>
+            <CardTitle className="text-sm">Chaîne de la dépense</CardTitle>
           </CardHeader>
           <CardContent>
             <ChaineDepenseCompact
@@ -728,7 +822,7 @@ function TabChaineHistorique({
           </CardContent>
         </Card>
 
-        {/* Liens cha\u00EEne */}
+        {/* Liens chaîne */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
@@ -772,12 +866,12 @@ function TabChaineHistorique({
               {getStatusBadge(imputation.statut)}
             </div>
 
-            {/* \u00C9tapes suivantes (gris\u00E9es) */}
+            {/* Étapes suivantes (grisées) */}
             <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 opacity-50">
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Expression de besoin</span>
               <Badge variant="outline" className="text-[10px] ml-auto">
-                \u00C0 venir
+                À venir
               </Badge>
             </div>
           </CardContent>
@@ -831,7 +925,7 @@ function TabChaineHistorique({
                         </span>
                         {oldStatut && newStatut && oldStatut !== newStatut && (
                           <span className="text-xs text-muted-foreground">
-                            {String(oldStatut)} \u2192 {String(newStatut)}
+                            {String(oldStatut)} → {String(newStatut)}
                           </span>
                         )}
                         {newStatut && !oldStatut && (
@@ -841,8 +935,7 @@ function TabChaineHistorique({
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {getPersonName(entry.user_profile)} \u2014{' '}
-                        {formatDateTime(entry.created_at)}
+                        {getPersonName(entry.user_profile)} — {formatDateTime(entry.created_at)}
                       </p>
                     </div>
                   </div>
@@ -863,6 +956,7 @@ function TabChaineHistorique({
 function ActionMenu({
   imputation,
   canValidate,
+  canCreateEB,
   isCreator,
   onOpenChange,
   onNavigate,
@@ -874,6 +968,7 @@ function ActionMenu({
 }: {
   imputation: Imputation;
   canValidate: boolean;
+  canCreateEB: boolean;
   isCreator: boolean;
   onOpenChange: (open: boolean) => void;
   onNavigate: (path: string) => void;
@@ -885,7 +980,7 @@ function ActionMenu({
 }) {
   const { toast } = useToast();
   const isSoumis = imputation.statut === 'soumis';
-  const isAValider = imputation.statut === 'a_valider';
+  const isVise = imputation.statut === 'vise';
   const isValide = imputation.statut === 'valide';
 
   const handleAction = async (action: () => Promise<unknown>, label: string) => {
@@ -908,21 +1003,19 @@ function ActionMenu({
       <DropdownMenuContent align="end" className="w-48 bg-popover">
         {/* Exporter PDF */}
         <DropdownMenuItem
-          onClick={() =>
-            toast({ title: 'Export PDF', description: 'Fonctionnalit\u00E9 \u00E0 venir' })
-          }
+          onClick={() => toast({ title: 'Export PDF', description: 'Fonctionnalité à venir' })}
         >
           <FileDown className="mr-2 h-4 w-4" />
           Exporter PDF
         </DropdownMenuItem>
 
-        {/* Modifier (cr\u00E9ateur + soumis) */}
+        {/* Modifier (créateur + soumis) */}
         {isCreator && isSoumis && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() =>
-                toast({ title: 'Modification', description: 'Fonctionnalit\u00E9 \u00E0 venir' })
+                toast({ title: 'Modification', description: 'Fonctionnalité à venir' })
               }
             >
               <Edit className="mr-2 h-4 w-4" />
@@ -931,7 +1024,7 @@ function ActionMenu({
           </>
         )}
 
-        {/* Soumettre (cr\u00E9ateur + soumis) */}
+        {/* Soumettre (créateur + soumis) */}
         {isCreator && isSoumis && (
           <DropdownMenuItem
             onClick={() => handleAction(() => submitImputation(imputation.id), 'Soumission')}
@@ -941,7 +1034,7 @@ function ActionMenu({
           </DropdownMenuItem>
         )}
 
-        {/* Supprimer (cr\u00E9ateur + soumis) */}
+        {/* Supprimer (créateur + soumis) */}
         {isCreator && isSoumis && (
           <DropdownMenuItem
             className="text-destructive"
@@ -952,8 +1045,8 @@ function ActionMenu({
           </DropdownMenuItem>
         )}
 
-        {/* Valider (canValidate + a_valider) */}
-        {canValidate && isAValider && (
+        {/* Valider (canValidate + visé par CB) */}
+        {canValidate && isVise && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setValidateOpen(true)}>
@@ -963,19 +1056,19 @@ function ActionMenu({
           </>
         )}
 
-        {/* Rejeter (canValidate + a_valider) */}
-        {canValidate && isAValider && (
+        {/* Rejeter (canValidate + visé par CB) */}
+        {canValidate && isVise && (
           <DropdownMenuItem onClick={() => setRejectOpen(true)}>
             <XCircle className="mr-2 h-4 w-4 text-destructive" />
             Rejeter
           </DropdownMenuItem>
         )}
 
-        {/* Diff\u00E9rer (canValidate + a_valider) */}
-        {canValidate && isAValider && (
+        {/* Différer (canValidate + visé par CB) */}
+        {canValidate && isVise && (
           <DropdownMenuItem onClick={() => setDeferOpen(true)}>
             <Clock className="mr-2 h-4 w-4 text-warning" />
-            Diff\u00E9rer
+            Différer
           </DropdownMenuItem>
         )}
 
@@ -995,8 +1088,8 @@ function ActionMenu({
           </>
         )}
 
-        {/* Cr\u00E9er Expression de Besoin (valid\u00E9) */}
-        {isValide && (
+        {/* Créer Expression de Besoin (validé) */}
+        {canCreateEB && isValide && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -1006,7 +1099,7 @@ function ActionMenu({
               }}
             >
               <ShoppingCart className="mr-2 h-4 w-4" />
-              Cr\u00E9er Exp. Besoin
+              Créer Exp. Besoin
             </DropdownMenuItem>
           </>
         )}
@@ -1027,7 +1120,8 @@ export function ImputationDetailSheet({
 }: ImputationDetailSheetProps) {
   const navigate = useNavigate();
   const { hasAnyRole, userId } = usePermissions();
-  const canValidate = hasAnyRole(['ADMIN', 'DG', 'DAAF', 'SDPM']);
+  const canValidate = hasAnyRole(['DG', 'ADMIN']);
+  const canCreateEB = hasAnyRole(['DAAF', 'ADMIN']);
   const isCreator = !!userId && imputation?.created_by === userId;
 
   // Mutations
@@ -1227,6 +1321,7 @@ export function ImputationDetailSheet({
               <ActionMenu
                 imputation={imputation}
                 canValidate={canValidate}
+                canCreateEB={canCreateEB}
                 isCreator={isCreator}
                 onOpenChange={onOpenChange}
                 onNavigate={navigate}
@@ -1274,7 +1369,7 @@ export function ImputationDetailSheet({
               </TabsTrigger>
               <TabsTrigger value="historique" className="flex-1 gap-1">
                 <History className="h-3 w-3" />
-                <span className="hidden sm:inline">Cha\u00EEne</span>
+                <span className="hidden sm:inline">Chaîne</span>
               </TabsTrigger>
             </TabsList>
 

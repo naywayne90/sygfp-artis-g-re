@@ -1,21 +1,34 @@
-import { useState, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Upload, 
-  FileSpreadsheet, 
-  Check, 
-  AlertTriangle, 
+import { useState, useCallback } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Upload,
+  FileSpreadsheet,
+  Check,
+  AlertTriangle,
   Download,
   ChevronLeft,
   ChevronRight,
@@ -32,15 +45,15 @@ import {
   Database,
   Layers,
   HelpCircle,
-} from "lucide-react";
-import { toast } from "sonner";
-import { Link } from "react-router-dom";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useImportJobs } from "@/hooks/useImportJobs";
-import { useARTIImport, ARTIParsedRow } from "@/hooks/useARTIImport";
-import { useReferentielSync, AllReferentielsResult } from "@/hooks/useReferentielSync";
-import { useAuditLog } from "@/hooks/useAuditLog";
-import logoArti from "@/assets/logo-arti.jpg";
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useImportJobs } from '@/hooks/useImportJobs';
+import { useARTIImport, ARTIParsedRow } from '@/hooks/useARTIImport';
+import { useReferentielSync, AllReferentielsResult } from '@/hooks/useReferentielSync';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import logoArti from '@/assets/logo-arti.jpg';
 
 interface ImportExcelWizardProps {
   open: boolean;
@@ -48,36 +61,60 @@ interface ImportExcelWizardProps {
   onImportComplete?: () => void;
 }
 
-type WizardStep = "exercice" | "detect" | "preview" | "confirm";
+type WizardStep = 'exercice' | 'detect' | 'preview' | 'confirm';
 
 const STEPS: { id: WizardStep; title: string; description: string; icon: React.ReactNode }[] = [
-  { id: "exercice", title: "Exercice & Fichier", description: "Charger le fichier Excel", icon: <Upload className="h-4 w-4" /> },
-  { id: "detect", title: "Détection", description: "Analyse automatique", icon: <Settings2 className="h-4 w-4" /> },
-  { id: "preview", title: "Prévisualisation", description: "Vérifier les données", icon: <Eye className="h-4 w-4" /> },
-  { id: "confirm", title: "Confirmation", description: "Valider l'import", icon: <Shield className="h-4 w-4" /> },
+  {
+    id: 'exercice',
+    title: 'Exercice & Fichier',
+    description: 'Charger le fichier Excel',
+    icon: <Upload className="h-4 w-4" />,
+  },
+  {
+    id: 'detect',
+    title: 'Détection',
+    description: 'Analyse automatique',
+    icon: <Settings2 className="h-4 w-4" />,
+  },
+  {
+    id: 'preview',
+    title: 'Prévisualisation',
+    description: 'Vérifier les données',
+    icon: <Eye className="h-4 w-4" />,
+  },
+  {
+    id: 'confirm',
+    title: 'Confirmation',
+    description: "Valider l'import",
+    icon: <Shield className="h-4 w-4" />,
+  },
 ];
 
-export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: ImportExcelWizardProps) {
+export function ImportExcelWizard({
+  open,
+  onOpenChange,
+  onImportComplete,
+}: ImportExcelWizardProps) {
   const { exercice: contextExercice } = useExercice();
   const { logAction } = useAuditLog();
-  const {
-    currentJob,
-    createImportJob,
-    uploadFile,
-    markJobFailed,
-  } = useImportJobs();
+  const { currentJob, createImportJob, uploadFile, markJobFailed } = useImportJobs();
 
   const { parseARTIExcel, executeARTIImport } = useARTIImport();
-  const { importAllReferentiels, refreshDropdowns, isSyncing: _isSyncing, detectReferenceSheets: _detectReferenceSheets } = useReferentielSync();
-  
+  const {
+    importAllReferentiels,
+    refreshDropdowns,
+    isSyncing: _isSyncing,
+    detectReferenceSheets: _detectReferenceSheets,
+  } = useReferentielSync();
+
   // Confirmation dialog state
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   // Step 1: Exercice & File
   const [selectedExercice, setSelectedExercice] = useState<number>(contextExercice);
   const [file, setFile] = useState<File | null>(null);
-  
+
   // Step 2: Detection results
-  const [step, setStep] = useState<WizardStep>("exercice");
+  const [step, setStep] = useState<WizardStep>('exercice');
   const [parsedRows, setParsedRows] = useState<ARTIParsedRow[]>([]);
   const [parseInfo, setParseInfo] = useState<{
     sheetUsed: string;
@@ -85,27 +122,41 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     mapping: Record<string, string | null>;
     headers: string[];
     allSheets: string[];
-    stats: { total: number; ok: number; warning: number; error: number; new: number; update: number };
+    stats: {
+      total: number;
+      ok: number;
+      warning: number;
+      error: number;
+      new: number;
+      update: number;
+    };
   } | null>(null);
-  
+
   // Step 3: Preview filter
-  const [statusFilter, setStatusFilter] = useState<"all" | "ok" | "error" | "warning" | "new" | "update" | "duplicate">("all");
-  
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'ok' | 'error' | 'warning' | 'new' | 'update' | 'duplicate'
+  >('all');
+
   // Step 4: Import options - SAFE MODE by default
   const [safeMode, setSafeMode] = useState(true); // Never replace existing lines
   const [replaceAmount, setReplaceAmount] = useState(false); // Advanced: replace only montant if line exists
   const [syncReferentiels, setSyncReferentiels] = useState(true); // Sync referentials option
   const [isProcessing, setIsProcessing] = useState(false);
   const [importComplete, setImportComplete] = useState(false);
-  const [importStats, setImportStats] = useState<{ inserted: number; updated: number; skipped: number; errors: number } | null>(null);
+  const [importStats, setImportStats] = useState<{
+    inserted: number;
+    updated: number;
+    skipped: number;
+    errors: number;
+  } | null>(null);
   const [referentielStats, setReferentielStats] = useState<AllReferentielsResult | null>(null);
 
   const resetWizard = useCallback(() => {
-    setStep("exercice");
+    setStep('exercice');
     setFile(null);
     setParsedRows([]);
     setParseInfo(null);
-    setStatusFilter("all");
+    setStatusFilter('all');
     setSafeMode(true);
     setReplaceAmount(false);
     setSyncReferentiels(true);
@@ -125,13 +176,13 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    if (!selectedFile.name.endsWith(".xlsx") && !selectedFile.name.endsWith(".xls")) {
-      toast.error("Seuls les fichiers .xlsx et .xls sont acceptés");
+    if (!selectedFile.name.endsWith('.xlsx') && !selectedFile.name.endsWith('.xls')) {
+      toast.error('Seuls les fichiers .xlsx et .xls sont acceptés');
       return;
     }
 
     if (selectedFile.size > 20 * 1024 * 1024) {
-      toast.error("Le fichier ne doit pas dépasser 20 Mo");
+      toast.error('Le fichier ne doit pas dépasser 20 Mo');
       return;
     }
 
@@ -143,11 +194,11 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     if (!file) return;
 
     setIsProcessing(true);
-    setStep("detect");
+    setStep('detect');
 
     try {
       // Create import job for audit trail
-      const job = await createImportJob("budget_structure", selectedExercice, file.name);
+      const job = await createImportJob('budget_structure', selectedExercice, file.name);
       if (!job) throw new Error("Échec de création du job d'import");
 
       await uploadFile(job.id, file);
@@ -166,18 +217,26 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
       });
 
       toast.success(`${result.rows.length} ligne(s) analysées depuis "${result.sheetUsed}"`);
-      setStep("preview");
+      setStep('preview');
     } catch (error) {
-      console.error("Error processing file:", error);
+      console.error('Error processing file:', error);
       toast.error(`Erreur lors de l'analyse: ${String(error)}`);
       if (currentJob) {
         await markJobFailed(currentJob.id, String(error));
       }
-      setStep("exercice");
+      setStep('exercice');
     } finally {
       setIsProcessing(false);
     }
-  }, [file, selectedExercice, createImportJob, uploadFile, parseARTIExcel, markJobFailed, currentJob]);
+  }, [
+    file,
+    selectedExercice,
+    createImportJob,
+    uploadFile,
+    parseARTIExcel,
+    markJobFailed,
+    currentJob,
+  ]);
 
   // Step 4: Execute import with audit logging
   const handleImport = useCallback(async () => {
@@ -186,21 +245,23 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
       toast.error("Veuillez sélectionner un exercice avant d'importer");
       return;
     }
-    
+
     if (!currentJob || !file) return;
 
     setIsProcessing(true);
     try {
       // Step 1: Sync referentials first if enabled
       if (syncReferentiels) {
-        toast.info("Synchronisation des référentiels en cours...");
+        toast.info('Synchronisation des référentiels en cours...');
         const refResult = await importAllReferentiels(file);
         setReferentielStats(refResult);
-        
+
         if (refResult.summary.totalInserted > 0 || refResult.summary.totalUpdated > 0) {
-          toast.success(`Référentiels: ${refResult.summary.totalInserted} ajouté(s), ${refResult.summary.totalUpdated} mis à jour`);
+          toast.success(
+            `Référentiels: ${refResult.summary.totalInserted} ajouté(s), ${refResult.summary.totalUpdated} mis à jour`
+          );
         }
-        
+
         // Refresh dropdowns after referential sync
         refreshDropdowns();
       }
@@ -208,42 +269,48 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
       // Step 2: Filter rows based on mode and execute import
       let rowsToImport: ARTIParsedRow[];
       const importOptions: { replaceAmountOnly?: boolean } = {};
-      
+
       if (safeMode && !replaceAmount) {
         // SAFE mode: Only new lines
-        rowsToImport = parsedRows.filter(r => r.decision === "NEW" && r.isValid);
+        rowsToImport = parsedRows.filter((r) => r.decision === 'NEW' && r.isValid);
       } else if (safeMode && replaceAmount) {
         // SAFE mode + Replace Amount: All valid lines, but only update montant
-        rowsToImport = parsedRows.filter(r => r.isValid);
+        rowsToImport = parsedRows.filter((r) => r.isValid);
         importOptions.replaceAmountOnly = true;
       } else {
         // Full replace mode: All valid lines with full update
-        rowsToImport = parsedRows.filter(r => r.isValid);
+        rowsToImport = parsedRows.filter((r) => r.isValid);
       }
 
-      const result = await executeARTIImport(rowsToImport, selectedExercice, currentJob.id, importOptions);
-      
-      const skipped = (safeMode && !replaceAmount) ? parsedRows.filter(r => r.decision === "UPDATE").length : 0;
-      
+      const result = await executeARTIImport(
+        rowsToImport,
+        selectedExercice,
+        currentJob.id,
+        importOptions
+      );
+
+      const skipped =
+        safeMode && !replaceAmount ? parsedRows.filter((r) => r.decision === 'UPDATE').length : 0;
+
       // AUDIT: Log the import action
       await logAction({
-        entityType: "budget_import",
+        entityType: 'budget_import',
         entityId: currentJob.id,
-        action: "create",
+        action: 'create',
         newValues: {
           filename: file.name,
           exercice: selectedExercice,
-          sheet_used: parseInfo?.sheetUsed || "",
+          sheet_used: parseInfo?.sheetUsed || '',
           total_rows: parsedRows.length,
           inserted: result.inserted,
           updated: result.updated,
           skipped: result.skipped + skipped,
           errors: result.errors,
-          mode: safeMode ? (replaceAmount ? "safe_update_amount" : "safe") : "replace",
+          mode: safeMode ? (replaceAmount ? 'safe_update_amount' : 'safe') : 'replace',
           sync_referentiels: syncReferentiels,
         },
       });
-      
+
       setImportStats({
         inserted: result.inserted,
         updated: result.updated,
@@ -251,45 +318,59 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
         errors: result.errors,
       });
       setImportComplete(true);
-      
+
       // Refresh all data
       refreshDropdowns();
-      
+
       if (result.errors === 0 && onImportComplete) {
         onImportComplete();
       }
 
-      toast.success(`Import terminé: ${result.inserted} créée(s), ${result.updated} mise(s) à jour`);
+      toast.success(
+        `Import terminé: ${result.inserted} créée(s), ${result.updated} mise(s) à jour`
+      );
     } catch (error) {
       toast.error(`Erreur lors de l'import: ${String(error)}`);
-      
+
       // AUDIT: Log failed import
       if (currentJob) {
         await logAction({
-          entityType: "budget_import",
+          entityType: 'budget_import',
           entityId: currentJob.id,
-          action: "create",
+          action: 'create',
           newValues: {
-            filename: file?.name || "",
+            filename: file?.name || '',
             exercice: selectedExercice,
             error: String(error),
-            status: "failed",
+            status: 'failed',
           },
         });
       }
     } finally {
       setIsProcessing(false);
     }
-  }, [currentJob, file, parsedRows, selectedExercice, safeMode, replaceAmount, syncReferentiels, executeARTIImport, importAllReferentiels, refreshDropdowns, onImportComplete]);
+  }, [
+    currentJob,
+    file,
+    parsedRows,
+    selectedExercice,
+    safeMode,
+    replaceAmount,
+    syncReferentiels,
+    executeARTIImport,
+    importAllReferentiels,
+    refreshDropdowns,
+    onImportComplete,
+  ]);
 
   // Computed stats (must be before export functions that use them)
   const stats = parseInfo?.stats || {
     total: parsedRows.length,
-    ok: parsedRows.filter(r => r.isValid && r.warnings.length === 0).length,
-    warning: parsedRows.filter(r => r.isValid && r.warnings.length > 0).length,
-    error: parsedRows.filter(r => !r.isValid).length,
-    new: parsedRows.filter(r => r.decision === "NEW").length,
-    update: parsedRows.filter(r => r.decision === "UPDATE").length,
+    ok: parsedRows.filter((r) => r.isValid && r.warnings.length === 0).length,
+    warning: parsedRows.filter((r) => r.isValid && r.warnings.length > 0).length,
+    error: parsedRows.filter((r) => !r.isValid).length,
+    new: parsedRows.filter((r) => r.decision === 'NEW').length,
+    update: parsedRows.filter((r) => r.decision === 'UPDATE').length,
   };
 
   const duplicates = stats.update;
@@ -297,123 +378,295 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
   // Export full import report (all rows with status)
   const handleExportFullReport = useCallback(() => {
     const headers = [
-      "Ligne Excel",
-      "Statut",
-      "Décision",
-      "Code Imputation (18 chiffres)",
-      "Libellé Projet",
-      "Montant Initial",
-      "OS",
-      "Action",
-      "Activité",
-      "Sous-Activité",
-      "Direction",
-      "Nature Dépense",
-      "NBE (6 chiffres)",
-      "Erreurs",
-      "Avertissements"
+      'Ligne Excel',
+      'Statut',
+      'Décision',
+      'Code Imputation (18 chiffres)',
+      'Libellé Projet',
+      'Montant Initial',
+      'OS',
+      'Action',
+      'Activité',
+      'Sous-Activité',
+      'Direction',
+      'Nature Dépense',
+      'NBE (6 chiffres)',
+      'Erreurs',
+      'Avertissements',
     ];
 
-    const csvRows = parsedRows.map(row => {
-      let statut = "";
+    const csvRows = parsedRows.map((row) => {
+      let statut = '';
       if (!row.isValid) {
-        statut = "REJETÉE";
-      } else if (row.decision === "UPDATE") {
-        statut = "DOUBLON (ignorée)";
+        statut = 'REJETÉE';
+      } else if (row.decision === 'UPDATE') {
+        statut = 'DOUBLON (ignorée)';
       } else if (row.warnings.length > 0) {
-        statut = "VALIDE (avec alertes)";
+        statut = 'VALIDE (avec alertes)';
       } else {
-        statut = "VALIDE";
+        statut = 'VALIDE';
       }
 
       return [
         row.rowIndex,
         statut,
         row.decision,
-        row.normalized?.code || "",
-        row.normalized?.label || row.raw.libelle || "",
-        row.normalized?.dotation_initiale?.toLocaleString("fr-FR") || row.raw.montant || "",
-        row.raw.os || "",
-        row.raw.action || "",
-        row.raw.activite || "",
-        row.raw.sousActivite || "",
-        row.raw.direction || "",
-        row.raw.natureDepense || "",
-        row.raw.nbe || "",
-        row.errors.join(" | "),
-        row.warnings.join(" | "),
+        row.normalized?.code || '',
+        row.normalized?.label || row.raw.libelle || '',
+        row.normalized?.dotation_initiale?.toLocaleString('fr-FR') || row.raw.montant || '',
+        row.raw.os || '',
+        row.raw.action || '',
+        row.raw.activite || '',
+        row.raw.sousActivite || '',
+        row.raw.direction || '',
+        row.raw.natureDepense || '',
+        row.raw.nbe || '',
+        row.errors.join(' | '),
+        row.warnings.join(' | '),
       ];
     });
 
     // Add summary section at the end
     csvRows.push([]);
-    csvRows.push(["=== RÉSUMÉ DU RAPPORT D'IMPORT ===", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
-    csvRows.push(["Fichier source", file?.name || "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
-    csvRows.push(["Exercice", selectedExercice.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
-    csvRows.push(["Onglet utilisé", parseInfo?.sheetUsed || "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
-    csvRows.push(["Date d'analyse", new Date().toLocaleString("fr-FR"), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    csvRows.push([
+      "=== RÉSUMÉ DU RAPPORT D'IMPORT ===",
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ]);
+    csvRows.push([
+      'Fichier source',
+      file?.name || '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ]);
+    csvRows.push([
+      'Exercice',
+      selectedExercice.toString(),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ]);
+    csvRows.push([
+      'Onglet utilisé',
+      parseInfo?.sheetUsed || '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ]);
+    csvRows.push([
+      "Date d'analyse",
+      new Date().toLocaleString('fr-FR'),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ]);
     csvRows.push([]);
-    csvRows.push(["LIGNES VALIDES (prêtes à importer)", stats.new.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
-    csvRows.push(["LIGNES AVEC ALERTES", stats.warning.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
-    csvRows.push(["LIGNES REJETÉES (erreurs)", stats.error.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
-    csvRows.push(["DOUBLONS DÉTECTÉS", duplicates.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
-    csvRows.push(["TOTAL ANALYSÉ", stats.total.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    csvRows.push([
+      'LIGNES VALIDES (prêtes à importer)',
+      stats.new.toString(),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ]);
+    csvRows.push([
+      'LIGNES AVEC ALERTES',
+      stats.warning.toString(),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ]);
+    csvRows.push([
+      'LIGNES REJETÉES (erreurs)',
+      stats.error.toString(),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ]);
+    csvRows.push([
+      'DOUBLONS DÉTECTÉS',
+      duplicates.toString(),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ]);
+    csvRows.push([
+      'TOTAL ANALYSÉ',
+      stats.total.toString(),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ]);
 
-    const csvContent = [headers, ...csvRows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const csvContent = [headers, ...csvRows]
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';'))
+      .join('\n');
+    const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `RAPPORT_IMPORT_BUDGET_${selectedExercice}_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `RAPPORT_IMPORT_BUDGET_${selectedExercice}_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-    
+
     toast.success("Rapport d'import complet téléchargé");
   }, [parsedRows, selectedExercice, file, parseInfo, stats, duplicates]);
 
   // Export only errors (for quick review)
   const handleExportErrors = useCallback(() => {
-    const errorRows = parsedRows.filter(r => !r.isValid);
-    
+    const errorRows = parsedRows.filter((r) => !r.isValid);
+
     if (errorRows.length === 0) {
-      toast.info("Aucune erreur à exporter");
+      toast.info('Aucune erreur à exporter');
       return;
     }
-    
-    const headers = ["Ligne Excel", "Code Imputation", "Montant", "OS", "Direction", "NBE", "Erreur(s)"];
-    const csvRows = errorRows.map(row => [
+
+    const headers = [
+      'Ligne Excel',
+      'Code Imputation',
+      'Montant',
+      'OS',
+      'Direction',
+      'NBE',
+      'Erreur(s)',
+    ];
+    const csvRows = errorRows.map((row) => [
       row.rowIndex,
-      row.normalized?.code || row.raw.imputation || "",
-      row.raw.montant || "",
-      row.raw.os || "",
-      row.raw.direction || "",
-      row.raw.nbe || "",
-      row.errors.join(" | "),
+      row.normalized?.code || row.raw.imputation || '',
+      row.raw.montant || '',
+      row.raw.os || '',
+      row.raw.direction || '',
+      row.raw.nbe || '',
+      row.errors.join(' | '),
     ]);
 
-    const csvContent = [headers, ...csvRows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const csvContent = [headers, ...csvRows]
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';'))
+      .join('\n');
+    const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `ERREURS_IMPORT_${selectedExercice}_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `ERREURS_IMPORT_${selectedExercice}_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-    
+
     toast.success(`${errorRows.length} erreur(s) exportée(s)`);
   }, [parsedRows, selectedExercice]);
 
   const filteredRows = parsedRows.filter((row) => {
-    if (statusFilter === "all") return true;
-    if (statusFilter === "ok") return row.isValid && row.warnings.length === 0;
-    if (statusFilter === "warning") return row.isValid && row.warnings.length > 0;
-    if (statusFilter === "error") return !row.isValid;
-    if (statusFilter === "new") return row.decision === "NEW";
-    if (statusFilter === "update" || statusFilter === "duplicate") return row.decision === "UPDATE";
+    if (statusFilter === 'all') return true;
+    if (statusFilter === 'ok') return row.isValid && row.warnings.length === 0;
+    if (statusFilter === 'warning') return row.isValid && row.warnings.length > 0;
+    if (statusFilter === 'error') return !row.isValid;
+    if (statusFilter === 'new') return row.decision === 'NEW';
+    if (statusFilter === 'update' || statusFilter === 'duplicate') return row.decision === 'UPDATE';
     return true;
   });
 
-  const stepIndex = STEPS.findIndex(s => s.id === step);
+  const stepIndex = STEPS.findIndex((s) => s.id === step);
   const progressPercent = ((stepIndex + 1) / STEPS.length) * 100;
 
   // Available years
@@ -437,17 +690,22 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+              1
+            </span>
             Choisir l'exercice budgétaire
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Select value={String(selectedExercice)} onValueChange={(v) => setSelectedExercice(Number(v))}>
+          <Select
+            value={String(selectedExercice)}
+            onValueChange={(v) => setSelectedExercice(Number(v))}
+          >
             <SelectTrigger className="w-full max-w-xs">
               <SelectValue placeholder="Sélectionner l'exercice" />
             </SelectTrigger>
             <SelectContent>
-              {availableYears.map(year => (
+              {availableYears.map((year) => (
                 <SelectItem key={year} value={String(year)}>
                   Exercice {year}
                 </SelectItem>
@@ -461,12 +719,12 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+              2
+            </span>
             Charger le fichier Excel
           </CardTitle>
-          <CardDescription>
-            Fichiers .xlsx ou .xls jusqu'à 20 Mo
-          </CardDescription>
+          <CardDescription>Fichiers .xlsx ou .xls jusqu'à 20 Mo</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
@@ -509,7 +767,10 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
         <Info className="h-4 w-4" />
         <AlertTitle>Format attendu (ARTI)</AlertTitle>
         <AlertDescription>
-          <p className="mb-2">L'assistant recherchera automatiquement l'onglet <strong>"Groupé (2)"</strong> en priorité, sinon <strong>"Feuil3"</strong>.</p>
+          <p className="mb-2">
+            L'assistant recherchera automatiquement l'onglet <strong>"Groupé (2)"</strong> en
+            priorité, sinon <strong>"Feuil3"</strong>.
+          </p>
           <div className="grid grid-cols-2 gap-x-4 text-sm">
             <div>• OS (2 chiffres)</div>
             <div>• Action (2 chiffres)</div>
@@ -521,14 +782,18 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
             <div>• Montant</div>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            L'imputation (18 chiffres) sera recalculée automatiquement pour éviter les erreurs de précision Excel.
+            L'imputation (18 chiffres) sera recalculée automatiquement pour éviter les erreurs de
+            précision Excel.
           </p>
         </AlertDescription>
       </Alert>
 
       {/* Help link */}
       <div className="flex items-center justify-center">
-        <Link to="/planification/aide-import" className="text-sm text-primary hover:underline flex items-center gap-1">
+        <Link
+          to="/planification/aide-import"
+          className="text-sm text-primary hover:underline flex items-center gap-1"
+        >
           <HelpCircle className="h-4 w-4" />
           Consulter l'aide complète sur l'import
         </Link>
@@ -571,7 +836,8 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
             {parseInfo.sheetReason}
             {parseInfo.allSheets.length > 1 && (
               <span className="block text-sm mt-1">
-                Autres onglets disponibles: {parseInfo.allSheets.filter(s => s !== parseInfo.sheetUsed).join(", ")}
+                Autres onglets disponibles:{' '}
+                {parseInfo.allSheets.filter((s) => s !== parseInfo.sheetUsed).join(', ')}
               </span>
             )}
           </AlertDescription>
@@ -580,54 +846,54 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
 
       {/* Stats cards */}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-        <Card 
-          className={`cursor-pointer hover:border-primary transition-colors ${statusFilter === "all" ? "border-primary ring-1 ring-primary" : ""}`}
-          onClick={() => setStatusFilter("all")}
+        <Card
+          className={`cursor-pointer hover:border-primary transition-colors ${statusFilter === 'all' ? 'border-primary ring-1 ring-primary' : ''}`}
+          onClick={() => setStatusFilter('all')}
         >
           <CardContent className="pt-3 pb-2 text-center">
             <div className="text-2xl font-bold">{stats.total}</div>
             <div className="text-xs text-muted-foreground">Total</div>
           </CardContent>
         </Card>
-        <Card 
-          className={`cursor-pointer hover:border-green-500 transition-colors ${statusFilter === "ok" ? "border-green-500 ring-1 ring-green-500" : ""}`}
-          onClick={() => setStatusFilter("ok")}
+        <Card
+          className={`cursor-pointer hover:border-green-500 transition-colors ${statusFilter === 'ok' ? 'border-green-500 ring-1 ring-green-500' : ''}`}
+          onClick={() => setStatusFilter('ok')}
         >
           <CardContent className="pt-3 pb-2 text-center">
             <div className="text-2xl font-bold text-green-600">{stats.ok}</div>
             <div className="text-xs text-muted-foreground">Valides</div>
           </CardContent>
         </Card>
-        <Card 
-          className={`cursor-pointer hover:border-blue-500 transition-colors ${statusFilter === "new" ? "border-blue-500 ring-1 ring-blue-500" : ""}`}
-          onClick={() => setStatusFilter("new")}
+        <Card
+          className={`cursor-pointer hover:border-blue-500 transition-colors ${statusFilter === 'new' ? 'border-blue-500 ring-1 ring-blue-500' : ''}`}
+          onClick={() => setStatusFilter('new')}
         >
           <CardContent className="pt-3 pb-2 text-center">
             <div className="text-2xl font-bold text-blue-600">{stats.new}</div>
             <div className="text-xs text-muted-foreground">Nouvelles</div>
           </CardContent>
         </Card>
-        <Card 
-          className={`cursor-pointer hover:border-orange-500 transition-colors ${statusFilter === "duplicate" ? "border-orange-500 ring-1 ring-orange-500" : ""}`}
-          onClick={() => setStatusFilter("duplicate")}
+        <Card
+          className={`cursor-pointer hover:border-orange-500 transition-colors ${statusFilter === 'duplicate' ? 'border-orange-500 ring-1 ring-orange-500' : ''}`}
+          onClick={() => setStatusFilter('duplicate')}
         >
           <CardContent className="pt-3 pb-2 text-center">
             <div className="text-2xl font-bold text-orange-600">{duplicates}</div>
             <div className="text-xs text-muted-foreground">Doublons</div>
           </CardContent>
         </Card>
-        <Card 
-          className={`cursor-pointer hover:border-yellow-500 transition-colors ${statusFilter === "warning" ? "border-yellow-500 ring-1 ring-yellow-500" : ""}`}
-          onClick={() => setStatusFilter("warning")}
+        <Card
+          className={`cursor-pointer hover:border-yellow-500 transition-colors ${statusFilter === 'warning' ? 'border-yellow-500 ring-1 ring-yellow-500' : ''}`}
+          onClick={() => setStatusFilter('warning')}
         >
           <CardContent className="pt-3 pb-2 text-center">
             <div className="text-2xl font-bold text-yellow-600">{stats.warning}</div>
             <div className="text-xs text-muted-foreground">Alertes</div>
           </CardContent>
         </Card>
-        <Card 
-          className={`cursor-pointer hover:border-destructive transition-colors ${statusFilter === "error" ? "border-destructive ring-1 ring-destructive" : ""}`}
-          onClick={() => setStatusFilter("error")}
+        <Card
+          className={`cursor-pointer hover:border-destructive transition-colors ${statusFilter === 'error' ? 'border-destructive ring-1 ring-destructive' : ''}`}
+          onClick={() => setStatusFilter('error')}
         >
           <CardContent className="pt-3 pb-2 text-center">
             <div className="text-2xl font-bold text-destructive">{stats.error}</div>
@@ -644,7 +910,12 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
             Télécharger le rapport d'import (CSV)
           </Button>
           {stats.error > 0 && (
-            <Button variant="outline" size="sm" onClick={handleExportErrors} className="text-destructive">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportErrors}
+              className="text-destructive"
+            >
               <XCircle className="h-4 w-4 mr-2" />
               Exporter {stats.error} erreur(s)
             </Button>
@@ -652,19 +923,25 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 text-green-600" />
-          <span><strong>{stats.new}</strong> prêtes à importer</span>
+          <span>
+            <strong>{stats.new}</strong> prêtes à importer
+          </span>
           {stats.error > 0 && (
             <>
               <span className="text-muted-foreground">•</span>
               <XCircle className="h-4 w-4 text-destructive" />
-              <span><strong>{stats.error}</strong> rejetées</span>
+              <span>
+                <strong>{stats.error}</strong> rejetées
+              </span>
             </>
           )}
           {duplicates > 0 && (
             <>
               <span className="text-muted-foreground">•</span>
               <AlertCircle className="h-4 w-4 text-orange-600" />
-              <span><strong>{duplicates}</strong> doublons</span>
+              <span>
+                <strong>{duplicates}</strong> doublons
+              </span>
             </>
           )}
         </div>
@@ -675,7 +952,9 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
         <CardHeader className="py-3">
           <CardTitle className="text-base flex items-center justify-between">
             <span>Aperçu des données (50 premières lignes)</span>
-            <Badge variant="outline">{filteredRows.length} / {stats.total}</Badge>
+            <Badge variant="outline">
+              {filteredRows.length} / {stats.total}
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -695,33 +974,41 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
               </TableHeader>
               <TableBody>
                 {filteredRows.slice(0, 50).map((row) => (
-                  <TableRow 
-                    key={row.rowIndex} 
+                  <TableRow
+                    key={row.rowIndex}
                     className={
-                      !row.isValid 
-                        ? "bg-red-50/50 dark:bg-red-950/10" 
-                        : row.decision === "UPDATE" 
-                        ? "bg-orange-50/50 dark:bg-orange-950/10"
-                        : row.warnings.length > 0 
-                        ? "bg-yellow-50/50 dark:bg-yellow-950/10" 
-                        : ""
+                      !row.isValid
+                        ? 'bg-red-50/50 dark:bg-red-950/10'
+                        : row.decision === 'UPDATE'
+                          ? 'bg-orange-50/50 dark:bg-orange-950/10'
+                          : row.warnings.length > 0
+                            ? 'bg-yellow-50/50 dark:bg-yellow-950/10'
+                            : ''
                     }
                   >
-                    <TableCell className="font-mono text-xs sticky left-0 bg-inherit">{row.rowIndex}</TableCell>
+                    <TableCell className="font-mono text-xs sticky left-0 bg-inherit">
+                      {row.rowIndex}
+                    </TableCell>
                     <TableCell>
-                      {row.decision === "NEW" && (
-                        <Badge variant="outline" className="text-blue-600 border-blue-600 gap-1 text-xs">
+                      {row.decision === 'NEW' && (
+                        <Badge
+                          variant="outline"
+                          className="text-blue-600 border-blue-600 gap-1 text-xs"
+                        >
                           <Plus className="h-3 w-3" />
                           Créer
                         </Badge>
                       )}
-                      {row.decision === "UPDATE" && (
-                        <Badge variant="outline" className="text-orange-600 border-orange-600 gap-1 text-xs">
+                      {row.decision === 'UPDATE' && (
+                        <Badge
+                          variant="outline"
+                          className="text-orange-600 border-orange-600 gap-1 text-xs"
+                        >
                           <RefreshCw className="h-3 w-3" />
                           Doublon
                         </Badge>
                       )}
-                      {row.decision === "ERROR" && (
+                      {row.decision === 'ERROR' && (
                         <Badge variant="destructive" className="gap-1 text-xs">
                           <XCircle className="h-3 w-3" />
                           Erreur
@@ -729,16 +1016,26 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
                       )}
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {row.normalized?.code || row.raw.imputation || <span className="text-muted-foreground">—</span>}
+                      {row.normalized?.code || row.raw.imputation || (
+                        <span className="text-muted-foreground">—</span>
+                      )}
                     </TableCell>
-                    <TableCell className="text-sm max-w-[200px] truncate" title={row.normalized?.label || row.raw.libelle || ""}>
-                      {row.normalized?.label || row.raw.libelle || <span className="text-muted-foreground italic">vide</span>}
+                    <TableCell
+                      className="text-sm max-w-[200px] truncate"
+                      title={row.normalized?.label || row.raw.libelle || ''}
+                    >
+                      {row.normalized?.label || row.raw.libelle || (
+                        <span className="text-muted-foreground italic">vide</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm">
-                      {row.normalized?.dotation_initiale?.toLocaleString("fr-FR") || row.raw.montant || "—"} FCFA
+                      {row.normalized?.dotation_initiale?.toLocaleString('fr-FR') ||
+                        row.raw.montant ||
+                        '—'}{' '}
+                      FCFA
                     </TableCell>
-                    <TableCell className="font-mono text-xs">{row.raw.os || "—"}</TableCell>
-                    <TableCell className="font-mono text-xs">{row.raw.direction || "—"}</TableCell>
+                    <TableCell className="font-mono text-xs">{row.raw.os || '—'}</TableCell>
+                    <TableCell className="font-mono text-xs">{row.raw.direction || '—'}</TableCell>
                     <TableCell className="text-xs max-w-[180px]">
                       {row.errors.length > 0 && (
                         <span className="text-destructive block">{row.errors[0]}</span>
@@ -769,12 +1066,12 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
           <CardContent className="py-2">
             <div className="flex flex-wrap gap-2">
               {Object.entries(parseInfo.mapping).map(([key, value]) => (
-                <Badge 
-                  key={key} 
-                  variant={value ? "secondary" : "outline"} 
-                  className={!value ? "text-muted-foreground border-dashed" : ""}
+                <Badge
+                  key={key}
+                  variant={value ? 'secondary' : 'outline'}
+                  className={!value ? 'text-muted-foreground border-dashed' : ''}
                 >
-                  {key}: {value || "non mappé"}
+                  {key}: {value || 'non mappé'}
                 </Badge>
               ))}
             </div>
@@ -789,10 +1086,16 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
       {!importComplete ? (
         <>
           {/* SAFE mode toggle */}
-          <Card className={safeMode ? "border-green-500 bg-green-50/50 dark:bg-green-950/10" : "border-orange-500 bg-orange-50/50 dark:bg-orange-950/10"}>
+          <Card
+            className={
+              safeMode
+                ? 'border-green-500 bg-green-50/50 dark:bg-green-950/10'
+                : 'border-orange-500 bg-orange-50/50 dark:bg-orange-950/10'
+            }
+          >
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Shield className={`h-5 w-5 ${safeMode ? "text-green-600" : "text-orange-600"}`} />
+                <Shield className={`h-5 w-5 ${safeMode ? 'text-green-600' : 'text-orange-600'}`} />
                 Mode d'import
               </CardTitle>
             </CardHeader>
@@ -803,30 +1106,27 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
                     Mode SAFE (recommandé)
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    {safeMode 
-                      ? "Ajouter uniquement les nouvelles imputations, ne jamais remplacer les existantes"
-                      : "Attention: les lignes existantes seront mises à jour avec les nouvelles valeurs"
-                    }
+                    {safeMode
+                      ? 'Ajouter uniquement les nouvelles imputations, ne jamais remplacer les existantes'
+                      : 'Attention: les lignes existantes seront mises à jour avec les nouvelles valeurs'}
                   </p>
                 </div>
-                <Switch
-                  id="safe-mode"
-                  checked={safeMode}
-                  onCheckedChange={setSafeMode}
-                />
+                <Switch id="safe-mode" checked={safeMode} onCheckedChange={setSafeMode} />
               </div>
-              
+
               {safeMode && (
                 <div className="flex items-center justify-between pt-3 border-t">
                   <div>
-                    <Label htmlFor="replace-amount" className="text-sm font-medium text-muted-foreground">
+                    <Label
+                      htmlFor="replace-amount"
+                      className="text-sm font-medium text-muted-foreground"
+                    >
                       Option avancée: Remplacer le montant si la ligne existe
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      {replaceAmount 
+                      {replaceAmount
                         ? `Les ${duplicates} doublon(s) détectés verront leur montant mis à jour (autres champs inchangés)`
-                        : "Les doublons seront ignorés (comportement par défaut)"
-                      }
+                        : 'Les doublons seront ignorés (comportement par défaut)'}
                     </p>
                   </div>
                   <Switch
@@ -836,14 +1136,14 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
                   />
                 </div>
               )}
-              
+
               {!safeMode && (
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>Attention</AlertTitle>
                   <AlertDescription>
-                    En désactivant le mode SAFE, {duplicates} ligne(s) existante(s) seront entièrement remplacées.
-                    Cette action est irréversible.
+                    En désactivant le mode SAFE, {duplicates} ligne(s) existante(s) seront
+                    entièrement remplacées. Cette action est irréversible.
                   </AlertDescription>
                 </Alert>
               )}
@@ -851,10 +1151,14 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
           </Card>
 
           {/* Sync referentiels toggle */}
-          <Card className={syncReferentiels ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/10" : ""}>
+          <Card
+            className={syncReferentiels ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/10' : ''}
+          >
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Database className={`h-5 w-5 ${syncReferentiels ? "text-blue-600" : "text-muted-foreground"}`} />
+                <Database
+                  className={`h-5 w-5 ${syncReferentiels ? 'text-blue-600' : 'text-muted-foreground'}`}
+                />
                 Synchronisation des référentiels
               </CardTitle>
             </CardHeader>
@@ -865,10 +1169,9 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
                     Charger automatiquement les référentiels
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    {syncReferentiels 
-                      ? "Les onglets OS, Direction, Action, Activité, Sous-Activité, NBE, Nature de dépense seront synchronisés (UPSERT par code, sans suppression)"
-                      : "Les référentiels ne seront pas mis à jour depuis ce fichier"
-                    }
+                    {syncReferentiels
+                      ? 'Les onglets OS, Direction, Action, Activité, Sous-Activité, NBE, Nature de dépense seront synchronisés (UPSERT par code, sans suppression)'
+                      : 'Les référentiels ne seront pas mis à jour depuis ce fichier'}
                   </p>
                 </div>
                 <Switch
@@ -877,7 +1180,7 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
                   onCheckedChange={setSyncReferentiels}
                 />
               </div>
-              
+
               {syncReferentiels && (
                 <div className="flex flex-wrap gap-2 pt-2">
                   <Badge variant="secondary" className="gap-1">
@@ -946,8 +1249,10 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
                   <RefreshCw className="h-4 w-4 text-orange-600" />
                   Doublons détectés
                 </span>
-                <span className={`font-medium ${safeMode ? "text-muted-foreground line-through" : "text-orange-600"}`}>
-                  {duplicates} {safeMode && "(ignorés)"}
+                <span
+                  className={`font-medium ${safeMode ? 'text-muted-foreground line-through' : 'text-orange-600'}`}
+                >
+                  {duplicates} {safeMode && '(ignorés)'}
                 </span>
               </div>
               <div className="flex justify-between py-2">
@@ -965,17 +1270,19 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
             <Info className="h-4 w-4" />
             <AlertTitle>Traçabilité complète</AlertTitle>
             <AlertDescription>
-              Toutes les actions seront enregistrées dans le Journal d'Audit. 
-              Aucune suppression ni reset ne sera effectué.
+              Toutes les actions seront enregistrées dans le Journal d'Audit. Aucune suppression ni
+              reset ne sera effectué.
             </AlertDescription>
           </Alert>
 
           {/* Import button */}
           <div className="flex justify-center">
-            <Button 
-              size="lg" 
-              onClick={handleImport} 
-              disabled={isProcessing || (safeMode ? stats.new === 0 : (stats.new + stats.update) === 0)}
+            <Button
+              size="lg"
+              onClick={handleImport}
+              disabled={
+                isProcessing || (safeMode ? stats.new === 0 : stats.new + stats.update === 0)
+              }
               className="min-w-[200px]"
             >
               {isProcessing ? (
@@ -986,7 +1293,8 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
               ) : (
                 <>
                   <Check className="h-4 w-4 mr-2" />
-                  Valider l'import ({safeMode ? stats.new : stats.new + stats.update} ligne{(safeMode ? stats.new : stats.new + stats.update) > 1 ? "s" : ""})
+                  Valider l'import ({safeMode ? stats.new : stats.new + stats.update} ligne
+                  {(safeMode ? stats.new : stats.new + stats.update) > 1 ? 's' : ''})
                 </>
               )}
             </Button>
@@ -1002,16 +1310,16 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
               <AlertTriangle className="h-20 w-20 text-yellow-600" />
             )}
           </div>
-          
+
           <div>
             <h3 className="text-2xl font-semibold">
-              {importStats?.errors === 0 ? "Import réussi !" : "Import terminé avec des erreurs"}
+              {importStats?.errors === 0 ? 'Import réussi !' : 'Import terminé avec des erreurs'}
             </h3>
             <p className="text-muted-foreground mt-2">
               {importStats?.inserted} nouvelle(s) ligne(s) créée(s)
-              {importStats?.updated ? `, ${importStats.updated} mise(s) à jour` : ""}
-              {importStats?.skipped ? `, ${importStats.skipped} doublon(s) ignoré(s)` : ""}
-              {importStats?.errors ? `, ${importStats.errors} erreur(s)` : ""}
+              {importStats?.updated ? `, ${importStats.updated} mise(s) à jour` : ''}
+              {importStats?.skipped ? `, ${importStats.skipped} doublon(s) ignoré(s)` : ''}
+              {importStats?.errors ? `, ${importStats.errors} erreur(s)` : ''}
             </p>
           </div>
 
@@ -1049,22 +1357,60 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
               <CardContent className="space-y-2">
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-bold text-green-600">{referentielStats.summary.totalInserted}</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {referentielStats.summary.totalInserted}
+                    </div>
                     <div className="text-sm text-muted-foreground">Ajoutés</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-purple-600">{referentielStats.summary.totalUpdated}</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      {referentielStats.summary.totalUpdated}
+                    </div>
                     <div className="text-sm text-muted-foreground">Mis à jour</div>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-1 justify-center pt-2 border-t">
-                  {referentielStats.os.sheetFound && <Badge variant="outline" className="text-xs">OS: {referentielStats.os.inserted + referentielStats.os.updated}</Badge>}
-                  {referentielStats.directions.sheetFound && <Badge variant="outline" className="text-xs">Dir: {referentielStats.directions.inserted + referentielStats.directions.updated}</Badge>}
-                  {referentielStats.actions.sheetFound && <Badge variant="outline" className="text-xs">Action: {referentielStats.actions.inserted + referentielStats.actions.updated}</Badge>}
-                  {referentielStats.activites.sheetFound && <Badge variant="outline" className="text-xs">Activ: {referentielStats.activites.inserted + referentielStats.activites.updated}</Badge>}
-                  {referentielStats.sousActivites.sheetFound && <Badge variant="outline" className="text-xs">S/Act: {referentielStats.sousActivites.inserted + referentielStats.sousActivites.updated}</Badge>}
-                  {referentielStats.nbe.sheetFound && <Badge variant="outline" className="text-xs">NBE: {referentielStats.nbe.inserted + referentielStats.nbe.updated}</Badge>}
-                  {referentielStats.natureDepense.sheetFound && <Badge variant="outline" className="text-xs">NatDep: {referentielStats.natureDepense.inserted + referentielStats.natureDepense.updated}</Badge>}
+                  {referentielStats.os.sheetFound && (
+                    <Badge variant="outline" className="text-xs">
+                      OS: {referentielStats.os.inserted + referentielStats.os.updated}
+                    </Badge>
+                  )}
+                  {referentielStats.directions.sheetFound && (
+                    <Badge variant="outline" className="text-xs">
+                      Dir:{' '}
+                      {referentielStats.directions.inserted + referentielStats.directions.updated}
+                    </Badge>
+                  )}
+                  {referentielStats.actions.sheetFound && (
+                    <Badge variant="outline" className="text-xs">
+                      Action: {referentielStats.actions.inserted + referentielStats.actions.updated}
+                    </Badge>
+                  )}
+                  {referentielStats.activites.sheetFound && (
+                    <Badge variant="outline" className="text-xs">
+                      Activ:{' '}
+                      {referentielStats.activites.inserted + referentielStats.activites.updated}
+                    </Badge>
+                  )}
+                  {referentielStats.sousActivites.sheetFound && (
+                    <Badge variant="outline" className="text-xs">
+                      S/Act:{' '}
+                      {referentielStats.sousActivites.inserted +
+                        referentielStats.sousActivites.updated}
+                    </Badge>
+                  )}
+                  {referentielStats.nbe.sheetFound && (
+                    <Badge variant="outline" className="text-xs">
+                      NBE: {referentielStats.nbe.inserted + referentielStats.nbe.updated}
+                    </Badge>
+                  )}
+                  {referentielStats.natureDepense.sheetFound && (
+                    <Badge variant="outline" className="text-xs">
+                      NatDep:{' '}
+                      {referentielStats.natureDepense.inserted +
+                        referentielStats.natureDepense.updated}
+                    </Badge>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1074,9 +1420,7 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
             <Button variant="outline" onClick={resetWizard}>
               Nouvel import
             </Button>
-            <Button onClick={handleClose}>
-              Fermer
-            </Button>
+            <Button onClick={handleClose}>Fermer</Button>
           </div>
         </div>
       )}
@@ -1101,20 +1445,20 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
                 key={s.id}
                 className={`flex-1 text-center ${
                   s.id === step
-                    ? "text-primary"
+                    ? 'text-primary'
                     : stepIndex > idx
-                    ? "text-muted-foreground"
-                    : "text-muted-foreground/50"
+                      ? 'text-muted-foreground'
+                      : 'text-muted-foreground/50'
                 }`}
               >
                 <div className="flex items-center justify-center mb-1">
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
                       stepIndex > idx
-                        ? "bg-primary text-primary-foreground"
+                        ? 'bg-primary text-primary-foreground'
                         : s.id === step
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground'
                     }`}
                   >
                     {stepIndex > idx ? <Check className="h-4 w-4" /> : s.icon}
@@ -1130,42 +1474,39 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
         {/* Content */}
         <ScrollArea className="flex-1 pr-4">
           <div className="py-4">
-            {step === "exercice" && renderExerciceStep()}
-            {step === "detect" && renderDetectStep()}
-            {step === "preview" && renderPreviewStep()}
-            {step === "confirm" && renderConfirmStep()}
+            {step === 'exercice' && renderExerciceStep()}
+            {step === 'detect' && renderDetectStep()}
+            {step === 'preview' && renderPreviewStep()}
+            {step === 'confirm' && renderConfirmStep()}
           </div>
         </ScrollArea>
 
         {/* Navigation */}
-        {!importComplete && step !== "detect" && (
+        {!importComplete && step !== 'detect' && (
           <div className="flex justify-between pt-4 border-t">
             <Button
               variant="outline"
               onClick={() => {
-                if (step === "preview") setStep("exercice");
-                else if (step === "confirm") setStep("preview");
+                if (step === 'preview') setStep('exercice');
+                else if (step === 'confirm') setStep('preview');
               }}
-              disabled={step === "exercice" || isProcessing}
+              disabled={step === 'exercice' || isProcessing}
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Précédent
             </Button>
 
-            {step === "exercice" && (
-              <Button
-                onClick={handleDetection}
-                disabled={!file || isProcessing}
-              >
+            {step === 'exercice' && (
+              <Button onClick={handleDetection} disabled={!file || isProcessing}>
                 Analyser le fichier
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             )}
 
-            {step === "preview" && (
+            {step === 'preview' && (
               <Button
-                onClick={() => setStep("confirm")}
-                disabled={isProcessing || (stats.new + stats.update) === 0}
+                onClick={() => setStep('confirm')}
+                disabled={isProcessing || stats.new + stats.update === 0}
               >
                 Continuer
                 <ChevronRight className="h-4 w-4 ml-2" />

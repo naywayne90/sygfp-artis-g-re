@@ -50,19 +50,20 @@ Après connexion, sélectionnez l'exercice budgétaire sur lequel travailler (ex
 
 ### 3.1 Menu principal
 
-| Section | Description |
-|---------|-------------|
-| **Tableau de bord** | Vue d'ensemble, indicateurs clés |
-| **Chaîne de dépense** | Les 9 étapes du workflow |
-| **Budget** | Structure budgétaire, virements |
-| **Partenaires** | Prestataires, contrats |
-| **Gestion** | Trésorerie, stocks, recettes |
-| **Rapports** | États d'exécution, alertes |
-| **Paramétrage** | Configuration (admin) |
+| Section               | Description                      |
+| --------------------- | -------------------------------- |
+| **Tableau de bord**   | Vue d'ensemble, indicateurs clés |
+| **Chaîne de dépense** | Les 9 étapes du workflow         |
+| **Budget**            | Structure budgétaire, virements  |
+| **Partenaires**       | Prestataires, contrats           |
+| **Gestion**           | Trésorerie, stocks, recettes     |
+| **Rapports**          | États d'exécution, alertes       |
+| **Paramétrage**       | Configuration (admin)            |
 
 ### 3.2 Recherche
 
 Utilisez la barre de recherche pour trouver rapidement un dossier par :
+
 - Numéro de référence
 - Objet
 - Prestataire
@@ -84,13 +85,14 @@ Utilisez la barre de recherche pour trouver rapidement un dossier par :
    - **Justification** : Pourquoi ce besoin ?
    - **Urgence** : Normale / Urgent / Très urgent
    - **Date souhaitée** : Échéance souhaitée
-4. Cliquez sur **Enregistrer** (brouillon) ou **Soumettre** (envoi au DG)
+4. Cliquez sur **Soumettre** pour envoyer la note au DG
 
 ### Étape 2 : Validation par le DG
 
 **Qui** : DG uniquement
 
 Le DG examine la note et peut :
+
 - **Valider** → Création automatique d'un dossier
 - **Rejeter** → Avec motif obligatoire
 - **Différer** → Reporter à plus tard
@@ -100,6 +102,7 @@ Le DG examine la note et peut :
 **Qui** : Agent/Gestionnaire
 
 Après validation SEF, créer la Note AEF pour chiffrer le besoin :
+
 1. Menu → **Notes AEF** → **Nouvelle**
 2. Lier à la Note SEF validée
 3. Indiquer le **montant estimé**
@@ -110,6 +113,7 @@ Après validation SEF, créer la Note AEF pour chiffrer le besoin :
 **Qui** : CB (Contrôleur Budgétaire)
 
 Le CB affecte la dépense à une ligne budgétaire :
+
 1. Menu → **Imputation**
 2. Sélectionner la Note AEF
 3. Choisir la **ligne budgétaire**
@@ -121,6 +125,7 @@ Le CB affecte la dépense à une ligne budgétaire :
 **Qui** : Agent
 
 Détailler le besoin technique :
+
 1. Menu → **Expression Besoin** → **Nouvelle**
 2. Remplir les spécifications
 3. Soumettre au Directeur
@@ -130,6 +135,7 @@ Détailler le besoin technique :
 **Qui** : SDPM / Commission des Marchés
 
 Si le montant dépasse le seuil (selon réglementation) :
+
 1. Créer un marché
 2. Publier l'appel d'offres
 3. Réceptionner les offres
@@ -140,6 +146,7 @@ Si le montant dépasse le seuil (selon réglementation) :
 **Qui** : CB
 
 Réserver les crédits budgétaires :
+
 1. Menu → **Engagements** → **Nouveau**
 2. Sélectionner la ligne budgétaire
 3. Indiquer le **montant exact**
@@ -153,6 +160,7 @@ Réserver les crédits budgétaires :
 **Qui** : Agent puis DAAF
 
 Après réception du service/bien :
+
 1. Menu → **Liquidations** → **Nouvelle**
 2. Lier à l'engagement
 3. Certifier le **service fait**
@@ -165,6 +173,7 @@ Après réception du service/bien :
 **Qui** : DAAF puis DG
 
 Créer l'ordre de paiement (mandat) :
+
 1. Menu → **Ordonnancements** → **Nouveau**
 2. Lier à la liquidation
 3. Préparer le mandat
@@ -175,6 +184,7 @@ Créer l'ordre de paiement (mandat) :
 **Qui** : Trésorerie
 
 Payer effectivement le prestataire :
+
 1. Menu → **Règlements** → **Nouveau**
 2. Lier à l'ordonnancement signé
 3. Choisir le **mode de paiement** (virement, chèque)
@@ -196,6 +206,7 @@ Payer effectivement le prestataire :
 ### 5.2 Alertes
 
 Le tableau de bord affiche les alertes :
+
 - ⚠️ Lignes budgétaires à 80%+ consommation
 - ⏰ Dossiers en attente depuis longtemps
 - 📋 Tâches à effectuer
@@ -218,6 +229,7 @@ Le tableau de bord affiche les alertes :
 ### 6.2 Qualification
 
 Un prestataire doit être **qualifié** avant de pouvoir recevoir des paiements :
+
 - Documents à jour
 - Validation par le service concerné
 
@@ -246,15 +258,15 @@ Le CB examine et peut approuver ou rejeter.
 
 ## 8. Rôles et Responsabilités
 
-| Rôle | Principales responsabilités |
-|------|----------------------------|
-| **Agent** | Créer notes, expressions de besoin, saisies |
-| **Directeur** | Valider notes AEF, expressions de sa direction |
-| **CB** | Imputation, validation engagements, virements |
-| **DAAF** | Valider liquidations, préparer ordonnancements |
-| **DG** | Valider notes SEF, signer ordonnancements |
-| **Trésorerie** | Exécuter les règlements |
-| **Admin** | Configuration, utilisateurs, paramètres |
+| Rôle           | Principales responsabilités                    |
+| -------------- | ---------------------------------------------- |
+| **Agent**      | Créer notes, expressions de besoin, saisies    |
+| **Directeur**  | Valider notes AEF, expressions de sa direction |
+| **CB**         | Imputation, validation engagements, virements  |
+| **DAAF**       | Valider liquidations, préparer ordonnancements |
+| **DG**         | Valider notes SEF, signer ordonnancements      |
+| **Trésorerie** | Exécuter les règlements                        |
+| **Admin**      | Configuration, utilisateurs, paramètres        |
 
 ---
 
@@ -285,10 +297,11 @@ Dans le formulaire, utilisez le bouton **Ajouter pièce jointe** et sélectionne
 ## 10. Support
 
 En cas de problème :
+
 1. Vérifiez ce guide
 2. Consultez votre administrateur local
 3. Contactez le support technique
 
 ---
 
-*Documentation utilisateur SYGFP - Version 1.0*
+_Documentation utilisateur SYGFP - Version 1.0_

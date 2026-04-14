@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,13 +14,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const formatMontant = (montant: number): string => {
-  if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
-  if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
-  if (montant >= 1_000) return `${(montant / 1_000).toFixed(0)} K`;
-  return montant.toFixed(0);
-};
+import { formatCurrency } from '@/lib/utils';
 
 export function DashboardCB() {
   const { data: stats, isLoading } = useDashboardStats();
@@ -85,7 +78,7 @@ export function DashboardCB() {
                 <CreditCard className="h-5 w-5 text-success" />
               </div>
               <div className="flex-1">
-                <p className="font-medium">{formatMontant(stats?.budgetDisponible || 0)}</p>
+                <p className="font-medium">{formatCurrency(stats?.budgetDisponible || 0)}</p>
                 <p className="text-xs text-muted-foreground">Credits disponibles</p>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -161,16 +154,16 @@ export function DashboardCB() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Budget total</span>
-                <span className="font-medium">{formatMontant(stats?.budgetTotal || 0)}</span>
+                <span className="font-medium">{formatCurrency(stats?.budgetTotal || 0)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Engage</span>
-                <span className="font-medium">{formatMontant(stats?.montantEngage || 0)}</span>
+                <span className="font-medium">{formatCurrency(stats?.montantEngage || 0)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Disponible</span>
                 <span className="font-medium text-success">
-                  {formatMontant(stats?.budgetDisponible || 0)}
+                  {formatCurrency(stats?.budgetDisponible || 0)}
                 </span>
               </div>
             </div>

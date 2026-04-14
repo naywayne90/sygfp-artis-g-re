@@ -223,7 +223,7 @@ class AttachmentServiceClass {
   private sanitizeFilename(filename: string): string {
     return filename
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[̀-ͯ]/g, '') // Remove accents
       .replace(/[^a-zA-Z0-9._-]/g, '_') // Replace special chars
       .replace(/_+/g, '_') // Collapse underscores
       .replace(/^_|_$/g, ''); // Trim underscores

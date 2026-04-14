@@ -140,7 +140,7 @@ export function OrdonnancementSignatures({
       if (daafSignature && !daafSignature.signed_by) return false;
     }
 
-    return ordonnancementStatut === 'valide';
+    return ordonnancementStatut === 'en_signature' || ordonnancementStatut === 'valide';
   };
 
   const handleSign = async (signatureId: string, role: string) => {

@@ -211,6 +211,7 @@ export const VALIDATION_STEPS = [
     order: 1,
     role: 'DAAF',
     label: 'Sous-Directeur DAAF',
+    shortLabel: 'Sous-Dir DAAF',
     visaStatut: 'visa_saf',
     visaPrefix: 'visa_saf',
   },
@@ -218,6 +219,7 @@ export const VALIDATION_STEPS = [
     order: 2,
     role: 'CB',
     label: 'Contrôleur Budgétaire',
+    shortLabel: 'CB',
     visaStatut: 'visa_cb',
     visaPrefix: 'visa_cb',
   },
@@ -225,10 +227,18 @@ export const VALIDATION_STEPS = [
     order: 3,
     role: 'DAF',
     label: 'Directeur Administratif et Financier',
+    shortLabel: 'Dir DAAF',
     visaStatut: 'visa_daaf',
     visaPrefix: 'visa_daaf',
   },
-  { order: 4, role: 'DG', label: 'Directeur Général', visaStatut: 'valide', visaPrefix: 'visa_dg' },
+  {
+    order: 4,
+    role: 'DG',
+    label: 'Directeur Général',
+    shortLabel: 'DG',
+    visaStatut: 'valide',
+    visaPrefix: 'visa_dg',
+  },
 ];
 
 // Statuts intermédiaires de validation (avant 'valide')

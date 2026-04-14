@@ -41,6 +41,7 @@ import {
   CheckCircle2,
   History,
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 export default function PassationApprobation() {
   const { exercice } = useExercice();
@@ -101,9 +102,6 @@ export default function PassationApprobation() {
     const daysSince = (Date.now() - new Date(p.attribue_at).getTime()) / (1000 * 60 * 60 * 24);
     return daysSince > 5;
   }).length;
-
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
   const getModeName = (value: string) =>
     MODES_PASSATION.find((m) => m.value === value)?.label || value;
@@ -240,7 +238,9 @@ export default function PassationApprobation() {
             <Banknote className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-mono">{formatMontant(montantTotal)}</div>
+            <div className="text-2xl font-bold font-mono">
+              {montantTotal ? formatCurrency(montantTotal) : '-'}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               Valeur cumulée des marchés en attente
             </p>
@@ -331,9 +331,11 @@ export default function PassationApprobation() {
                             <Badge variant="outline">{getModeName(pm.mode_passation)}</Badge>
                           </TableCell>
                           <TableCell className="text-right font-medium font-mono">
-                            {formatMontant(
-                              pm.montant_retenu || pm.expression_besoin?.montant_estime || null
-                            )}
+                            {pm.montant_retenu || pm.expression_besoin?.montant_estime
+                              ? formatCurrency(
+                                  pm.montant_retenu || pm.expression_besoin?.montant_estime || 0
+                                )
+                              : '-'}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -434,9 +436,11 @@ export default function PassationApprobation() {
                           <Badge variant="outline">{getModeName(pm.mode_passation)}</Badge>
                         </TableCell>
                         <TableCell className="text-right font-medium font-mono">
-                          {formatMontant(
-                            pm.montant_retenu || pm.expression_besoin?.montant_estime || null
-                          )}
+                          {pm.montant_retenu || pm.expression_besoin?.montant_estime
+                            ? formatCurrency(
+                                pm.montant_retenu || pm.expression_besoin?.montant_estime || 0
+                              )
+                            : '-'}
                         </TableCell>
                         <TableCell>{getDecisionBadge(pm)}</TableCell>
                         <TableCell className="text-sm">

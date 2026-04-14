@@ -9,7 +9,7 @@
  *
  * Règles :
  * - Référence générée à la SOUMISSION via RPC submit_note_sef_with_reference
- * - La reference est generee a la creation (plus de brouillon)
+ * - La reference est generee a la creation (pas de brouillon)
  * - Référence IMMUABLE après génération
  * - Compteur séquentiel par (étape, mois, année) - atomique via UPSERT SQL
  */
@@ -27,6 +27,7 @@ export const ETAPE_CODES = {
   LIQUIDATION: 6,
   ORDONNANCEMENT: 7,
   REGLEMENT: 8,
+  VIREMENT: 9,
 } as const;
 
 export type EtapeCode = keyof typeof ETAPE_CODES;
@@ -41,6 +42,7 @@ export const ETAPE_LABELS: Record<number, string> = {
   6: 'Liquidation',
   7: 'Ordonnancement',
   8: 'Règlement',
+  9: 'Virement',
 };
 
 export interface ARTIReference {
@@ -145,6 +147,7 @@ export function formatARTIReferenceShort(reference: string): string {
     6: 'LIQ',
     7: 'ORD',
     8: 'REG',
+    9: 'VIR',
   };
   const etapeAbbrev = ETAPE_ABBREVS[parsed.etape] || '?';
   const moisStr = String(parsed.mois).padStart(2, '0');

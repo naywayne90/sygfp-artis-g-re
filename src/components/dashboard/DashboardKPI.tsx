@@ -35,13 +35,7 @@ import {
   PieChart,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const formatMontant = (montant: number): string => {
-  if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
-  if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
-  if (montant >= 1_000) return `${(montant / 1_000).toFixed(0)} K`;
-  return montant.toFixed(0);
-};
+import { formatCurrency } from '@/lib/utils';
 
 // Empty state component with tracking activation
 function EmptyStateWithTracking({
@@ -159,12 +153,12 @@ function DGSection() {
             </div>
             <div className="p-4 rounded-lg bg-muted/50 space-y-2">
               <p className="text-xs text-muted-foreground">Budget total</p>
-              <p className="text-xl font-bold">{formatMontant(stats?.budgetGlobal || 0)}</p>
+              <p className="text-xl font-bold">{formatCurrency(stats?.budgetGlobal || 0)}</p>
               <p className="text-xs text-muted-foreground">FCFA</p>
             </div>
             <div className="p-4 rounded-lg bg-secondary/10 space-y-2">
               <p className="text-xs text-muted-foreground">Engagé</p>
-              <p className="text-xl font-bold">{formatMontant(stats?.budgetEngage || 0)}</p>
+              <p className="text-xl font-bold">{formatCurrency(stats?.budgetEngage || 0)}</p>
               <Progress
                 value={stats?.budgetGlobal ? (stats.budgetEngage / stats.budgetGlobal) * 100 : 0}
                 className="h-2"
@@ -172,7 +166,7 @@ function DGSection() {
             </div>
             <div className="p-4 rounded-lg bg-success/10 space-y-2">
               <p className="text-xs text-muted-foreground">Payé</p>
-              <p className="text-xl font-bold">{formatMontant(stats?.budgetPaye || 0)}</p>
+              <p className="text-xl font-bold">{formatCurrency(stats?.budgetPaye || 0)}</p>
               <Progress
                 value={stats?.budgetGlobal ? (stats.budgetPaye / stats.budgetGlobal) * 100 : 0}
                 className="h-2 [&>div]:bg-success"
@@ -349,7 +343,7 @@ function DAFSection() {
                   <span className="text-sm text-muted-foreground">Reste à engager</span>
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="text-2xl font-bold">{formatMontant(stats?.resteAEngager || 0)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats?.resteAEngager || 0)}</p>
                 <p className="text-xs text-muted-foreground">FCFA disponible</p>
               </div>
               <div className="p-4 rounded-lg border space-y-2">
@@ -357,7 +351,7 @@ function DAFSection() {
                   <span className="text-sm text-muted-foreground">Reste à liquider</span>
                   <Receipt className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="text-2xl font-bold">{formatMontant(stats?.resteALiquider || 0)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats?.resteALiquider || 0)}</p>
                 <p className="text-xs text-muted-foreground">FCFA engagés</p>
               </div>
               <div className="p-4 rounded-lg border space-y-2">
@@ -365,7 +359,7 @@ function DAFSection() {
                   <span className="text-sm text-muted-foreground">Reste à payer</span>
                   <Wallet className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="text-2xl font-bold">{formatMontant(stats?.resteAPayer || 0)}</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats?.resteAPayer || 0)}</p>
                 <p className="text-xs text-muted-foreground">FCFA liquidés</p>
               </div>
             </div>
@@ -535,9 +529,9 @@ function ControleurSection() {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-sm font-medium">{formatMontant(ligne.engage)}</p>
+                        <p className="text-sm font-medium">{formatCurrency(ligne.engage)}</p>
                         <p className="text-xs text-muted-foreground">
-                          sur {formatMontant(ligne.dotation)}
+                          sur {formatCurrency(ligne.dotation)}
                         </p>
                       </div>
                       <Badge
@@ -719,11 +713,11 @@ function ControleurSection() {
             </div>
             <div className="p-4 rounded-lg bg-primary/10 space-y-2 text-center">
               <p className="text-xs text-muted-foreground">Montant engagé</p>
-              <p className="text-xl font-bold">{formatMontant(stats?.montantEngage || 0)}</p>
+              <p className="text-xl font-bold">{formatCurrency(stats?.montantEngage || 0)}</p>
             </div>
             <div className="p-4 rounded-lg bg-success/10 space-y-2 text-center">
               <p className="text-xs text-muted-foreground">Disponible</p>
-              <p className="text-xl font-bold">{formatMontant(stats?.montantDisponible || 0)}</p>
+              <p className="text-xl font-bold">{formatCurrency(stats?.montantDisponible || 0)}</p>
             </div>
           </div>
         </CardContent>

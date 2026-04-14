@@ -68,6 +68,7 @@ import { DecisionBlock } from '@/components/workflow/DecisionBlock';
 import { useNoteAccessControl } from '@/hooks/useNoteAccessControl';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ChaineDepenseCompact } from '@/components/workflow/ChaineDepenseCompact';
+import { formatCurrency } from '@/lib/utils';
 import { formatMontant } from '@/lib/config/sygfp-constants';
 import { QRCodeCanvas } from 'qrcode.react';
 

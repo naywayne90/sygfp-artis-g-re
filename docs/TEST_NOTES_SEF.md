@@ -9,7 +9,7 @@
 
 ---
 
-## Scénario 1 : Création brouillon + PJ (2 min)
+## Scénario 1 : Création + PJ (2 min)
 
 ### En tant qu'Agent
 
@@ -29,7 +29,7 @@
 - [ ] Toast "Note créée avec succès"
 - [ ] Référence pivot générée (format `ARTI/2026/XXX/0001`)
 - [ ] Note visible dans onglet "Toutes"
-- [ ] Statut = "Brouillon"
+- [ ] Statut = "Soumis"
 - [ ] Compteur "Total" incrémenté
 
 5. **Ouvrir** la note créée
@@ -43,11 +43,11 @@
 
 ---
 
-## Scénario 2 : Modification brouillon (1 min)
+## Scénario 2 : Modification note soumise (1 min)
 
 ### En tant qu'Agent (créateur)
 
-1. **Ouvrir** le brouillon créé
+1. **Ouvrir** la note créée
 2. **Cliquer** "Modifier"
 3. **Changer** l'urgence en "Urgent"
 4. **Sauvegarder**
@@ -64,7 +64,7 @@
 
 ### En tant qu'Agent (créateur)
 
-1. **Ouvrir** le brouillon
+1. **Ouvrir** la note
 2. **Cliquer** "Soumettre pour validation"
 
 ✅ **Vérifications** :
@@ -207,7 +207,7 @@
 
 ✅ **Vérifications** :
 
-- [ ] Notes brouillon de Direction A non visibles
+- [ ] Notes soumises de Direction A non visibles
 - [ ] Notes validées de Direction A visibles (si même exercice)
 - [ ] Impossible de modifier notes d'autres directions
 
@@ -215,21 +215,21 @@
 
 ## Résumé des vérifications
 
-| Test                   | Statut |
-| ---------------------- | ------ |
-| Création brouillon     | ⬜     |
-| Ajout PJ               | ⬜     |
-| Modification brouillon | ⬜     |
-| Soumission             | ⬜     |
-| Restriction non-DG     | ⬜     |
-| Validation DG          | ⬜     |
-| Création dossier auto  | ⬜     |
-| Rejet avec motif       | ⬜     |
-| Différé avec motif     | ⬜     |
-| Recherche référence    | ⬜     |
-| Recherche objet        | ⬜     |
-| Export Excel           | ⬜     |
-| Isolation direction    | ⬜     |
+| Test                  | Statut |
+| --------------------- | ------ |
+| Création note         | ⬜     |
+| Ajout PJ              | ⬜     |
+| Modification note     | ⬜     |
+| Soumission            | ⬜     |
+| Restriction non-DG    | ⬜     |
+| Validation DG         | ⬜     |
+| Création dossier auto | ⬜     |
+| Rejet avec motif      | ⬜     |
+| Différé avec motif    | ⬜     |
+| Recherche référence   | ⬜     |
+| Recherche objet       | ⬜     |
+| Export Excel          | ⬜     |
+| Isolation direction   | ⬜     |
 
 ---
 
@@ -257,7 +257,7 @@
 
 ### En tant qu'Agent
 
-1. **Créer** une note brouillon
+1. **Créer** une note
 2. **Ajouter** 3 pièces jointes
 3. **Essayer** d'ajouter une 4ème
 
@@ -297,9 +297,9 @@
 
 | Test                   | Statut |
 | ---------------------- | ------ |
-| Création brouillon     | ⬜     |
+| Création note          | ⬜     |
 | Ajout PJ               | ⬜     |
-| Modification brouillon | ⬜     |
+| Modification note      | ⬜     |
 | Soumission             | ⬜     |
 | Restriction non-DG     | ⬜     |
 | Validation DG          | ⬜     |

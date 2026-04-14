@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,7 @@ export default function NotesSEF() {
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
-  const { canCreate: canCreateRBAC } = useRBAC();
+  const { canCreate: canCreateRBAC, isDG } = useRBAC();
 
   // Vérification combinée : exercice ouvert ET profil autorisé à créer
   const canCreateNoteSEF = canWrite && canCreateRBAC('note_sef');
@@ -84,6 +84,11 @@ export default function NotesSEF() {
   const [deferringNote, setDeferringNote] = useState<NoteSEF | null>(null);
 
   const canValidate = hasAnyRole(['ADMIN', 'DG', 'DAAF']);
+
+  // DG : ouvrir directement sur l'onglet "À valider"
+  useEffect(() => {
+    if (isDG) setActiveTab('a_valider');
+  }, [isDG, setActiveTab]);
 
   // Compteurs dérivés
   const soumisCount = counts.soumis;
@@ -195,7 +200,7 @@ export default function NotesSEF() {
         {canValidate && (
           <Button
             variant="outline"
-            onClick={() => (window.location.href = '/notes-sef/validation')}
+            onClick={() => navigate('/notes-sef/validation')}
             className="gap-2"
           >
             <CheckCircle className="h-4 w-4" />
@@ -224,31 +229,38 @@ export default function NotesSEF() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button
-                  onClick={() => setFormOpen(true)}
-                  className="gap-2"
-                  disabled={!canCreateNoteSEF}
-                >
-                  {!canCreateNoteSEF ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  Nouvelle note SEF
-                </Button>
-              </span>
-            </TooltipTrigger>
-            {!canCreateNoteSEF && (
-              <TooltipContent>
-                <p>
-                  {!canWrite
-                    ? getDisabledMessage()
-                    : "Vous n'avez pas les droits pour créer une Note SEF"}
-                </p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+        {/* DG ne crée pas de notes — il valide */}
+        {!isDG && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button
+                    onClick={() => setFormOpen(true)}
+                    className="gap-2"
+                    disabled={!canCreateNoteSEF}
+                  >
+                    {!canCreateNoteSEF ? (
+                      <Lock className="h-4 w-4" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
+                    Nouvelle note SEF
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!canCreateNoteSEF && (
+                <TooltipContent>
+                  <p>
+                    {!canWrite
+                      ? getDisabledMessage()
+                      : "Vous n'avez pas les droits pour créer une Note SEF"}
+                  </p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </PageHeader>
 
       {/* KPIs - Compteurs serveur-side */}
@@ -353,7 +365,7 @@ export default function NotesSEF() {
             title="Toutes les notes SEF"
             description={
               pagination.totalPages > 1
-                ? `${pagination.total} note(s) trouvée(s) \u2022 Page ${pagination.page}/${pagination.totalPages}`
+                ? `${pagination.total} note(s) trouvée(s) • Page ${pagination.page}/${pagination.totalPages}`
                 : `${pagination.total} note(s) trouvée(s)`
             }
             onView={(note) => setSelectedNote(note)}

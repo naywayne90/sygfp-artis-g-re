@@ -25,13 +25,7 @@ import {
   FolderOpen,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const formatMontant = (montant: number): string => {
-  if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
-  if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
-  if (montant >= 1_000) return `${(montant / 1_000).toFixed(0)} K`;
-  return montant.toFixed(0);
-};
+import { formatCurrency } from '@/lib/utils';
 
 const formatDate = (dateStr: string): string => {
   try {
@@ -132,7 +126,7 @@ function TableauDossiersEnCours({ engagements, isLoading }: TableauDossiersEnCou
                       {eng.budget_line?.code || '-'}
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      {formatMontant(eng.montant)} FCFA
+                      {formatCurrency(eng.montant)}
                     </TableCell>
                     <TableCell>{getStatutBadge(eng.statut)}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
@@ -231,10 +225,7 @@ export function DashboardDSI() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <p className="text-3xl font-bold">
-                {formatMontant(budgetTotal)}{' '}
-                <span className="text-sm font-normal text-muted-foreground">FCFA</span>
-              </p>
+              <p className="text-3xl font-bold">{formatCurrency(budgetTotal)}</p>
               <Progress value={100} className="h-2" />
               <p className="text-xs text-muted-foreground">Dotation initiale exercice en cours</p>
             </div>
@@ -251,10 +242,7 @@ export function DashboardDSI() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <p className="text-3xl font-bold">
-                {formatMontant(montantEngage)}{' '}
-                <span className="text-sm font-normal text-muted-foreground">FCFA</span>
-              </p>
+              <p className="text-3xl font-bold">{formatCurrency(montantEngage)}</p>
               <Progress value={tauxEngagement} className="h-2" />
               <p className="text-xs text-muted-foreground">
                 <span className="font-medium text-warning">{tauxEngagement}%</span> du budget engage
@@ -273,10 +261,7 @@ export function DashboardDSI() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <p className="text-3xl font-bold text-success">
-                {formatMontant(resteAFaire)}{' '}
-                <span className="text-sm font-normal text-muted-foreground">FCFA</span>
-              </p>
+              <p className="text-3xl font-bold text-success">{formatCurrency(resteAFaire)}</p>
               <Progress value={100 - tauxEngagement} className="h-2 [&>div]:bg-success" />
               <p className="text-xs text-muted-foreground">
                 <span className="font-medium text-success">{100 - tauxEngagement}%</span> disponible

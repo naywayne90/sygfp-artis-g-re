@@ -34,6 +34,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Plus, Eye, FileSignature, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
 import { ContratDetails } from './ContratDetails';
 
 export function ContratList() {
@@ -103,10 +104,6 @@ export function ContratList() {
     } as Parameters<typeof createContrat.mutateAsync>[0]);
     setOpen(false);
     resetForm();
-  };
-
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
   };
 
   const getStatutBadge = (statut: string) => {
@@ -400,7 +397,7 @@ export function ContratList() {
                     <TableCell>{getPrestataireName(contrat.prestataire_id)}</TableCell>
                     <TableCell>{contrat.type_contrat}</TableCell>
                     <TableCell className="text-right font-medium">
-                      {formatMontant(contrat.montant_actuel || contrat.montant_initial)}
+                      {formatCurrency(contrat.montant_actuel || contrat.montant_initial)}
                     </TableCell>
                     <TableCell>{getStatutBadge(contrat.statut)}</TableCell>
                     <TableCell>

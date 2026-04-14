@@ -30,6 +30,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import logoArti from '@/assets/logo-arti.jpg';
 import { MODES_PAIEMENT } from '@/hooks/useReglements';
+import { formatCurrency } from '@/lib/utils';
 
 // ============================================================================
 // TYPES
@@ -79,9 +80,6 @@ const PDF_CONFIG = {
 // ============================================================================
 // HELPERS
 // ============================================================================
-
-const formatMontant = (montant: number): string =>
-  new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
 const getModePaiementLabel = (mode: string): string =>
   MODES_PAIEMENT.find((m) => m.value === mode)?.label || mode;
@@ -182,8 +180,8 @@ async function generateBordereauPdf(
     startY: yPos,
     head: [],
     body: [
-      ['N\u00b0 Bordereau', numeroBordereau, "Date d'\u00e9mission", dateEmission],
-      ['Exercice', exercice, 'Nombre de r\u00e8glements', String(reglements.length)],
+      ['N° Bordereau', numeroBordereau, "Date d'émission", dateEmission],
+      ['Exercice', exercice, 'Nombre de règlements', String(reglements.length)],
     ],
     styles: { fontSize: fonts.body, cellPadding: 2.5 },
     columnStyles: {
@@ -209,7 +207,7 @@ async function generateBordereauPdf(
     reg.date_paiement ? format(new Date(reg.date_paiement), 'dd/MM/yyyy') : '-',
     getModePaiementLabel(reg.mode_paiement),
     reg.reference_paiement || '-',
-    formatMontant(reg.montant),
+    formatCurrency(reg.montant),
   ]);
 
   // Add total row
@@ -222,7 +220,7 @@ async function generateBordereauPdf(
     '',
     { content: 'TOTAL', styles: { fontStyle: 'bold' } } as unknown as string,
     {
-      content: formatMontant(totalMontant),
+      content: formatCurrency(totalMontant),
       styles: { fontStyle: 'bold' },
     } as unknown as string,
   ]);
@@ -231,13 +229,13 @@ async function generateBordereauPdf(
     startY: yPos,
     head: [
       [
-        'N\u00b0',
-        'R\u00e9f. R\u00e8glement',
-        'R\u00e9f. Ordonnancement',
-        'B\u00e9n\u00e9ficiaire',
+        'N°',
+        'Réf. Règlement',
+        'Réf. Ordonnancement',
+        'Bénéficiaire',
         'Date paiement',
         'Mode',
-        'R\u00e9f\u00e9rence',
+        'Référence',
         'Montant (FCFA)',
       ],
     ],
@@ -269,14 +267,14 @@ async function generateBordereauPdf(
   doc.setFontSize(fonts.subtitle);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...colors.primary);
-  doc.text(`Montant total du bordereau : ${formatMontant(totalMontant)}`, margins.left, yPos);
+  doc.text(`Montant total du bordereau : ${formatCurrency(totalMontant)}`, margins.left, yPos);
   yPos += 4;
 
   doc.setFontSize(fonts.small);
   doc.setFont('helvetica', 'italic');
   doc.setTextColor(...colors.secondary);
   doc.text(
-    `Arr\u00eat\u00e9 le pr\u00e9sent bordereau \u00e0 la somme de ${formatMontant(totalMontant)}`,
+    `Arrêté le présent bordereau à la somme de ${formatCurrency(totalMontant)}`,
     margins.left,
     yPos
   );
@@ -310,12 +308,9 @@ async function generateBordereauPdf(
 
   // DG
   doc.setFont('helvetica', 'bold');
-  doc.text(
-    'Le Directeur G\u00e9n\u00e9ral',
-    margins.left + 2 * sigWidth + sigWidth / 2,
-    signatureY,
-    { align: 'center' }
-  );
+  doc.text('Le Directeur Général', margins.left + 2 * sigWidth + sigWidth / 2, signatureY, {
+    align: 'center',
+  });
   doc.setFont('helvetica', 'normal');
   doc.text('Date : ___/___/______', margins.left + 2 * sigWidth + sigWidth / 2, signatureY + 20, {
     align: 'center',
@@ -325,7 +320,7 @@ async function generateBordereauPdf(
   doc.setFontSize(fonts.small - 1);
   doc.setTextColor(...colors.secondary);
   doc.text(
-    'Document g\u00e9n\u00e9r\u00e9 par SYGFP - Syst\u00e8me de Gestion des Finances Publiques ARTI',
+    'Document généré par SYGFP - Système de Gestion des Finances Publiques ARTI',
     pageWidth / 2,
     pageHeight - 8,
     { align: 'center' }
@@ -333,10 +328,10 @@ async function generateBordereauPdf(
 
   // Metadata
   doc.setProperties({
-    title: `Bordereau de R\u00e8glement - ${numeroBordereau}`,
+    title: `Bordereau de Règlement - ${numeroBordereau}`,
     subject: `Exercice ${exercice}`,
     author: 'ARTI - SYGFP',
-    creator: 'SYGFP - Syst\u00e8me de Gestion des Finances Publiques',
+    creator: 'SYGFP - Système de Gestion des Finances Publiques',
   });
 
   const blob = doc.output('blob');
@@ -382,7 +377,7 @@ export function BordereauReglement({ reglements, exercice }: BordereauReglementP
 
   const handleGenerate = async () => {
     if (selectedReglements.length === 0) {
-      toast.error('Veuillez s\u00e9lectionner au moins un r\u00e8glement');
+      toast.error('Veuillez sélectionner au moins un règlement');
       return;
     }
 
@@ -403,11 +398,11 @@ export function BordereauReglement({ reglements, exercice }: BordereauReglementP
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toast.success('Bordereau PDF g\u00e9n\u00e9r\u00e9 avec succ\u00e8s');
+      toast.success('Bordereau PDF généré avec succès');
       setDialogOpen(false);
     } catch (error) {
       console.error('[BordereauReglement] Erreur:', error);
-      toast.error('Erreur lors de la g\u00e9n\u00e9ration du PDF');
+      toast.error('Erreur lors de la génération du PDF');
     } finally {
       setIsGenerating(false);
     }
@@ -425,10 +420,10 @@ export function BordereauReglement({ reglements, exercice }: BordereauReglementP
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            G\u00e9n\u00e9rer un bordereau de r\u00e8glement
+            Générer un bordereau de règlement
           </DialogTitle>
           <DialogDescription>
-            S\u00e9lectionnez les r\u00e8glements \u00e0 inclure dans le bordereau PDF
+            Sélectionnez les règlements à inclure dans le bordereau PDF
           </DialogDescription>
         </DialogHeader>
 
@@ -436,7 +431,7 @@ export function BordereauReglement({ reglements, exercice }: BordereauReglementP
           {/* Num bordereau */}
           <div className="flex items-center gap-4">
             <Label htmlFor="num-bordereau" className="whitespace-nowrap">
-              N\u00b0 Bordereau
+              N° Bordereau
             </Label>
             <Input
               id="num-bordereau"
@@ -457,8 +452,8 @@ export function BordereauReglement({ reglements, exercice }: BordereauReglementP
                       onCheckedChange={toggleAll}
                     />
                   </th>
-                  <th className="p-2 text-left">N\u00b0 R\u00e8glement</th>
-                  <th className="p-2 text-left">B\u00e9n\u00e9ficiaire</th>
+                  <th className="p-2 text-left">N° Règlement</th>
+                  <th className="p-2 text-left">Bénéficiaire</th>
                   <th className="p-2 text-left">Date</th>
                   <th className="p-2 text-right">Montant</th>
                 </tr>
@@ -481,7 +476,7 @@ export function BordereauReglement({ reglements, exercice }: BordereauReglementP
                     <td className="p-2">
                       {reg.date_paiement ? format(new Date(reg.date_paiement), 'dd/MM/yyyy') : '-'}
                     </td>
-                    <td className="p-2 text-right font-medium">{formatMontant(reg.montant)}</td>
+                    <td className="p-2 text-right font-medium">{formatCurrency(reg.montant)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -491,9 +486,9 @@ export function BordereauReglement({ reglements, exercice }: BordereauReglementP
           {/* Summary */}
           <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
             <span className="text-sm text-muted-foreground">
-              {selectedReglements.length} r\u00e8glement(s) s\u00e9lectionn\u00e9(s)
+              {selectedReglements.length} règlement(s) sélectionné(s)
             </span>
-            <span className="text-lg font-bold">{formatMontant(totalMontant)}</span>
+            <span className="text-lg font-bold">{formatCurrency(totalMontant)}</span>
           </div>
         </div>
 
@@ -511,7 +506,7 @@ export function BordereauReglement({ reglements, exercice }: BordereauReglementP
             ) : (
               <Download className="h-4 w-4" />
             )}
-            {isGenerating ? 'G\u00e9n\u00e9ration...' : 'T\u00e9l\u00e9charger PDF'}
+            {isGenerating ? 'Génération...' : 'Télécharger PDF'}
           </Button>
         </DialogFooter>
       </DialogContent>

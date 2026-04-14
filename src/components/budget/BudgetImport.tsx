@@ -65,7 +65,7 @@ export function BudgetImport({ open, onOpenChange, onSuccess }: BudgetImportProp
     ].join(';');
 
     const content = `${headers}\n${example}`;
-    const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['﻿' + content], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `modele_budget_${exercice}.csv`;

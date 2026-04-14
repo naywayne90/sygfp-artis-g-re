@@ -14,6 +14,7 @@ import { createElement } from 'react';
 import { EngagementDetail, BudgetAvailability, VALIDATION_STEPS } from '@/hooks/useEngagements';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
 import logoArti from '@/assets/logo-arti.jpg';
 
 // ============================================================================
@@ -130,11 +131,6 @@ function formatDateShort(date: string | Date | null): string {
   } catch {
     return '-';
   }
-}
-
-function formatMontant(montant: number | null | undefined): string {
-  if (montant == null) return '-';
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 }
 
 // ============================================================================
@@ -254,9 +250,9 @@ async function generatePage1(
     startY: yPos,
     head: [['Désignation', 'Montant']],
     body: [
-      ['Montant Hors Taxes (HT)', formatMontant(montantHT)],
-      [`TVA (${tvaRate}%)`, formatMontant(tvaAmount)],
-      ['MONTANT TOTAL TTC', formatMontant(engagement.montant)],
+      ['Montant Hors Taxes (HT)', formatCurrency(montantHT)],
+      [`TVA (${tvaRate}%)`, formatCurrency(tvaAmount)],
+      ['MONTANT TOTAL TTC', formatCurrency(engagement.montant)],
     ],
     styles: { fontSize: fonts.body, cellPadding: 3 },
     headStyles: {
@@ -368,13 +364,13 @@ async function generatePage1(
       startY: yPos,
       head: [['Élément', 'Montant']],
       body: [
-        ['Dotation initiale', formatMontant(availability.dotation_initiale)],
-        ['Virements reçus (+)', formatMontant(availability.virements_recus)],
-        ['Virements émis (-)', formatMontant(availability.virements_emis)],
-        ['Dotation actuelle', formatMontant(availability.dotation_actuelle)],
-        ['Engagements antérieurs', formatMontant(availability.engagements_anterieurs)],
-        ['Engagement actuel', formatMontant(availability.engagement_actuel)],
-        ['Disponible après engagement', formatMontant(availability.disponible)],
+        ['Dotation initiale', formatCurrency(availability.dotation_initiale)],
+        ['Virements reçus (+)', formatCurrency(availability.virements_recus)],
+        ['Virements émis (-)', formatCurrency(availability.virements_emis)],
+        ['Dotation actuelle', formatCurrency(availability.dotation_actuelle)],
+        ['Engagements antérieurs', formatCurrency(availability.engagements_anterieurs)],
+        ['Engagement actuel', formatCurrency(availability.engagement_actuel)],
+        ['Disponible après engagement', formatCurrency(availability.disponible)],
         ['Taux de consommation', `${tauxConsommation}%`],
       ],
       styles: { fontSize: fonts.body, cellPadding: 2.5 },

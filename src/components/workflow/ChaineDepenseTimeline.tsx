@@ -12,6 +12,7 @@ import {
   XCircle,
   ArrowRight,
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface EtapeInfo {
   id: string | null;
@@ -72,9 +73,9 @@ const getStatutBadge = (statut: string | null | undefined) => {
   );
 };
 
-const formatMontant = (montant: number | null | undefined) => {
+const formatMontantSafe = (montant: number | null | undefined) => {
   if (!montant) return '-';
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
+  return formatCurrency(montant);
 };
 
 export function ChaineDepenseTimeline({
@@ -170,25 +171,25 @@ export function ChaineDepenseTimeline({
           {engagement?.montant && (
             <div>
               <span className="text-muted-foreground">Montant engagé:</span>
-              <p className="font-medium">{formatMontant(engagement.montant)}</p>
+              <p className="font-medium">{formatMontantSafe(engagement.montant)}</p>
             </div>
           )}
           {liquidation?.montant && (
             <div>
               <span className="text-muted-foreground">Montant liquidé:</span>
-              <p className="font-medium">{formatMontant(liquidation.montant)}</p>
+              <p className="font-medium">{formatMontantSafe(liquidation.montant)}</p>
             </div>
           )}
           {ordonnancement?.montant && (
             <div>
               <span className="text-muted-foreground">Montant ordonnancé:</span>
-              <p className="font-medium">{formatMontant(ordonnancement.montant)}</p>
+              <p className="font-medium">{formatMontantSafe(ordonnancement.montant)}</p>
             </div>
           )}
           {reglement?.montant && (
             <div>
               <span className="text-muted-foreground">Montant payé:</span>
-              <p className="font-medium text-success">{formatMontant(reglement.montant)}</p>
+              <p className="font-medium text-success">{formatMontantSafe(reglement.montant)}</p>
             </div>
           )}
         </div>

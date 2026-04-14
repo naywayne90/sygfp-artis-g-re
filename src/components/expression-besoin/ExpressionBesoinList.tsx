@@ -39,7 +39,7 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
-import { formatMontant } from '@/lib/config/sygfp-constants';
+import { formatCurrency } from '@/lib/utils';
 
 interface ExpressionBesoinListProps {
   expressions: ExpressionBesoin[];
@@ -87,7 +87,8 @@ export function ExpressionBesoinList({
   isSubmitting,
 }: ExpressionBesoinListProps) {
   const navigate = useNavigate();
-  const { canVerifyEB, canValidateEB } = usePermissions();
+  const { canVerifyEB, canValidateEB, hasRole } = usePermissions();
+  const isDG = hasRole('DG');
 
   // Detail dialog — pass only the ID for lazy loading
   const [selectedExpressionId, setSelectedExpressionId] = useState<string | null>(null);
@@ -189,7 +190,7 @@ export function ExpressionBesoinList({
                   {expression.direction?.sigle || expression.direction?.code || '-'}
                 </TableCell>
                 <TableCell>
-                  {expression.montant_estime ? formatMontant(expression.montant_estime) : '-'}
+                  {expression.montant_estime ? formatCurrency(expression.montant_estime) : '-'}
                 </TableCell>
                 <TableCell>
                   <Badge className={urgence.className} variant="outline">
@@ -271,8 +272,8 @@ export function ExpressionBesoinList({
                           </>
                         )}
 
-                        {/* Vérifié : DG/DAAF peut Valider / Rejeter */}
-                        {expression.statut === 'verifie' && canValidateEB() && (
+                        {/* En validation : DG/DAAF peut Valider / Rejeter */}
+                        {expression.statut === 'en_validation' && canValidateEB() && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -306,7 +307,7 @@ export function ExpressionBesoinList({
                           </>
                         )}
 
-                        {expression.statut === 'valide' && (
+                        {expression.statut === 'valide' && !isDG && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem

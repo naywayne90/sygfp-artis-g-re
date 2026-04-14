@@ -6,7 +6,6 @@ import { useExercice } from '@/contexts/ExerciceContext';
 export interface ExecutionStats {
   // Engagements
   engagements: {
-    brouillon: { count: number; montant: number };
     soumis: { count: number; montant: number };
     valide: { count: number; montant: number };
     rejete: { count: number; montant: number };
@@ -14,7 +13,6 @@ export interface ExecutionStats {
   };
   // Liquidations
   liquidations: {
-    brouillon: { count: number; montant: number };
     soumis: { count: number; montant: number };
     valide: { count: number; montant: number };
     rejete: { count: number; montant: number };
@@ -22,7 +20,7 @@ export interface ExecutionStats {
   };
   // Ordonnancements
   ordonnancements: {
-    brouillon: { count: number; montant: number };
+    soumis: { count: number; montant: number };
     en_signature: { count: number; montant: number };
     signe: { count: number; montant: number };
     rejete: { count: number; montant: number };
@@ -123,17 +121,15 @@ export function useExecutionDashboard() {
       const reglements = reglementsRes.data || [];
       const dossiers = dossiersRes.data || [];
 
-      // Aggregate engagements
+      // Aggregate engagements (pas de brouillon : tout est soumis des la creation)
       const engagementsStats = aggregateByStatus(engagements, {
-        brouillon: ['soumis', 'en_cours'],
-        soumis: ['soumis', 'en_attente'],
+        soumis: ['soumis', 'en_cours', 'en_attente'],
         valide: ['valide'],
         rejete: ['rejete', 'annule'],
       });
 
       // Aggregate liquidations
       const liquidationsStats = aggregateByStatus(liquidations, {
-        brouillon: ['soumis'],
         soumis: ['soumis', 'en_attente'],
         valide: ['valide'],
         rejete: ['rejete'],
@@ -141,8 +137,8 @@ export function useExecutionDashboard() {
 
       // Aggregate ordonnancements
       const ordonnancementsStats = aggregateByStatus(ordonnancements, {
-        brouillon: ['soumis', 'en_attente'],
-        en_signature: ['en_signature', 'soumis'],
+        soumis: ['soumis', 'en_attente'],
+        en_signature: ['en_signature'],
         signe: ['signe', 'valide'],
         rejete: ['rejete'],
       });

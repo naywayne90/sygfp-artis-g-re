@@ -27,19 +27,9 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn, formatCurrency } from '@/lib/utils';
 
 // ============================================================================
 // TYPES
@@ -149,15 +139,6 @@ const ENTITY_ROUTES: Record<string, string> = {
 // HELPERS
 // ============================================================================
 
-function formatMontant(montant: number | undefined): string {
-  if (montant === undefined || montant === null) return 'N/A';
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'decimal',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(montant) + ' FCFA';
-}
-
 function getEntityRoute(entityType: string | null, entityId: string | null): string | null {
   if (!entityType || !entityId) return null;
   const route = ENTITY_ROUTES[entityType];
@@ -179,20 +160,22 @@ export function NotificationCard({
   const navigate = useNavigate();
 
   const metadata = notification.metadata;
-  const hasFinancialData = metadata && (
-    metadata.montant ||
-    metadata.montant_net ||
-    metadata.montant_deja_regle ||
-    metadata.montant_restant ||
-    metadata.montant_reglement_courant
-  );
+  const hasFinancialData =
+    metadata &&
+    (metadata.montant ||
+      metadata.montant_net ||
+      metadata.montant_deja_regle ||
+      metadata.montant_restant ||
+      metadata.montant_reglement_courant);
 
   const entityRoute = useMemo(
     () => getEntityRoute(notification.entity_type, notification.entity_id),
     [notification.entity_type, notification.entity_id]
   );
 
-  const isFinancialNotification = ['ordonnancement', 'reglement', 'reglement_partiel'].includes(notification.type);
+  const isFinancialNotification = ['ordonnancement', 'reglement', 'reglement_partiel'].includes(
+    notification.type
+  );
 
   const handleClick = () => {
     if (onClick) {
@@ -249,7 +232,10 @@ export function NotificationCard({
             {notification.message}
           </p>
           <p className="text-[10px] text-muted-foreground mt-1">
-            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: fr })}
+            {formatDistanceToNow(new Date(notification.created_at), {
+              addSuffix: true,
+              locale: fr,
+            })}
           </p>
         </div>
       </div>
@@ -284,12 +270,22 @@ export function NotificationCard({
               </div>
               <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
               <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                <span>{formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: fr })}</span>
+                <span>
+                  {formatDistanceToNow(new Date(notification.created_at), {
+                    addSuffix: true,
+                    locale: fr,
+                  })}
+                </span>
                 {notification.is_urgent && (
-                  <Badge variant="destructive" className="text-[10px]">Urgent</Badge>
+                  <Badge variant="destructive" className="text-[10px]">
+                    Urgent
+                  </Badge>
                 )}
                 {metadata?.is_partial && (
-                  <Badge variant="outline" className="text-[10px] border-orange-300 text-orange-600">
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] border-orange-300 text-orange-600"
+                  >
                     Partiel
                   </Badge>
                 )}
@@ -304,7 +300,12 @@ export function NotificationCard({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleMarkAsRead}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={handleMarkAsRead}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
@@ -316,7 +317,12 @@ export function NotificationCard({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={handleDelete}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={handleDelete}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
@@ -339,44 +345,72 @@ export function NotificationCard({
               <TableBody>
                 {metadata?.reference && (
                   <TableRow className="border-0">
-                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">Référence</TableCell>
-                    <TableCell className="py-1 px-0 text-xs font-mono text-right">{metadata.reference}</TableCell>
+                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">
+                      Référence
+                    </TableCell>
+                    <TableCell className="py-1 px-0 text-xs font-mono text-right">
+                      {metadata.reference}
+                    </TableCell>
                   </TableRow>
                 )}
                 {metadata?.montant_net && (
                   <TableRow className="border-0">
-                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">Montant net</TableCell>
-                    <TableCell className="py-1 px-0 text-xs font-medium text-right">{formatMontant(metadata.montant_net)}</TableCell>
+                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">
+                      Montant net
+                    </TableCell>
+                    <TableCell className="py-1 px-0 text-xs font-medium text-right">
+                      {formatCurrency(metadata.montant_net)}
+                    </TableCell>
                   </TableRow>
                 )}
                 {metadata?.montant_reglement_courant && (
                   <TableRow className="border-0">
-                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">Règlement courant</TableCell>
-                    <TableCell className="py-1 px-0 text-xs font-medium text-green-600 text-right">{formatMontant(metadata.montant_reglement_courant)}</TableCell>
+                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">
+                      Règlement courant
+                    </TableCell>
+                    <TableCell className="py-1 px-0 text-xs font-medium text-green-600 text-right">
+                      {formatCurrency(metadata.montant_reglement_courant)}
+                    </TableCell>
                   </TableRow>
                 )}
                 {metadata?.montant_deja_regle !== undefined && (
                   <TableRow className="border-0">
-                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">Déjà réglé</TableCell>
-                    <TableCell className="py-1 px-0 text-xs text-right">{formatMontant(metadata.montant_deja_regle)}</TableCell>
+                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">
+                      Déjà réglé
+                    </TableCell>
+                    <TableCell className="py-1 px-0 text-xs text-right">
+                      {formatCurrency(metadata.montant_deja_regle)}
+                    </TableCell>
                   </TableRow>
                 )}
                 {metadata?.montant_restant !== undefined && metadata.montant_restant > 0 && (
                   <TableRow className="border-0">
-                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">Reste à payer</TableCell>
-                    <TableCell className="py-1 px-0 text-xs font-medium text-orange-600 text-right">{formatMontant(metadata.montant_restant)}</TableCell>
+                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">
+                      Reste à payer
+                    </TableCell>
+                    <TableCell className="py-1 px-0 text-xs font-medium text-orange-600 text-right">
+                      {formatCurrency(metadata.montant_restant)}
+                    </TableCell>
                   </TableRow>
                 )}
                 {metadata?.fournisseur && (
                   <TableRow className="border-0">
-                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">Fournisseur</TableCell>
-                    <TableCell className="py-1 px-0 text-xs text-right">{metadata.fournisseur}</TableCell>
+                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">
+                      Fournisseur
+                    </TableCell>
+                    <TableCell className="py-1 px-0 text-xs text-right">
+                      {metadata.fournisseur}
+                    </TableCell>
                   </TableRow>
                 )}
                 {metadata?.mode_paiement && (
                   <TableRow className="border-0">
-                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">Mode paiement</TableCell>
-                    <TableCell className="py-1 px-0 text-xs text-right">{metadata.mode_paiement}</TableCell>
+                    <TableCell className="py-1 px-0 text-xs text-muted-foreground">
+                      Mode paiement
+                    </TableCell>
+                    <TableCell className="py-1 px-0 text-xs text-right">
+                      {metadata.mode_paiement}
+                    </TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -387,7 +421,15 @@ export function NotificationCard({
         {/* Lien vers le dossier */}
         {entityRoute && (
           <div className="mt-4 pt-3 border-t flex justify-end">
-            <Button variant="ghost" size="sm" className="text-xs h-7" onClick={(e) => { e.stopPropagation(); navigate(entityRoute); }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs h-7"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(entityRoute);
+              }}
+            >
               Voir le dossier
               <ArrowRight className="h-3 w-3 ml-1" />
             </Button>

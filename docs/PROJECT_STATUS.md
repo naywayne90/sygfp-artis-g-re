@@ -1,37 +1,38 @@
 # Etat du Projet SYGFP
 
 > **Suivi de l'avancement et roadmap**
-> Version: 2.2 | Derniere mise a jour: 2026-02-19
+> Version: 2.4 | Derniere mise a jour: 2026-04-14
 
 ---
 
 ## 1. Vue d'Ensemble
 
-| Metrique            | Valeur                       |
-| ------------------- | ---------------------------- |
-| **Version**         | 1.2 RC                       |
-| **Fichiers source** | 802 (TS + TSX)               |
-| **Lignes de code**  | 279 872                      |
-| **Composants TSX**  | 417 fichiers (50 modules)    |
-| **Hooks**           | 165 fichiers (58 733 lignes) |
-| **Pages**           | 115 fichiers (12 sections)   |
-| **Routes**          | 111                          |
-| **Lib/Utils**       | 45 fichiers (12 951 lignes)  |
-| **Services**        | 17 fichiers (5 757 lignes)   |
-| **Contextes**       | 2 (640 lignes)               |
-| **Types**           | 3 fichiers (572 lignes)      |
-| **Integrations**    | 2 fichiers (18 262 lignes)   |
-| **Migrations DB**   | 253                          |
-| **Edge Functions**  | 12 (5 567 lignes)            |
-| **Tests unitaires** | 7 fichiers                   |
-| **Tests E2E**       | 69 fichiers                  |
-| **Docs modules**    | 13 fiches                    |
+| Metrique            | Valeur                  |
+| ------------------- | ----------------------- |
+| **Version**         | 1.3 Production          |
+| **Fichiers source** | 800+ (TS + TSX)         |
+| **Lignes de code**  | 279 872+                |
+| **Composants TSX**  | 428 fichiers            |
+| **Hooks**           | 179 fichiers            |
+| **Pages**           | 127 fichiers            |
+| **Routes**          | 105                     |
+| **Lib/Utils**       | 45 fichiers             |
+| **Services**        | 17 fichiers             |
+| **Contextes**       | 2                       |
+| **Migrations DB**   | 283                     |
+| **Tables DB**       | 201                     |
+| **RLS policies**    | 671                     |
+| **Edge Functions**  | 12                      |
+| **Tests unitaires** | 713 (7 fichiers Vitest) |
+| **Tests E2E**       | 71 specs Playwright     |
+| **Docs modules**    | 21 fiches               |
+| **Sidebar items**   | 55                      |
 
 ---
 
 ## INVENTAIRE FRONTEND COMPLET
 
-> Inventaire exhaustif au 2026-02-19 — 802 fichiers, 279 872 lignes de code
+> Inventaire exhaustif au 2026-04-13 — 800+ fichiers (mise a jour des metriques cles)
 
 ---
 
@@ -352,15 +353,15 @@
 
 #### F3.3 General (7 routes)
 
-| Route                  | Page               |
-| ---------------------- | ------------------ |
-| `/`                    | Dashboard          |
-| `/recherche`           | Recherche          |
-| `/notifications`       | Notifications      |
-| `/alertes-budgetaires` | AlertesBudgetaires |
-| `/alertes`             | Alertes            |
-| `/mon-profil`          | MonProfil          |
-| `/taches`              | WorkflowTasks      |
+| Route                  | Page                               |
+| ---------------------- | ---------------------------------- |
+| `/`                    | Dashboard                          |
+| `/recherche`           | Recherche                          |
+| `/notifications`       | Notifications                      |
+| `/alertes-budgetaires` | AlertesBudgetaires                 |
+| `/alertes`             | Alertes                            |
+| `/mon-profil`          | MonProfil                          |
+| `/taches`              | WorkflowTasks (Centre de Pilotage) |
 
 #### F3.4 Administration (29 routes sous /admin/\*)
 
@@ -1188,4 +1189,42 @@ Par categorie :
 
 ---
 
-_Derniere mise a jour: 2026-02-19_
+## 14. Journal des evolutions recentes
+
+### 14.1 Session 14/04/2026 — Centre de Pilotage + Passation DG UX
+
+#### Centre de Pilotage (`/taches`) — Refonte complete
+
+**Probleme** : le badge TopBar "18 a traiter" renvoyait vers `/taches` qui affichait "Aucune tache" (requetait `workflow_tasks` table vide, non reliee aux donnees reelles).
+
+**Solution** : reecriture de `src/pages/WorkflowTasks.tsx` en tableau de bord unifie utilisant `useSidebarBadges()` (deja en place, 0 nouveau hook, 0 requete DB additionnelle).
+
+**Composants ajoutes dans la page** :
+
+- `KPICards` : 4 cartes (A traiter, Modules actifs avec barre de progression X/10, Differes, Urgents)
+- `TopUrgentBanner` : 3 modules les plus charges en quick-nav
+- `ChainVisual` : chaine 9 etapes en cercles cliquables (SEF > AEF > IMP > EB > PM > ENG > LIQ > ORD > REG), badge "X total", timestamp "MaJ il y a...", bouton refresh (invalidate `['sidebar-badges', exercice]`)
+- `ModuleCard` : 10 cartes module (icone + count + extras + bouton Traiter/Consulter)
+- `CentrePilotageSkeleton` : loading state
+
+**Corrections connexes** :
+
+- `src/config/modules.registry.ts` : breadcrumb route `/taches` renomme "Mes Taches" > "Centre de pilotage"
+- `src/hooks/useSidebarBadges.ts` : suppression des 16x erreurs 404 `roadmap_submissions` (table inexistante en prod, remplacee par `Promise.resolve({ count: 0, data: [], error: null })`)
+
+**Tests** : 30/30 interactions validees (navigation depuis chaque bouton/carte/cercle), cohérence KPI=18 / chaine=25, 0 erreur console, 809/809 tests unitaires verts.
+
+#### Passation de Marche — Ameliorations UX DG
+
+Ajouts **additifs** sur `src/pages/execution/PassationMarche.tsx` (module certifie 100/100, 94 tests passation inchangés) visibles uniquement pour le role DG :
+
+- **Pipeline Progress Bar** : 7 etapes en pastilles cliquables sous les KPIs, etape Attribution en violet pour marquer le point d'entree DG
+- **Empty state enrichi** : quand `A approuver = 0` mais pipeline > 0, affichage d'un funnel visuel des items en cours avec destination "Approbation DG > Vous"
+- **KPI Traitees cliquable** : filtre vers onglet `approuve`
+- **KPI Rejetees conditionnel** : 4eme carte rouge visible si `counts.rejete > 0`
+
+Details complets : `docs/modules/MODULE_MARCHES.md` section 10.
+
+---
+
+_Derniere mise a jour: 2026-04-14_

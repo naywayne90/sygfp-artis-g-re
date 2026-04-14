@@ -1,22 +1,21 @@
-// @ts-nocheck - Tables and columns not in generated types
 /**
  * useTaskExecution - Hook pour la gestion de l'exécution physique des activités
  *
  * Gère le suivi de l'avancement, les statuts, les preuves et les contributeurs.
  */
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useAuditLog } from "@/hooks/useAuditLog";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 // Types
-export type TaskStatus = "non_demarre" | "en_cours" | "realise" | "bloque" | "annule";
+export type TaskStatus = 'non_demarre' | 'en_cours' | 'realise' | 'bloque' | 'annule';
 
-export type ProofType = "document" | "photo" | "rapport" | "pv" | "attestation" | "autre";
+export type ProofType = 'document' | 'photo' | 'rapport' | 'pv' | 'attestation' | 'autre';
 
-export type TaskSource = "manuel" | "import" | "auto";
+export type TaskSource = 'manuel' | 'import' | 'auto';
 
 export interface TaskExecution {
   id: string;
@@ -107,36 +106,33 @@ export const TASK_SOURCE_CONFIG: Record<
   { label: string; color: string; bgColor: string; icon: string }
 > = {
   manuel: {
-    label: "Saisie manuelle",
-    color: "text-blue-600",
-    bgColor: "bg-blue-100",
-    icon: "edit",
+    label: 'Saisie manuelle',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
+    icon: 'edit',
   },
   import: {
-    label: "Import fichier",
-    color: "text-purple-600",
-    bgColor: "bg-purple-100",
-    icon: "upload",
+    label: 'Import fichier',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-100',
+    icon: 'upload',
   },
   auto: {
-    label: "Automatique",
-    color: "text-gray-600",
-    bgColor: "bg-gray-100",
-    icon: "settings",
+    label: 'Automatique',
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-100',
+    icon: 'settings',
   },
 };
 
 // Configuration des types de preuves
-export const PROOF_TYPE_CONFIG: Record<
-  ProofType,
-  { label: string; icon: string }
-> = {
-  document: { label: "Document", icon: "file-text" },
-  photo: { label: "Photo", icon: "image" },
-  rapport: { label: "Rapport", icon: "file-bar-chart" },
-  pv: { label: "Procès-verbal", icon: "scroll" },
-  attestation: { label: "Attestation", icon: "award" },
-  autre: { label: "Autre", icon: "file" },
+export const PROOF_TYPE_CONFIG: Record<ProofType, { label: string; icon: string }> = {
+  document: { label: 'Document', icon: 'file-text' },
+  photo: { label: 'Photo', icon: 'image' },
+  rapport: { label: 'Rapport', icon: 'file-bar-chart' },
+  pv: { label: 'Procès-verbal', icon: 'scroll' },
+  attestation: { label: 'Attestation', icon: 'award' },
+  autre: { label: 'Autre', icon: 'file' },
 };
 
 export interface TaskFilters {
@@ -144,7 +140,7 @@ export interface TaskFilters {
   missionId?: string;
   actionId?: string;
   osId?: string;
-  status?: TaskStatus | "all";
+  status?: TaskStatus | 'all';
   responsableId?: string;
   search?: string;
 }
@@ -165,29 +161,29 @@ export const TASK_STATUS_CONFIG: Record<
   { label: string; color: string; bgColor: string }
 > = {
   non_demarre: {
-    label: "Non démarré",
-    color: "text-gray-600",
-    bgColor: "bg-gray-100",
+    label: 'Non démarré',
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-100',
   },
   en_cours: {
-    label: "En cours",
-    color: "text-blue-600",
-    bgColor: "bg-blue-100",
+    label: 'En cours',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
   },
   realise: {
-    label: "Réalisé",
-    color: "text-green-600",
-    bgColor: "bg-green-100",
+    label: 'Réalisé',
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
   },
   bloque: {
-    label: "Bloqué",
-    color: "text-red-600",
-    bgColor: "bg-red-100",
+    label: 'Bloqué',
+    color: 'text-red-600',
+    bgColor: 'bg-red-100',
   },
   annule: {
-    label: "Annulé",
-    color: "text-orange-600",
-    bgColor: "bg-orange-100",
+    label: 'Annulé',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-100',
   },
 };
 
@@ -201,40 +197,40 @@ export function useTaskExecutions(filters?: TaskFilters) {
 
   // Liste des exécutions
   const executionsQuery = useQuery({
-    queryKey: ["task-executions", exerciceId, filters],
+    queryKey: ['task-executions', exerciceId, filters],
     queryFn: async () => {
       // Utiliser la vue enrichie
       let query = supabase
-        .from("v_task_executions")
-        .select("*")
-        .order("updated_at", { ascending: false });
+        .from('v_task_executions')
+        .select('*')
+        .order('updated_at', { ascending: false });
 
       if (exerciceId) {
-        query = query.eq("exercice_id", exerciceId);
+        query = query.eq('exercice_id', exerciceId);
       }
 
       if (filters?.directionId) {
-        query = query.eq("direction_id", filters.directionId);
+        query = query.eq('direction_id', filters.directionId);
       }
 
       if (filters?.missionId) {
-        query = query.eq("mission_id", filters.missionId);
+        query = query.eq('mission_id', filters.missionId);
       }
 
       if (filters?.actionId) {
-        query = query.eq("action_id", filters.actionId);
+        query = query.eq('action_id', filters.actionId);
       }
 
       if (filters?.osId) {
-        query = query.eq("os_id", filters.osId);
+        query = query.eq('os_id', filters.osId);
       }
 
-      if (filters?.status && filters.status !== "all") {
-        query = query.eq("status", filters.status);
+      if (filters?.status && filters.status !== 'all') {
+        query = query.eq('status', filters.status);
       }
 
       if (filters?.responsableId) {
-        query = query.eq("responsable_id", filters.responsableId);
+        query = query.eq('responsable_id', filters.responsableId);
       }
 
       if (filters?.search) {
@@ -253,24 +249,24 @@ export function useTaskExecutions(filters?: TaskFilters) {
 
   // Statistiques
   const statsQuery = useQuery({
-    queryKey: ["task-executions-stats", exerciceId, filters?.directionId],
+    queryKey: ['task-executions-stats', exerciceId, filters?.directionId],
     queryFn: async () => {
       let query = supabase
-        .from("task_executions")
-        .select("status, taux_avancement")
-        .eq("exercice_id", exerciceId!);
+        .from('task_executions')
+        .select('status, taux_avancement')
+        .eq('exercice_id', exerciceId!);
 
       if (filters?.directionId) {
         // Filtrer par direction via jointure
         const { data: activiteIds } = await supabase
-          .from("v_task_executions")
-          .select("activite_id")
-          .eq("exercice_id", exerciceId!)
-          .eq("direction_id", filters.directionId);
+          .from('v_task_executions')
+          .select('activite_id')
+          .eq('exercice_id', exerciceId!)
+          .eq('direction_id', filters.directionId);
 
         if (activiteIds && activiteIds.length > 0) {
           query = query.in(
-            "activite_id",
+            'activite_id',
             activiteIds.map((a) => a.activite_id)
           );
         }
@@ -281,17 +277,14 @@ export function useTaskExecutions(filters?: TaskFilters) {
 
       const stats: TaskStats = {
         total: data.length,
-        non_demarre: data.filter((t) => t.status === "non_demarre").length,
-        en_cours: data.filter((t) => t.status === "en_cours").length,
-        realise: data.filter((t) => t.status === "realise").length,
-        bloque: data.filter((t) => t.status === "bloque").length,
-        annule: data.filter((t) => t.status === "annule").length,
+        non_demarre: data.filter((t) => t.status === 'non_demarre').length,
+        en_cours: data.filter((t) => t.status === 'en_cours').length,
+        realise: data.filter((t) => t.status === 'realise').length,
+        bloque: data.filter((t) => t.status === 'bloque').length,
+        annule: data.filter((t) => t.status === 'annule').length,
         taux_moyen:
           data.length > 0
-            ? Math.round(
-                data.reduce((sum, t) => sum + (t.taux_avancement || 0), 0) /
-                  data.length
-              )
+            ? Math.round(data.reduce((sum, t) => sum + (t.taux_avancement || 0), 0) / data.length)
             : 0,
       };
 
@@ -303,7 +296,7 @@ export function useTaskExecutions(filters?: TaskFilters) {
   // Mutation pour démarrer une tâche
   const startTaskMutation = useMutation({
     mutationFn: async (activiteId: string) => {
-      const { data, error } = await supabase.rpc("start_task", {
+      const { data, error } = await supabase.rpc('start_task', {
         p_activite_id: activiteId,
         p_exercice_id: exerciceId!,
       });
@@ -311,13 +304,13 @@ export function useTaskExecutions(filters?: TaskFilters) {
       return data;
     },
     onSuccess: (_, activiteId) => {
-      queryClient.invalidateQueries({ queryKey: ["task-executions"] });
+      queryClient.invalidateQueries({ queryKey: ['task-executions'] });
       log({
-        action: "task_started",
-        entity_type: "task_execution",
+        action: 'task_started',
+        entity_type: 'task_execution',
         entity_id: activiteId,
       });
-      toast.success("Tâche démarrée");
+      toast.success('Tâche démarrée');
     },
     onError: (error: Error) => {
       toast.error(`Erreur: ${error.message}`);
@@ -333,7 +326,7 @@ export function useTaskExecutions(filters?: TaskFilters) {
       activiteId: string;
       commentaire?: string;
     }) => {
-      const { data, error } = await supabase.rpc("mark_task_completed", {
+      const { data, error } = await supabase.rpc('mark_task_completed', {
         p_activite_id: activiteId,
         p_exercice_id: exerciceId!,
         p_commentaire: commentaire || null,
@@ -342,13 +335,13 @@ export function useTaskExecutions(filters?: TaskFilters) {
       return data;
     },
     onSuccess: (_, { activiteId }) => {
-      queryClient.invalidateQueries({ queryKey: ["task-executions"] });
+      queryClient.invalidateQueries({ queryKey: ['task-executions'] });
       log({
-        action: "task_completed",
-        entity_type: "task_execution",
+        action: 'task_completed',
+        entity_type: 'task_execution',
         entity_id: activiteId,
       });
-      toast.success("Tâche marquée comme réalisée");
+      toast.success('Tâche marquée comme réalisée');
     },
     onError: (error: Error) => {
       toast.error(`Erreur: ${error.message}`);
@@ -357,14 +350,8 @@ export function useTaskExecutions(filters?: TaskFilters) {
 
   // Mutation pour marquer comme bloqué
   const blockTaskMutation = useMutation({
-    mutationFn: async ({
-      activiteId,
-      motif,
-    }: {
-      activiteId: string;
-      motif: string;
-    }) => {
-      const { data, error } = await supabase.rpc("mark_task_blocked", {
+    mutationFn: async ({ activiteId, motif }: { activiteId: string; motif: string }) => {
+      const { data, error } = await supabase.rpc('mark_task_blocked', {
         p_activite_id: activiteId,
         p_exercice_id: exerciceId!,
         p_motif: motif,
@@ -373,13 +360,13 @@ export function useTaskExecutions(filters?: TaskFilters) {
       return data;
     },
     onSuccess: (_, { activiteId }) => {
-      queryClient.invalidateQueries({ queryKey: ["task-executions"] });
+      queryClient.invalidateQueries({ queryKey: ['task-executions'] });
       log({
-        action: "task_blocked",
-        entity_type: "task_execution",
+        action: 'task_blocked',
+        entity_type: 'task_execution',
         entity_id: activiteId,
       });
-      toast.success("Tâche marquée comme bloquée");
+      toast.success('Tâche marquée comme bloquée');
     },
     onError: (error: Error) => {
       toast.error(`Erreur: ${error.message}`);
@@ -402,25 +389,22 @@ export function useTaskExecutions(filters?: TaskFilters) {
         responsable_nom?: string;
       };
     }) => {
-      const { data: result, error } = await supabase.rpc(
-        "upsert_task_execution",
-        {
-          p_activite_id: activiteId,
-          p_exercice_id: exerciceId!,
-          p_status: data.status || null,
-          p_taux_avancement: data.taux_avancement ?? null,
-          p_date_debut_reelle: data.date_debut_reelle || null,
-          p_date_fin_reelle: data.date_fin_reelle || null,
-          p_commentaire: data.commentaire || null,
-          p_responsable_nom: data.responsable_nom || null,
-        }
-      );
+      const { data: result, error } = await supabase.rpc('upsert_task_execution', {
+        p_activite_id: activiteId,
+        p_exercice_id: exerciceId!,
+        p_status: data.status || null,
+        p_taux_avancement: data.taux_avancement ?? null,
+        p_date_debut_reelle: data.date_debut_reelle || null,
+        p_date_fin_reelle: data.date_fin_reelle || null,
+        p_commentaire: data.commentaire || null,
+        p_responsable_nom: data.responsable_nom || null,
+      });
       if (error) throw error;
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["task-executions"] });
-      toast.success("Tâche mise à jour");
+      queryClient.invalidateQueries({ queryKey: ['task-executions'] });
+      toast.success('Tâche mise à jour');
     },
     onError: (error: Error) => {
       toast.error(`Erreur: ${error.message}`);
@@ -467,12 +451,12 @@ export function useTaskExecutions(filters?: TaskFilters) {
 export function useTaskExecutionDetail(taskId: string | null) {
   // Détail
   const detailQuery = useQuery({
-    queryKey: ["task-execution-detail", taskId],
+    queryKey: ['task-execution-detail', taskId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("v_task_executions")
-        .select("*")
-        .eq("id", taskId!)
+        .from('v_task_executions')
+        .select('*')
+        .eq('id', taskId!)
         .single();
 
       if (error) throw error;
@@ -483,13 +467,13 @@ export function useTaskExecutionDetail(taskId: string | null) {
 
   // Contributeurs
   const contributorsQuery = useQuery({
-    queryKey: ["task-execution-contributors", taskId],
+    queryKey: ['task-execution-contributors', taskId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("task_execution_contributors")
-        .select("*")
-        .eq("task_execution_id", taskId!)
-        .order("created_at");
+        .from('task_execution_contributors')
+        .select('*')
+        .eq('task_execution_id', taskId!)
+        .order('created_at');
 
       if (error) throw error;
       return data as TaskContributor[];
@@ -499,13 +483,13 @@ export function useTaskExecutionDetail(taskId: string | null) {
 
   // Preuves
   const proofsQuery = useQuery({
-    queryKey: ["task-execution-proofs", taskId],
+    queryKey: ['task-execution-proofs', taskId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("task_execution_proofs")
-        .select("*")
-        .eq("task_execution_id", taskId!)
-        .order("uploaded_at", { ascending: false });
+        .from('task_execution_proofs')
+        .select('*')
+        .eq('task_execution_id', taskId!)
+        .order('uploaded_at', { ascending: false });
 
       if (error) throw error;
       return data as TaskProof[];
@@ -515,21 +499,21 @@ export function useTaskExecutionDetail(taskId: string | null) {
 
   // Historique avec nom du performeur
   const historyQuery = useQuery({
-    queryKey: ["task-execution-history", taskId],
+    queryKey: ['task-execution-history', taskId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("task_execution_history")
-        .select("*, profiles:performed_by(full_name)")
-        .eq("task_execution_id", taskId!)
-        .order("performed_at", { ascending: false });
+        .from('task_execution_history')
+        .select('*, profiles:performed_by(full_name)')
+        .eq('task_execution_id', taskId!)
+        .order('performed_at', { ascending: false });
 
       if (error) throw error;
 
       // Mapper pour aplatir la jointure
-      return (data || []).map(item => ({
+      return (data || []).map((item) => ({
         ...item,
         performer_name: (item.profiles as any)?.full_name || null,
-        profiles: undefined
+        profiles: undefined,
       })) as TaskHistory[];
     },
     enabled: !!taskId,
@@ -540,10 +524,7 @@ export function useTaskExecutionDetail(taskId: string | null) {
     contributors: contributorsQuery.data ?? [],
     proofs: proofsQuery.data ?? [],
     history: historyQuery.data ?? [],
-    isLoading:
-      detailQuery.isLoading ||
-      contributorsQuery.isLoading ||
-      proofsQuery.isLoading,
+    isLoading: detailQuery.isLoading || contributorsQuery.isLoading || proofsQuery.isLoading,
     isError: detailQuery.isError,
     refetch: () => {
       detailQuery.refetch();
@@ -561,11 +542,11 @@ export function useActivitesWithoutExecution(directionId?: string) {
   const { exerciceId } = useExercice();
 
   return useQuery({
-    queryKey: ["activites-without-execution", exerciceId, directionId],
+    queryKey: ['activites-without-execution', exerciceId, directionId],
     queryFn: async () => {
       // Récupérer les activités qui n'ont pas encore d'exécution pour cet exercice
       const query = supabase
-        .from("activites")
+        .from('activites')
         .select(
           `
           id, code, libelle, montant_prevu,
@@ -578,17 +559,17 @@ export function useActivitesWithoutExecution(directionId?: string) {
           )
         `
         )
-        .eq("est_active", true)
-        .eq("exercice_id", exerciceId!);
+        .eq('est_active', true)
+        .eq('exercice_id', exerciceId!);
 
       const { data: activites, error } = await query;
       if (error) throw error;
 
       // Récupérer les exécutions existantes
       const { data: executions } = await supabase
-        .from("task_executions")
-        .select("activite_id")
-        .eq("exercice_id", exerciceId!);
+        .from('task_executions')
+        .select('activite_id')
+        .eq('exercice_id', exerciceId!);
 
       const executedIds = new Set(executions?.map((e) => e.activite_id) ?? []);
 
@@ -597,9 +578,7 @@ export function useActivitesWithoutExecution(directionId?: string) {
 
       // Filtrer par direction si spécifié
       if (directionId) {
-        result = result.filter(
-          (a) => (a.action as any)?.mission?.direction?.id === directionId
-        );
+        result = result.filter((a) => (a.action as any)?.mission?.direction?.id === directionId);
       }
 
       return result;
@@ -613,12 +592,12 @@ export function useActivitesWithoutExecution(directionId?: string) {
  */
 export function useTaskFiltersData() {
   const directionsQuery = useQuery({
-    queryKey: ["task-filters-directions"],
+    queryKey: ['task-filters-directions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("directions")
-        .select("id, code, label")
-        .order("code");
+        .from('directions')
+        .select('id, code, label')
+        .order('code');
 
       if (error) throw error;
       return data;
@@ -626,12 +605,12 @@ export function useTaskFiltersData() {
   });
 
   const osQuery = useQuery({
-    queryKey: ["task-filters-os"],
+    queryKey: ['task-filters-os'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("objectifs_strategiques")
-        .select("id, code, libelle")
-        .order("code");
+        .from('objectifs_strategiques')
+        .select('id, code, libelle')
+        .order('code');
 
       if (error) throw error;
       return data;

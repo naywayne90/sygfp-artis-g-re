@@ -121,7 +121,7 @@ function exportDashboardCSV(
     ds.stats.budgetConsomme,
   ]);
   const csv = [headers.join(separator), ...rows.map((r) => r.join(separator))].join('\n');
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;

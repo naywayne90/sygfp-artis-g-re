@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Composant de protection de route RBAC
  * Redirige si l'utilisateur n'a pas accès
@@ -40,15 +39,8 @@ export function RBACRouteGuard({
 }: RBACRouteGuardProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const {
-    user,
-    isLoading,
-    isAuthenticated,
-    canAccess,
-    isAdmin,
-    getProfilLabel,
-    getProfilColor,
-  } = useRBAC();
+  const { user, isLoading, isAuthenticated, canAccess, isAdmin, getProfilLabel, getProfilColor } =
+    useRBAC();
 
   // Vérifier l'accès
   const hasAccess = React.useMemo(() => {
@@ -62,7 +54,14 @@ export function RBACRouteGuard({
 
     // Sinon, utiliser la matrice de routes
     return canAccess(location.pathname);
-  }, [isAuthenticated, isAdmin, requiredProfiles, user?.profilFonctionnel, canAccess, location.pathname]);
+  }, [
+    isAuthenticated,
+    isAdmin,
+    requiredProfiles,
+    user?.profilFonctionnel,
+    canAccess,
+    location.pathname,
+  ]);
 
   // Redirection si pas d'accès
   useEffect(() => {
@@ -122,15 +121,13 @@ export function RBACRouteGuard({
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Page demandée :</span>
-                <code className="text-xs bg-background px-2 py-1 rounded">
-                  {location.pathname}
-                </code>
+                <code className="text-xs bg-background px-2 py-1 rounded">{location.pathname}</code>
               </div>
               {requiredProfiles && requiredProfiles.length > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Profils requis :</span>
                   <div className="flex gap-1 flex-wrap justify-end">
-                    {requiredProfiles.map(p => (
+                    {requiredProfiles.map((p) => (
                       <Badge key={p} variant="secondary" className="text-xs">
                         {p}
                       </Badge>
@@ -141,17 +138,10 @@ export function RBACRouteGuard({
             </div>
 
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => navigate(-1)}
-              >
+              <Button variant="outline" className="flex-1" onClick={() => navigate(-1)}>
                 Retour
               </Button>
-              <Button
-                className="flex-1"
-                onClick={() => navigate('/')}
-              >
+              <Button className="flex-1" onClick={() => navigate('/')}>
                 Tableau de bord
               </Button>
             </div>
@@ -199,9 +189,7 @@ export function UserProfileBadge() {
         {getProfilLabel()}
       </Badge>
       {user.roleHierarchique && (
-        <span className="text-xs text-muted-foreground">
-          {getRoleLabel()}
-        </span>
+        <span className="text-xs text-muted-foreground">{getRoleLabel()}</span>
       )}
     </div>
   );

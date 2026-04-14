@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -7,16 +7,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Eye,
   ExternalLink,
@@ -29,11 +29,12 @@ import {
   ArrowDown,
   Loader2,
   FolderOpen,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Dossier } from "@/hooks/useDossiers";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Dossier } from '@/hooks/useDossiers';
+import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
 
 interface DossierSearchResultsProps {
   dossiers: Dossier[];
@@ -47,30 +48,28 @@ interface DossierSearchResultsProps {
   onClose: () => void;
 }
 
-type SortField = "numero" | "created_at" | "montant_estime" | "etape_courante" | "statut_global";
-type SortDirection = "asc" | "desc";
+type SortField = 'numero' | 'created_at' | 'montant_estime' | 'etape_courante' | 'statut_global';
+type SortDirection = 'asc' | 'desc';
 
 const STATUT_BADGE_VARIANTS: Record<string, { label: string; className: string }> = {
-  en_cours: { label: "En cours", className: "bg-primary/10 text-primary border-primary/30" },
-  termine: { label: "Terminé", className: "bg-success/10 text-success border-success/30" },
-  solde: { label: "Soldé", className: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  annule: { label: "Annulé", className: "bg-destructive/10 text-destructive border-destructive/30" },
-  suspendu: { label: "Suspendu", className: "bg-warning/10 text-warning border-warning/30" },
-  bloque: { label: "Bloqué", className: "bg-orange-100 text-orange-700 border-orange-200" },
+  en_cours: { label: 'En cours', className: 'bg-primary/10 text-primary border-primary/30' },
+  termine: { label: 'Terminé', className: 'bg-success/10 text-success border-success/30' },
+  solde: { label: 'Soldé', className: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  annule: {
+    label: 'Annulé',
+    className: 'bg-destructive/10 text-destructive border-destructive/30',
+  },
+  suspendu: { label: 'Suspendu', className: 'bg-warning/10 text-warning border-warning/30' },
+  bloque: { label: 'Bloqué', className: 'bg-orange-100 text-orange-700 border-orange-200' },
 };
 
 const ETAPE_LABELS: Record<string, string> = {
-  note: "Note SEF",
-  expression_besoin: "Expression besoin",
-  engagement: "Engagement",
-  liquidation: "Liquidation",
-  ordonnancement: "Ordonnancement",
-  reglement: "Règlement",
-};
-
-const formatMontant = (montant: number | null | undefined) => {
-  if (montant === null || montant === undefined) return "—";
-  return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+  note: 'Note SEF',
+  expression_besoin: 'Expression besoin',
+  engagement: 'Engagement',
+  liquidation: 'Liquidation',
+  ordonnancement: 'Ordonnancement',
+  reglement: 'Règlement',
 };
 
 export function DossierSearchResults({
@@ -81,38 +80,38 @@ export function DossierSearchResults({
   onClose,
 }: DossierSearchResultsProps) {
   const navigate = useNavigate();
-  const [sortField, setSortField] = useState<SortField>("created_at");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   // Sort dossiers locally
   const sortedDossiers = [...dossiers].sort((a, b) => {
     let comparison = 0;
     switch (sortField) {
-      case "numero":
-        comparison = (a.numero || "").localeCompare(b.numero || "");
+      case 'numero':
+        comparison = (a.numero || '').localeCompare(b.numero || '');
         break;
-      case "created_at":
+      case 'created_at':
         comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         break;
-      case "montant_estime":
+      case 'montant_estime':
         comparison = (a.montant_estime || 0) - (b.montant_estime || 0);
         break;
-      case "etape_courante":
-        comparison = (a.etape_courante || "").localeCompare(b.etape_courante || "");
+      case 'etape_courante':
+        comparison = (a.etape_courante || '').localeCompare(b.etape_courante || '');
         break;
-      case "statut_global":
-        comparison = (a.statut_global || "").localeCompare(b.statut_global || "");
+      case 'statut_global':
+        comparison = (a.statut_global || '').localeCompare(b.statut_global || '');
         break;
     }
-    return sortDirection === "asc" ? comparison : -comparison;
+    return sortDirection === 'asc' ? comparison : -comparison;
   });
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortDirection("asc");
+      setSortDirection('asc');
     }
   };
 
@@ -123,33 +122,33 @@ export function DossierSearchResults({
 
   const exportToCSV = () => {
     const headers = [
-      "Numéro",
-      "Objet",
-      "Direction",
-      "Bénéficiaire",
-      "Montant estimé",
-      "Étape",
-      "Statut",
-      "Date création",
+      'Numéro',
+      'Objet',
+      'Direction',
+      'Bénéficiaire',
+      'Montant estimé',
+      'Étape',
+      'Statut',
+      'Date création',
     ];
 
     const rows = sortedDossiers.map((d) => [
       d.numero,
-      `"${(d.objet || "").replace(/"/g, '""')}"`,
-      d.direction?.sigle || d.direction?.code || "",
-      d.beneficiaire?.raison_sociale || "",
+      `"${(d.objet || '').replace(/"/g, '""')}"`,
+      d.direction?.sigle || d.direction?.code || '',
+      d.beneficiaire?.raison_sociale || '',
       d.montant_estime || 0,
       ETAPE_LABELS[d.etape_courante] || d.etape_courante,
       STATUT_BADGE_VARIANTS[d.statut_global]?.label || d.statut_global,
-      format(new Date(d.created_at), "dd/MM/yyyy"),
+      format(new Date(d.created_at), 'dd/MM/yyyy'),
     ]);
 
-    const csvContent = [headers.join(";"), ...rows.map((row) => row.join(";"))].join("\n");
+    const csvContent = [headers.join(';'), ...rows.map((row) => row.join(';'))].join('\n');
 
-    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `dossiers_export_${format(new Date(), "yyyyMMdd_HHmmss")}.csv`;
+    link.download = `dossiers_export_${format(new Date(), 'yyyyMMdd_HHmmss')}.csv`;
     link.click();
 
     toast.success(`${sortedDossiers.length} dossiers exportés`);
@@ -159,14 +158,14 @@ export function DossierSearchResults({
     // For now, export as CSV with Excel-friendly format
     // In production, you'd use a library like xlsx
     exportToCSV();
-    toast.info("Format Excel (CSV compatible)");
+    toast.info('Format Excel (CSV compatible)');
   };
 
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) {
       return <ArrowUpDown className="h-3.5 w-3.5 ml-1 text-muted-foreground" />;
     }
-    return sortDirection === "asc" ? (
+    return sortDirection === 'asc' ? (
       <ArrowUp className="h-3.5 w-3.5 ml-1 text-primary" />
     ) : (
       <ArrowDown className="h-3.5 w-3.5 ml-1 text-primary" />
@@ -202,7 +201,7 @@ export function DossierSearchResults({
       <div className="flex items-center justify-between px-6 py-3 border-b">
         <div className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{pagination.total}</span> dossier
-          {pagination.total > 1 ? "s" : ""} trouvé{pagination.total > 1 ? "s" : ""}
+          {pagination.total > 1 ? 's' : ''} trouvé{pagination.total > 1 ? 's' : ''}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -231,7 +230,7 @@ export function DossierSearchResults({
             <TableRow>
               <TableHead
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => handleSort("numero")}
+                onClick={() => handleSort('numero')}
               >
                 <div className="flex items-center">
                   Numéro
@@ -243,7 +242,7 @@ export function DossierSearchResults({
               <TableHead>Bénéficiaire</TableHead>
               <TableHead
                 className="cursor-pointer hover:bg-muted/50 text-right"
-                onClick={() => handleSort("montant_estime")}
+                onClick={() => handleSort('montant_estime')}
               >
                 <div className="flex items-center justify-end">
                   Montant
@@ -252,7 +251,7 @@ export function DossierSearchResults({
               </TableHead>
               <TableHead
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => handleSort("etape_courante")}
+                onClick={() => handleSort('etape_courante')}
               >
                 <div className="flex items-center">
                   Étape
@@ -261,7 +260,7 @@ export function DossierSearchResults({
               </TableHead>
               <TableHead
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => handleSort("statut_global")}
+                onClick={() => handleSort('statut_global')}
               >
                 <div className="flex items-center">
                   Statut
@@ -270,7 +269,7 @@ export function DossierSearchResults({
               </TableHead>
               <TableHead
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => handleSort("created_at")}
+                onClick={() => handleSort('created_at')}
               >
                 <div className="flex items-center">
                   Date
@@ -284,7 +283,7 @@ export function DossierSearchResults({
             {sortedDossiers.map((dossier) => {
               const statutVariant = STATUT_BADGE_VARIANTS[dossier.statut_global] || {
                 label: dossier.statut_global,
-                className: "bg-muted text-muted-foreground",
+                className: 'bg-muted text-muted-foreground',
               };
 
               return (
@@ -305,16 +304,16 @@ export function DossierSearchResults({
                         {dossier.direction.sigle || dossier.direction.code}
                       </Badge>
                     ) : (
-                      "—"
+                      '—'
                     )}
                   </TableCell>
                   <TableCell>
                     <div className="max-w-[120px] truncate text-sm">
-                      {dossier.beneficiaire?.raison_sociale || "—"}
+                      {dossier.beneficiaire?.raison_sociale || '—'}
                     </div>
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    {formatMontant(dossier.montant_estime)}
+                    {dossier.montant_estime ? formatCurrency(dossier.montant_estime) : '—'}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="text-xs">
@@ -327,7 +326,7 @@ export function DossierSearchResults({
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {format(new Date(dossier.created_at), "dd/MM/yyyy", { locale: fr })}
+                    {format(new Date(dossier.created_at), 'dd/MM/yyyy', { locale: fr })}
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
@@ -344,7 +343,7 @@ export function DossierSearchResults({
                         <DropdownMenuItem
                           onClick={() => {
                             onClose();
-                            window.open(`/dossiers/${dossier.id}`, "_blank");
+                            window.open(`/dossiers/${dossier.id}`, '_blank');
                           }}
                         >
                           <ExternalLink className="h-4 w-4 mr-2" />

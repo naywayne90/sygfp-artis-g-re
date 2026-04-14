@@ -189,6 +189,15 @@ Toutes ces routes ont ete testees le 01/04/2026 : **40/40 OK, 0 erreurs critique
 | `http://localhost:8080/planification/livrables-centralises` | Livrables Centralises |
 | `http://localhost:8080/planification/mes-taches`            | Mes Taches            |
 
+**Evolutions 14/04/2026 :**
+
+| Route                              | Avant                | Apres                                                                            |
+| ---------------------------------- | -------------------- | -------------------------------------------------------------------------------- |
+| `/taches`                          | "Mes Taches" (vide)  | **Centre de Pilotage** (dashboard reel via `useSidebarBadges`)                   |
+| `/execution/passation-marche` (DG) | KPIs + tabs basiques | + Pipeline Progress Bar + empty state enrichi + KPI Traitees/Rejetees cliquables |
+
+Details : `docs/PROJECT_STATUS.md` section 14.1 et `docs/modules/MODULE_MARCHES.md` section 10.
+
 ## 7. MCP disponibles
 
 | MCP                   | Usage                                                 |

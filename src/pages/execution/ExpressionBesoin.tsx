@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,9 +12,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useExercice } from '@/contexts/ExerciceContext';
-import { useExpressionsBesoin } from '@/hooks/useExpressionsBesoin';
+import {
+  useExpressionsBesoin,
+  type ExpressionBesoin as EBType,
+} from '@/hooks/useExpressionsBesoin';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useRBAC } from '@/contexts/RBACContext';
 import { ExpressionBesoinForm } from '@/components/expression-besoin/ExpressionBesoinForm';
 import {
   ExpressionBesoinFromImputationForm,
@@ -26,6 +38,8 @@ import { ExpressionBesoinExportButton } from '@/components/expression-besoin/Exp
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
+import { differenceInDays, differenceInHours } from 'date-fns';
 import {
   Briefcase,
   FileText,
@@ -42,6 +56,14 @@ import {
   ShoppingCart,
   FileSignature,
   ShieldCheck,
+  Building2,
+  Banknote,
+  User,
+  Shield,
+  Filter,
+  Timer,
+  MoreHorizontal,
+  AlertTriangle,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { NotesPagination } from '@/components/shared/NotesPagination';
@@ -52,14 +74,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 // Tab -> server statut filter mapping
 const TAB_STATUT: Record<string, string | undefined> = {
   a_traiter: undefined,
   soumis: 'soumis',
   a_verifier: 'soumis',
-  a_valider: 'verifie',
+  a_valider: 'en_validation',
   validees: 'valide',
   satisfaites: 'satisfaite',
   rejetees: 'rejete',
@@ -67,17 +90,182 @@ const TAB_STATUT: Record<string, string | undefined> = {
   toutes: undefined,
 };
 
+// ---------------------------------------------------------------------------
+// Helper functions
+// ---------------------------------------------------------------------------
+
+/** Ancienneté badge — temps d'attente du dossier */
+const getAncienneteBadge = (dateStr: string) => {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const days = differenceInDays(now, date);
+  const hours = differenceInHours(now, date);
+  if (days >= 7)
+    return (
+      <Badge
+        variant="outline"
+        className="bg-red-50 text-red-700 border-red-200 text-xs whitespace-nowrap"
+      >
+        <Timer className="h-3 w-3 mr-1" />
+        {days}j — Urgent
+      </Badge>
+    );
+  if (days >= 3)
+    return (
+      <Badge
+        variant="outline"
+        className="bg-orange-50 text-orange-700 border-orange-200 text-xs whitespace-nowrap"
+      >
+        <Timer className="h-3 w-3 mr-1" />
+        Depuis {days}j
+      </Badge>
+    );
+  if (days >= 1)
+    return (
+      <Badge
+        variant="outline"
+        className="bg-blue-50 text-blue-700 border-blue-200 text-xs whitespace-nowrap"
+      >
+        Depuis {days}j
+      </Badge>
+    );
+  return (
+    <Badge
+      variant="outline"
+      className="bg-green-50 text-green-700 border-green-200 text-xs whitespace-nowrap"
+    >
+      {hours}h
+    </Badge>
+  );
+};
+
+/** Budget disponible badge — vert/orange/rouge */
+const getBudgetBadge = (eb: EBType) => {
+  const bl = eb.imputation?.budget_line;
+  if (!bl) return <span className="text-xs text-muted-foreground">—</span>;
+  const dotation = Math.max(bl.dotation_modifiee || 0, bl.dotation_initiale || 0);
+  const disponible = dotation - (bl.total_engage || 0) - (bl.montant_reserve || 0);
+  const apresEB = disponible - (eb.montant_estime || 0);
+  const ratio = dotation > 0 ? ((bl.total_engage || 0) / dotation) * 100 : 0;
+
+  if (apresEB < 0)
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge
+            variant="outline"
+            className="bg-red-50 text-red-700 border-red-200 text-xs cursor-help whitespace-nowrap"
+          >
+            Insuffisant
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-xs">
+          <p className="font-medium text-destructive">Budget insuffisant</p>
+          <p>Disponible : {formatCurrency(Math.max(0, disponible))}</p>
+          <p>Montant EB : {formatCurrency(eb.montant_estime || 0)}</p>
+          <p>Manque : {formatCurrency(Math.abs(apresEB))}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  if (ratio >= 80)
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge
+            variant="outline"
+            className="bg-orange-50 text-orange-700 border-orange-200 text-xs cursor-help whitespace-nowrap"
+          >
+            {formatCurrency(apresEB)}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-xs">
+          <p className="font-medium text-orange-600">Ligne tendue ({Math.round(ratio)}% engagé)</p>
+          <p>Dotation : {formatCurrency(dotation)}</p>
+          <p>Engagé : {formatCurrency(bl.total_engage || 0)}</p>
+          <p>Disponible après : {formatCurrency(apresEB)}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200 text-xs cursor-help whitespace-nowrap"
+        >
+          {formatCurrency(apresEB)}
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-xs">
+        <p className="font-medium text-green-600">Budget suffisant ({Math.round(ratio)}% engagé)</p>
+        <p>Dotation : {formatCurrency(dotation)}</p>
+        <p>Engagé : {formatCurrency(bl.total_engage || 0)}</p>
+        <p>Disponible après : {formatCurrency(apresEB)}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
+/** Urgence badge */
+const getUrgenceBadge = (urgence: string | null) => {
+  if (urgence === 'urgente')
+    return (
+      <Badge variant="destructive" className="text-xs">
+        Très urgent
+      </Badge>
+    );
+  if (urgence === 'haute')
+    return <Badge className="bg-orange-500 text-white text-xs">Urgent</Badge>;
+  return null;
+};
+
+/** Étape de validation (step indicator) */
+const getStepBadge = (eb: EBType) => {
+  const step = eb.etape_validation || eb.current_validation_step || 1;
+  const steps = [
+    { label: 'Sous-Dir', short: 'S-D' },
+    { label: 'CB', short: 'CB' },
+    { label: 'DAAF', short: 'DAAF' },
+  ];
+  const current = steps[step - 1] || steps[0];
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Badge variant="outline" className="text-xs cursor-help whitespace-nowrap">
+          Étape {step}/3 — {current.short}
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent>
+        <div className="space-y-1">
+          {steps.map((s, i) => (
+            <p key={i} className={i === step - 1 ? 'font-bold' : 'text-muted-foreground'}>
+              {i + 1}. {s.label} {i < step - 1 ? '✅' : i === step - 1 ? '➡️ En cours' : ''}
+            </p>
+          ))}
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
 export default function ExpressionBesoin() {
   const { exercice: _exercice } = useExercice();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { canVerifyEB, canValidateEB } = usePermissions();
+  const { isDG } = useRBAC();
 
   // Pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('a_traiter');
+  const [activeTab, setActiveTab] = useState(isDG ? 'a_valider' : 'a_traiter');
+  const [directionFilter, setDirectionFilter] = useState<string>('all');
+
+  // DG : ouvrir directement sur "À valider" (fallback si isDG charge après le mount)
+  useEffect(() => {
+    if (isDG) setActiveTab('a_valider');
+  }, [isDG]);
 
   // Reset page on tab or search change
   useEffect(() => {
@@ -165,6 +353,37 @@ export default function ExpressionBesoin() {
 
   const formatMontantOrDash = (montant: number | null) => (montant ? formatMontant(montant) : '-');
 
+  // ---------------------------------------------------------------------------
+  // DG KPIs : computed from current tab data
+  // ---------------------------------------------------------------------------
+  const validationKpis = useMemo(() => {
+    if (activeTab !== 'a_valider') return { total: 0, montantTotal: 0, directions: 0 };
+    const montantTotal = expressions.reduce((sum, eb) => sum + (eb.montant_estime || 0), 0);
+    const dirSet = new Set(expressions.map((eb) => eb.direction_id).filter(Boolean));
+    return { total: expressions.length, montantTotal, directions: dirSet.size };
+  }, [activeTab, expressions]);
+
+  // Directions uniques pour le filtre
+  const uniqueDirections = useMemo(() => {
+    const dirMap = new Map<string, { id: string; sigle: string | null; label: string }>();
+    for (const eb of expressions) {
+      if (eb.direction?.id && !dirMap.has(eb.direction.id)) {
+        dirMap.set(eb.direction.id, {
+          id: eb.direction.id,
+          sigle: eb.direction.sigle,
+          label: eb.direction.label,
+        });
+      }
+    }
+    return Array.from(dirMap.values());
+  }, [expressions]);
+
+  // Expressions filtrées par direction
+  const filteredExpressions = useMemo(() => {
+    if (directionFilter === 'all') return expressions;
+    return expressions.filter((eb) => eb.direction_id === directionFilter);
+  }, [expressions, directionFilter]);
+
   if (isLoadingSource) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -174,400 +393,771 @@ export default function ExpressionBesoin() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <PageHeader
-        title="Expressions de Besoin"
-        description="Formalisation des besoins"
-        icon={Briefcase}
-        stepNumber={4}
-        backUrl="/"
-      >
-        <ExpressionBesoinExportButton
-          filters={{ statut: serverStatut, search: searchTerm || undefined }}
-        />
-        <Button variant="outline" onClick={() => setShowForm(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Depuis marché
-        </Button>
-        <Button onClick={() => setShowImputationForm(true)}>
-          <ShoppingCart className="mr-2 h-4 w-4" />
-          Nouvelle EB
-        </Button>
-      </PageHeader>
+    <TooltipProvider>
+      <div className="space-y-6 animate-fade-in">
+        <PageHeader
+          title="Expressions de Besoin"
+          description={
+            isDG ? 'Suivi et validation des besoins exprimés' : 'Formalisation des besoins'
+          }
+          icon={Briefcase}
+          stepNumber={4}
+          backUrl="/"
+        >
+          <ExpressionBesoinExportButton
+            filters={{ statut: serverStatut, search: searchTerm || undefined }}
+          />
+          {/* DG ne crée pas d'EB — il supervise */}
+          {!isDG && (
+            <>
+              <Button variant="outline" onClick={() => setShowForm(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Depuis marché
+              </Button>
+              <Button onClick={() => setShowImputationForm(true)}>
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Nouvelle EB
+              </Button>
+            </>
+          )}
+        </PageHeader>
 
-      {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">À traiter</CardTitle>
-            <Tag className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{imputationsValidees.length}</div>
-            <p className="text-xs text-muted-foreground">Imputations validées</p>
-          </CardContent>
-        </Card>
+        {/* ================================================================== */}
+        {/* KPIs — adaptés au profil                                           */}
+        {/* ================================================================== */}
+        {isDG ? (
+          /* === KPIs DG : focus sur ce qui attend une décision === */
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Card principale : En validation */}
+            <Card className="border-indigo-200 bg-indigo-50/30 dark:border-indigo-800 dark:bg-indigo-950/20 lg:col-span-2">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-indigo-600">En cours de validation</p>
+                    <div className="flex items-baseline gap-3 mt-1">
+                      <p className="text-3xl font-bold text-indigo-700">{counts.en_validation}</p>
+                      <span className="text-sm text-muted-foreground">
+                        expression{counts.en_validation > 1 ? 's' : ''} de besoin
+                      </span>
+                    </div>
+                    {activeTab === 'a_valider' && validationKpis.montantTotal > 0 && (
+                      <p className="text-lg font-semibold text-indigo-600 mt-1">
+                        {formatCurrency(validationKpis.montantTotal)}
+                      </p>
+                    )}
+                  </div>
+                  <div className="h-14 w-14 rounded-full bg-indigo-100 flex items-center justify-center">
+                    <Briefcase className="h-7 w-7 text-indigo-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Soumis</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.soumis}</div>
-            <p className="text-xs text-muted-foreground">En cours</p>
-          </CardContent>
-        </Card>
+            {/* Pipeline : soumis (en attente CB) */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground">En attente vérification</p>
+                    <p className="text-2xl font-bold">{counts.soumis}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Sous-Dir / CB</p>
+                  </div>
+                  <Clock className="h-7 w-7 text-blue-500 opacity-80" />
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400">
-              À vérifier
-            </CardTitle>
-            <ShieldCheck className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
-              {counts.soumis}
-            </div>
-            <p className="text-xs text-blue-600/70 dark:text-blue-400/70">CB (couverture budget)</p>
-          </CardContent>
-        </Card>
+            {/* Synthèse : validées + traitées */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Traitées</p>
+                    <p className="text-2xl font-bold text-green-600">{counts.valide}</p>
+                    <div className="flex gap-2 mt-0.5">
+                      {counts.differe > 0 && (
+                        <span className="text-xs text-orange-600">
+                          {counts.differe} différée{counts.differe > 1 ? 's' : ''}
+                        </span>
+                      )}
+                      {counts.rejete > 0 && (
+                        <span className="text-xs text-destructive">
+                          {counts.rejete} rejetée{counts.rejete > 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <CheckCircle2 className="h-7 w-7 text-success opacity-80" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          /* === KPIs standard (non-DG) === */
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  À traiter
+                </CardTitle>
+                <Tag className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{imputationsValidees.length}</div>
+                <p className="text-xs text-muted-foreground">Imputations validées</p>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">À valider</CardTitle>
-            <Clock className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.verifie}</div>
-            <p className="text-xs text-muted-foreground">DG/DAAF</p>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Soumis</CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{counts.soumis}</div>
+                <p className="text-xs text-muted-foreground">En cours</p>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Validées</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.valide}</div>
-            <p className="text-xs text-muted-foreground">Prêtes passation</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Satisfaites</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.satisfaite}</div>
-            <p className="text-xs text-muted-foreground">Passation créée</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Rejetées</CardTitle>
-            <XCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.rejete}</div>
-            <p className="text-xs text-muted-foreground">Refusées</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Différées</CardTitle>
-            <PauseCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.differe}</div>
-            <p className="text-xs text-muted-foreground">Reportées</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Alerte si aucune imputation validée */}
-      {imputationsValidees.length === 0 && (
-        <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <CreditCard className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
-              <div>
-                <h4 className="font-medium text-amber-800 dark:text-amber-300">
-                  Imputation budgétaire requise
-                </h4>
-                <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-                  Pour créer une Expression de Besoin, vous devez d'abord disposer d'au moins une
-                  imputation validée. Rendez-vous sur la page{' '}
-                  <a href="/execution/imputation" className="underline font-medium">
-                    Imputation
-                  </a>{' '}
-                  pour imputer une Note AEF validée.
+            <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                  À vérifier
+                </CardTitle>
+                <ShieldCheck className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+                  {counts.soumis}
+                </div>
+                <p className="text-xs text-blue-600/70 dark:text-blue-400/70">
+                  CB (couverture budget)
                 </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  À valider
+                </CardTitle>
+                <Clock className="h-4 w-4 text-warning" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{counts.en_validation}</div>
+                <p className="text-xs text-muted-foreground">DAAF/CB</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Validées
+                </CardTitle>
+                <CheckCircle2 className="h-4 w-4 text-success" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{counts.valide}</div>
+                <p className="text-xs text-muted-foreground">Prêtes passation</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Satisfaites
+                </CardTitle>
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{counts.satisfaite}</div>
+                <p className="text-xs text-muted-foreground">Passation créée</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Rejetées
+                </CardTitle>
+                <XCircle className="h-4 w-4 text-destructive" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{counts.rejete}</div>
+                <p className="text-xs text-muted-foreground">Refusées</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Différées
+                </CardTitle>
+                <PauseCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{counts.differe}</div>
+                <p className="text-xs text-muted-foreground">Reportées</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Alerte si aucune imputation validée (non-DG uniquement) */}
+        {!isDG && imputationsValidees.length === 0 && (
+          <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3">
+                <CreditCard className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-amber-800 dark:text-amber-300">
+                    Imputation budgétaire requise
+                  </h4>
+                  <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                    Pour créer une Expression de Besoin, vous devez d'abord disposer d'au moins une
+                    imputation validée. Rendez-vous sur la page{' '}
+                    <a href="/execution/imputation" className="underline font-medium">
+                      Imputation
+                    </a>{' '}
+                    pour imputer une Note AEF validée.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ================================================================== */}
+        {/* Recherche + Filtre direction                                       */}
+        {/* ================================================================== */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 max-w-md min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Rechercher par numéro, objet..."
+              className="pl-9"
+            />
+          </div>
+
+          {/* Filtre direction */}
+          {uniqueDirections.length > 1 && (
+            <Select value={directionFilter} onValueChange={setDirectionFilter}>
+              <SelectTrigger className="w-[180px] gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="Direction" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les directions</SelectItem>
+                {uniqueDirections.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.sigle || d.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+
+        {/* ================================================================== */}
+        {/* Liste des expressions                                              */}
+        {/* ================================================================== */}
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <CardTitle>Expressions de besoin</CardTitle>
+                <CardDescription>
+                  {isDG
+                    ? 'Suivi du circuit de validation 3 étapes'
+                    : 'Créer des EB depuis les imputations validées'}
+                </CardDescription>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </CardHeader>
+          <CardContent>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="mb-4 flex flex-wrap gap-1 h-auto">
+                {!isDG && (
+                  <TabsTrigger value="a_traiter" className="gap-1">
+                    <Tag className="h-3 w-3" />À traiter
+                    <Badge variant="secondary" className="ml-1 text-xs">
+                      {imputationsValidees.length}
+                    </Badge>
+                  </TabsTrigger>
+                )}
+                <TabsTrigger value="soumis">Soumis ({counts.soumis})</TabsTrigger>
+                {canVerifyEB() && (
+                  <TabsTrigger value="a_verifier" className="gap-1">
+                    <ShieldCheck className="h-3 w-3" />À vérifier
+                    <Badge variant="secondary" className="ml-1 text-xs bg-blue-100 text-blue-700">
+                      {counts.soumis}
+                    </Badge>
+                  </TabsTrigger>
+                )}
+                {canValidateEB() && (
+                  <TabsTrigger value="a_valider" className="gap-1">
+                    <Briefcase className="h-3 w-3" />À valider
+                    <Badge
+                      variant="secondary"
+                      className="ml-1 text-xs bg-indigo-100 text-indigo-700"
+                    >
+                      {counts.en_validation}
+                    </Badge>
+                  </TabsTrigger>
+                )}
+                <TabsTrigger value="validees">Validées ({counts.valide})</TabsTrigger>
+                <TabsTrigger value="satisfaites">Satisfaites ({counts.satisfaite})</TabsTrigger>
+                <TabsTrigger value="rejetees">Rejetées ({counts.rejete})</TabsTrigger>
+                <TabsTrigger value="differees">Différées ({counts.differe})</TabsTrigger>
+                <TabsTrigger value="toutes">Toutes ({counts.total})</TabsTrigger>
+              </TabsList>
 
-      {/* Liste des expressions */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <CardTitle>Expressions de besoin</CardTitle>
-              <CardDescription>Créer des EB depuis les imputations validées</CardDescription>
-            </div>
-            <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4 flex flex-wrap gap-1 h-auto">
-              <TabsTrigger value="a_traiter" className="gap-1">
-                <Tag className="h-3 w-3" />À traiter
-                <Badge variant="secondary" className="ml-1 text-xs">
-                  {imputationsValidees.length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="soumis">Soumis ({counts.soumis})</TabsTrigger>
-              {canVerifyEB() && (
-                <TabsTrigger value="a_verifier" className="gap-1">
-                  <ShieldCheck className="h-3 w-3" />À vérifier
-                  <Badge variant="secondary" className="ml-1 text-xs bg-blue-100 text-blue-700">
-                    {counts.soumis}
-                  </Badge>
-                </TabsTrigger>
+              {/* ============================================================ */}
+              {/* Onglet Imputations à traiter (non-DG)                        */}
+              {/* ============================================================ */}
+              {!isDG && (
+                <TabsContent value="a_traiter">
+                  {imputationsValidees.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>Aucune imputation validée à traiter</p>
+                      <p className="text-sm mt-1">Les imputations validées apparaîtront ici</p>
+                    </div>
+                  ) : (
+                    <div className="rounded-md border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Référence</TableHead>
+                            <TableHead>Objet</TableHead>
+                            <TableHead>Direction</TableHead>
+                            <TableHead className="text-right">Montant</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {imputationsValidees.map((imp) => (
+                            <TableRow key={imp.id}>
+                              <TableCell className="font-mono text-sm">
+                                {imp.reference || '-'}
+                              </TableCell>
+                              <TableCell className="max-w-[250px] truncate">{imp.objet}</TableCell>
+                              <TableCell>
+                                {imp.direction?.sigle || imp.direction?.label || '-'}
+                              </TableCell>
+                              <TableCell className="text-right font-medium">
+                                {formatMontantOrDash(imp.montant)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => navigate(`/execution/imputation?view=${imp.id}`)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      setSourceImputation(imp);
+                                      setShowImputationForm(true);
+                                    }}
+                                  >
+                                    <ShoppingCart className="mr-2 h-4 w-4" />
+                                    Créer EB
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </TabsContent>
               )}
-              {canValidateEB() && (
-                <TabsTrigger value="a_valider">À valider ({counts.verifie})</TabsTrigger>
-              )}
-              <TabsTrigger value="validees">Validées ({counts.valide})</TabsTrigger>
-              <TabsTrigger value="satisfaites">Satisfaites ({counts.satisfaite})</TabsTrigger>
-              <TabsTrigger value="rejetees">Rejetées ({counts.rejete})</TabsTrigger>
-              <TabsTrigger value="differees">Différées ({counts.differe})</TabsTrigger>
-              <TabsTrigger value="toutes">Toutes ({counts.total})</TabsTrigger>
-            </TabsList>
 
-            {/* Onglet Imputations à traiter */}
-            <TabsContent value="a_traiter">
-              {imputationsValidees.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucune imputation validée à traiter</p>
-                  <p className="text-sm mt-1">Les imputations validées apparaîtront ici</p>
-                </div>
-              ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Référence</TableHead>
-                        <TableHead>Objet</TableHead>
-                        <TableHead>Direction</TableHead>
-                        <TableHead className="text-right">Montant</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {imputationsValidees.map((imp) => (
-                        <TableRow key={imp.id}>
-                          <TableCell className="font-mono text-sm">
-                            {imp.reference || '-'}
-                          </TableCell>
-                          <TableCell className="max-w-[250px] truncate">{imp.objet}</TableCell>
-                          <TableCell>
-                            {imp.direction?.sigle || imp.direction?.label || '-'}
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatMontantOrDash(imp.montant)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate(`/execution/imputation?view=${imp.id}`)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  setSourceImputation(imp);
-                                  setShowImputationForm(true);
-                                }}
-                              >
-                                <ShoppingCart className="mr-2 h-4 w-4" />
-                                Créer EB
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </TabsContent>
+              {/* ============================================================ */}
+              {/* Onglet "À valider" — enrichi pour DG/DAAF/CB                  */}
+              {/* ============================================================ */}
+              <TabsContent value="a_valider" className="space-y-4">
+                {/* Sous-KPIs pour l'onglet validation */}
+                {isDG && (
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <Card>
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-muted-foreground">En attente validation</p>
+                            <p className="text-xl font-bold">{validationKpis.total}</p>
+                          </div>
+                          <Briefcase className="h-6 w-6 text-indigo-500 opacity-80" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Montant total</p>
+                            <p className="text-xl font-bold">
+                              {formatCurrency(validationKpis.montantTotal)}
+                            </p>
+                          </div>
+                          <Banknote className="h-6 w-6 text-primary opacity-80" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Directions</p>
+                            <p className="text-xl font-bold">{validationKpis.directions}</p>
+                          </div>
+                          <Building2 className="h-6 w-6 text-muted-foreground opacity-80" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
 
-            {/* Onglet validées avec action passation */}
-            <TabsContent value="validees">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                </div>
-              ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Référence</TableHead>
-                        <TableHead>Objet</TableHead>
-                        <TableHead>Direction</TableHead>
-                        <TableHead className="text-right">Montant</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {expressions.length === 0 ? (
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : !filteredExpressions.length ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Briefcase className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucune expression de besoin en attente de validation</p>
+                  </div>
+                ) : (
+                  <div className="rounded-md border overflow-x-auto">
+                    <Table>
+                      <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                            Aucune expression de besoin validée
-                          </TableCell>
+                          <TableHead className="whitespace-nowrap">Numéro</TableHead>
+                          <TableHead>Objet</TableHead>
+                          <TableHead>Direction</TableHead>
+                          <TableHead className="text-right whitespace-nowrap">Montant</TableHead>
+                          <TableHead className="whitespace-nowrap">Dispo. budget</TableHead>
+                          <TableHead className="whitespace-nowrap">Étape</TableHead>
+                          <TableHead className="whitespace-nowrap">Créé par</TableHead>
+                          <TableHead className="whitespace-nowrap">Ancienneté</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                      ) : (
-                        expressions.map((eb) => (
-                          <TableRow key={eb.id}>
-                            <TableCell className="font-mono text-sm">{eb.numero || '-'}</TableCell>
-                            <TableCell className="max-w-[250px] truncate">{eb.objet}</TableCell>
-                            <TableCell>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredExpressions.map((eb) => (
+                          <TableRow key={eb.id} className="group">
+                            <TableCell className="font-mono text-xs whitespace-nowrap">
+                              {eb.numero || 'En attente'}
+                            </TableCell>
+                            <TableCell className="max-w-[200px]">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="block truncate cursor-help">{eb.objet}</span>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom" className="max-w-sm">
+                                  <p className="font-medium">{eb.objet}</p>
+                                  {eb.imputation?.budget_line?.code && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Ligne : {eb.imputation.budget_line.code} —{' '}
+                                      {eb.imputation.budget_line.label}
+                                    </p>
+                                  )}
+                                  {eb.urgence && eb.urgence !== 'normale' && (
+                                    <p className="text-xs text-orange-600 mt-1">
+                                      Urgence : {eb.urgence}
+                                    </p>
+                                  )}
+                                </TooltipContent>
+                              </Tooltip>
+                              {getUrgenceBadge(eb.urgence)}
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">
                               {eb.direction?.sigle || eb.direction?.label || '-'}
                             </TableCell>
-                            <TableCell className="text-right font-medium">
+                            <TableCell className="text-right font-semibold whitespace-nowrap">
                               {formatMontantOrDash(eb.montant_estime)}
                             </TableCell>
+                            <TableCell>{getBudgetBadge(eb)}</TableCell>
+                            <TableCell>{getStepBadge(eb)}</TableCell>
+                            <TableCell>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex items-center gap-1.5 cursor-help">
+                                    <User className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                                    <span className="text-sm truncate max-w-[100px]">
+                                      {eb.creator?.full_name || '-'}
+                                    </span>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="font-medium">
+                                    {eb.creator?.full_name || 'Non renseigné'}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {eb.direction?.label || ''}
+                                  </p>
+                                  {eb.verified_at && (
+                                    <p className="text-xs text-blue-600 mt-1">
+                                      Vérifié le{' '}
+                                      {format(new Date(eb.verified_at), 'dd MMM yyyy', {
+                                        locale: fr,
+                                      })}
+                                      {eb.verifier?.full_name && ` par ${eb.verifier.full_name}`}
+                                    </p>
+                                  )}
+                                  {eb.visa_cb_date && (
+                                    <p className="text-xs text-indigo-600 mt-0.5">
+                                      Visa CB le{' '}
+                                      {format(new Date(eb.visa_cb_date), 'dd MMM yyyy', {
+                                        locale: fr,
+                                      })}
+                                      {eb.visa_cb_profile?.full_name &&
+                                        ` par ${eb.visa_cb_profile.full_name}`}
+                                    </p>
+                                  )}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TableCell>
+                            <TableCell>{getAncienneteBadge(eb.created_at)}</TableCell>
                             <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      navigate(`/execution/expression-besoin?view=${eb.id}`)
-                                    }
-                                  >
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    Voir détails
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      navigate(`/execution/passation-marche?sourceEB=${eb.id}`)
-                                    }
-                                    className="text-primary"
-                                  >
-                                    <FileSignature className="mr-2 h-4 w-4" />
-                                    Créer passation marché
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                              <div className="flex justify-end gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setViewExpressionId(eb.id);
+                                    setShowViewDialog(true);
+                                  }}
+                                  title="Voir détails"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {/* Les boutons de validation inline pour DAAF/CB (pas DG) */}
+                                {canVerifyEB() && !isDG && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      className="bg-green-600 hover:bg-green-700 text-white gap-1"
+                                      onClick={() => verifyExpression({ id: eb.id })}
+                                      disabled={isSubmitting}
+                                    >
+                                      <CheckCircle2 className="h-4 w-4" />
+                                      Valider
+                                    </Button>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm">
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end" className="bg-popover">
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            rejectExpression({ id: eb.id, reason: '' })
+                                          }
+                                          className="text-destructive"
+                                        >
+                                          <XCircle className="mr-2 h-4 w-4" />
+                                          Rejeter
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() => deferExpression({ id: eb.id, motif: '' })}
+                                        >
+                                          <Clock className="mr-2 h-4 w-4" />
+                                          Différer
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </>
+                                )}
+                              </div>
                             </TableCell>
                           </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </TabsContent>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </TabsContent>
 
-            {/* Autres onglets — server-filtered data from the hook */}
-            {[
-              'toutes',
-              'soumis',
-              'a_verifier',
-              'a_valider',
-              'satisfaites',
-              'rejetees',
-              'differees',
-            ].map((tab) => (
-              <TabsContent key={tab} value={tab}>
+              {/* ============================================================ */}
+              {/* Onglet validées avec action passation                         */}
+              {/* ============================================================ */}
+              <TabsContent value="validees">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
                   </div>
                 ) : (
-                  <ExpressionBesoinList
-                    expressions={expressions}
-                    onSubmit={submitExpression}
-                    onDelete={deleteExpression}
-                    onVerify={verifyExpression}
-                    onValidate={validateExpression}
-                    onReject={rejectExpression}
-                    onDefer={deferExpression}
-                    onResume={resumeExpression}
-                    isSubmitting={isSubmitting}
-                  />
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Référence</TableHead>
+                          <TableHead>Objet</TableHead>
+                          <TableHead>Direction</TableHead>
+                          <TableHead className="text-right">Montant</TableHead>
+                          {isDG && <TableHead>Validée le</TableHead>}
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredExpressions.length === 0 ? (
+                          <TableRow>
+                            <TableCell
+                              colSpan={isDG ? 6 : 5}
+                              className="text-center py-8 text-muted-foreground"
+                            >
+                              Aucune expression de besoin validée
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          filteredExpressions.map((eb) => (
+                            <TableRow key={eb.id}>
+                              <TableCell className="font-mono text-sm">
+                                {eb.numero || '-'}
+                              </TableCell>
+                              <TableCell className="max-w-[250px]">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="block truncate cursor-help">{eb.objet}</span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="bottom" className="max-w-sm">
+                                    <p>{eb.objet}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TableCell>
+                              <TableCell>
+                                {eb.direction?.sigle || eb.direction?.label || '-'}
+                              </TableCell>
+                              <TableCell className="text-right font-medium">
+                                {formatMontantOrDash(eb.montant_estime)}
+                              </TableCell>
+                              {isDG && (
+                                <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                                  {eb.validated_at
+                                    ? format(new Date(eb.validated_at), 'dd MMM yyyy', {
+                                        locale: fr,
+                                      })
+                                    : '-'}
+                                </TableCell>
+                              )}
+                              <TableCell className="text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setViewExpressionId(eb.id);
+                                        setShowViewDialog(true);
+                                      }}
+                                    >
+                                      <Eye className="mr-2 h-4 w-4" />
+                                      Voir détails
+                                    </DropdownMenuItem>
+                                    {!isDG && (
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          navigate(`/execution/passation-marche?sourceEB=${eb.id}`)
+                                        }
+                                        className="text-primary"
+                                      >
+                                        <FileSignature className="mr-2 h-4 w-4" />
+                                        Créer passation marché
+                                      </DropdownMenuItem>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </TabsContent>
-            ))}
-          </Tabs>
 
-          {/* Pagination */}
-          <NotesPagination
-            page={page}
-            pageSize={pageSize}
-            total={totalCount}
-            totalPages={totalPages}
-            onPageChange={setPage}
-            onPageSizeChange={(size) => {
-              setPageSize(size);
-              setPage(1);
-            }}
-          />
-        </CardContent>
-      </Card>
+              {/* ============================================================ */}
+              {/* Autres onglets — server-filtered data from the hook          */}
+              {/* ============================================================ */}
+              {['toutes', 'soumis', 'a_verifier', 'satisfaites', 'rejetees', 'differees'].map(
+                (tab) => (
+                  <TabsContent key={tab} value={tab}>
+                    {isLoading ? (
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                      </div>
+                    ) : (
+                      <ExpressionBesoinList
+                        expressions={filteredExpressions}
+                        onSubmit={submitExpression}
+                        onDelete={deleteExpression}
+                        onVerify={verifyExpression}
+                        onValidate={validateExpression}
+                        onReject={rejectExpression}
+                        onDefer={deferExpression}
+                        onResume={resumeExpression}
+                        isSubmitting={isSubmitting}
+                      />
+                    )}
+                  </TabsContent>
+                )
+              )}
+            </Tabs>
 
-      {/* Form dialog depuis marché */}
-      <ExpressionBesoinForm open={showForm} onOpenChange={setShowForm} />
+            {/* Pagination */}
+            <NotesPagination
+              page={page}
+              pageSize={pageSize}
+              total={totalCount}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+            />
+          </CardContent>
+        </Card>
 
-      {/* Detail dialog via ?view= (lazy loaded by ID) */}
-      <ExpressionBesoinDetails
-        expressionId={viewExpressionId ?? undefined}
-        open={showViewDialog}
-        onOpenChange={(open) => {
-          setShowViewDialog(open);
-          if (!open) {
-            setViewExpressionId(null);
-            searchParams.delete('view');
-            setSearchParams(searchParams, { replace: true });
-          }
-        }}
-      />
+        {/* Form dialog depuis marché */}
+        <ExpressionBesoinForm open={showForm} onOpenChange={setShowForm} />
 
-      {/* Form dialog depuis imputation */}
-      <ExpressionBesoinFromImputationForm
-        open={showImputationForm}
-        onOpenChange={handleCloseImputationForm}
-        sourceImputation={sourceImputation}
-        imputationsValidees={imputationsValidees}
-        onSuccess={() => setActiveTab('toutes')}
-      />
-    </div>
+        {/* Detail dialog via ?view= (lazy loaded by ID) */}
+        <ExpressionBesoinDetails
+          expressionId={viewExpressionId ?? undefined}
+          open={showViewDialog}
+          onOpenChange={(open) => {
+            setShowViewDialog(open);
+            if (!open) {
+              setViewExpressionId(null);
+              searchParams.delete('view');
+              setSearchParams(searchParams, { replace: true });
+            }
+          }}
+        />
+
+        {/* Form dialog depuis imputation */}
+        <ExpressionBesoinFromImputationForm
+          open={showImputationForm}
+          onOpenChange={handleCloseImputationForm}
+          sourceImputation={sourceImputation}
+          imputationsValidees={imputationsValidees}
+          onSuccess={() => setActiveTab('toutes')}
+        />
+      </div>
+    </TooltipProvider>
   );
 }

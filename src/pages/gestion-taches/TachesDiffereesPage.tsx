@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * TachesDiffereesPage - Liste des tâches différées
  *
@@ -6,21 +5,21 @@
  * avec les colonnes: IMPUT, ID OS, LIBELLE OS, etc. comme dans l'ancien système
  */
 
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -28,16 +27,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { ExportButtons } from "@/components/etats/ExportButtons";
-import {
-  AlertTriangle,
-  Search,
-  RefreshCw,
-  Filter,
-  Clock
-} from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+} from '@/components/ui/table';
+import { ExportButtons } from '@/components/etats/ExportButtons';
+import { AlertTriangle, Search, RefreshCw, Filter, Clock } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TacheDifferee {
   id: string;
@@ -60,72 +53,76 @@ interface TacheDifferee {
 
 export default function TachesDiffereesPage() {
   const { exerciceId, exercice } = useExercice();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDirection, setSelectedDirection] = useState<string>("all");
-  const [selectedMission, setSelectedMission] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDirection, setSelectedDirection] = useState<string>('all');
+  const [selectedMission, setSelectedMission] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
   // Charger les filtres
   const { data: filterData } = useQuery({
-    queryKey: ["taches-filters", exerciceId],
+    queryKey: ['taches-filters', exerciceId],
     queryFn: async () => {
       const [directionsRes, missionsRes] = await Promise.all([
-        supabase.from("directions").select("id, code, label").order("code"),
-        supabase.from("missions").select("id, code, libelle").order("code")
+        supabase.from('directions').select('id, code, label').order('code'),
+        supabase.from('missions').select('id, code, libelle').order('code'),
       ]);
 
       return {
         directions: directionsRes.data || [],
-        missions: missionsRes.data || []
+        missions: missionsRes.data || [],
       };
     },
-    enabled: !!exerciceId
+    enabled: !!exerciceId,
   });
 
   // Charger les tâches différées
-  const { data: taches, isLoading, refetch } = useQuery({
-    queryKey: ["taches-differees", exerciceId, selectedDirection, selectedMission, selectedStatus],
+  const {
+    data: taches,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['taches-differees', exerciceId, selectedDirection, selectedMission, selectedStatus],
     queryFn: async () => {
       let query = supabase
-        .from("task_executions_view")
-        .select("*")
-        .eq("exercice_id", exerciceId)
-        .in("status", ["bloque", "en_attente"]);
+        .from('task_executions_view')
+        .select('*')
+        .eq('exercice_id', exerciceId)
+        .in('status', ['bloque', 'en_attente']);
 
-      if (selectedDirection !== "all") {
-        query = query.eq("direction_id", selectedDirection);
+      if (selectedDirection !== 'all') {
+        query = query.eq('direction_id', selectedDirection);
       }
-      if (selectedMission !== "all") {
-        query = query.eq("mission_id", selectedMission);
+      if (selectedMission !== 'all') {
+        query = query.eq('mission_id', selectedMission);
       }
-      if (selectedStatus !== "all") {
-        query = query.eq("status", selectedStatus);
+      if (selectedStatus !== 'all') {
+        query = query.eq('status', selectedStatus);
       }
 
-      const { data, error } = await query.order("activite_code");
+      const { data, error } = await query.order('activite_code');
 
       if (error) throw error;
 
       return (data || []).map((task: Record<string, unknown>, index: number) => ({
         id: task.id as string,
-        imput: task.activite_code as string || `${index + 1}`,
-        id_os: task.os_code as string || "-",
-        libelle_os: task.os_libelle as string || "-",
-        id_action: task.action_code as string || "-",
-        libelle_action: task.action_libelle as string || "-",
-        id_mission: task.mission_code as string || "-",
-        libelle_mission: task.mission_libelle as string || "-",
-        id_direction: task.direction_code as string || "-",
-        libelle_direction: task.direction_label as string || "-",
-        id_plan: "-",
-        libelle_plan: "-",
-        activites: task.activite_libelle as string || "-",
+        imput: (task.activite_code as string) || `${index + 1}`,
+        id_os: (task.os_code as string) || '-',
+        libelle_os: (task.os_libelle as string) || '-',
+        id_action: (task.action_code as string) || '-',
+        libelle_action: (task.action_libelle as string) || '-',
+        id_mission: (task.mission_code as string) || '-',
+        libelle_mission: (task.mission_libelle as string) || '-',
+        id_direction: (task.direction_code as string) || '-',
+        libelle_direction: (task.direction_label as string) || '-',
+        id_plan: '-',
+        libelle_plan: '-',
+        activites: (task.activite_libelle as string) || '-',
         motif_blocage: task.motif_blocage as string | null,
         date_blocage: task.date_blocage as string | null,
-        status: task.status as string
+        status: task.status as string,
       })) as TacheDifferee[];
     },
-    enabled: !!exerciceId
+    enabled: !!exerciceId,
   });
 
   // Filtrer par recherche
@@ -134,21 +131,26 @@ export default function TachesDiffereesPage() {
     if (!searchQuery) return taches;
 
     const query = searchQuery.toLowerCase();
-    return taches.filter(t =>
-      t.activites.toLowerCase().includes(query) ||
-      t.libelle_os.toLowerCase().includes(query) ||
-      t.libelle_direction.toLowerCase().includes(query) ||
-      t.imput.toLowerCase().includes(query) ||
-      (t.motif_blocage && t.motif_blocage.toLowerCase().includes(query))
+    return taches.filter(
+      (t) =>
+        t.activites.toLowerCase().includes(query) ||
+        t.libelle_os.toLowerCase().includes(query) ||
+        t.libelle_direction.toLowerCase().includes(query) ||
+        t.imput.toLowerCase().includes(query) ||
+        (t.motif_blocage && t.motif_blocage.toLowerCase().includes(query))
     );
   }, [taches, searchQuery]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "bloque":
+      case 'bloque':
         return <Badge variant="destructive">Bloqué</Badge>;
-      case "en_attente":
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">En attente</Badge>;
+      case 'en_attente':
+        return (
+          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+            En attente
+          </Badge>
+        );
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -156,18 +158,18 @@ export default function TachesDiffereesPage() {
 
   // Export columns
   const exportColumns = [
-    { key: "imput", label: "IMPUT", type: "text" as const },
-    { key: "id_os", label: "ID OS", type: "text" as const },
-    { key: "libelle_os", label: "LIBELLE OS", type: "text" as const },
-    { key: "id_action", label: "ID ACTION", type: "text" as const },
-    { key: "libelle_action", label: "LIBELLE ACTION", type: "text" as const },
-    { key: "id_mission", label: "ID MISSION", type: "text" as const },
-    { key: "libelle_mission", label: "LIBELLE MISSION", type: "text" as const },
-    { key: "id_direction", label: "ID DIRECTION", type: "text" as const },
-    { key: "libelle_direction", label: "LIBELLE DIRECTION", type: "text" as const },
-    { key: "activites", label: "ACTIVITES", type: "text" as const },
-    { key: "status", label: "STATUT", type: "text" as const },
-    { key: "motif_blocage", label: "MOTIF BLOCAGE", type: "text" as const },
+    { key: 'imput', label: 'IMPUT', type: 'text' as const },
+    { key: 'id_os', label: 'ID OS', type: 'text' as const },
+    { key: 'libelle_os', label: 'LIBELLE OS', type: 'text' as const },
+    { key: 'id_action', label: 'ID ACTION', type: 'text' as const },
+    { key: 'libelle_action', label: 'LIBELLE ACTION', type: 'text' as const },
+    { key: 'id_mission', label: 'ID MISSION', type: 'text' as const },
+    { key: 'libelle_mission', label: 'LIBELLE MISSION', type: 'text' as const },
+    { key: 'id_direction', label: 'ID DIRECTION', type: 'text' as const },
+    { key: 'libelle_direction', label: 'LIBELLE DIRECTION', type: 'text' as const },
+    { key: 'activites', label: 'ACTIVITES', type: 'text' as const },
+    { key: 'status', label: 'STATUT', type: 'text' as const },
+    { key: 'motif_blocage', label: 'MOTIF BLOCAGE', type: 'text' as const },
   ];
 
   return (
@@ -180,7 +182,7 @@ export default function TachesDiffereesPage() {
             Liste des tâches différées
           </h1>
           <p className="text-muted-foreground">
-            Exercice {exercice?.annee || "-"} - Tâches bloquées ou en attente
+            Exercice {exercice?.annee || '-'} - Tâches bloquées ou en attente
           </p>
         </div>
 
@@ -193,9 +195,9 @@ export default function TachesDiffereesPage() {
             <ExportButtons
               data={filteredTaches as unknown as Record<string, unknown>[]}
               columns={exportColumns}
-              filename={`taches-differees-${exercice?.annee || "export"}`}
+              filename={`taches-differees-${exercice?.annee || 'export'}`}
               title="Liste des tâches différées"
-              subtitle={`Exercice ${exercice?.annee || "-"}`}
+              subtitle={`Exercice ${exercice?.annee || '-'}`}
               showCopy
               showPrint
             />
@@ -281,9 +283,7 @@ export default function TachesDiffereesPage() {
       <Card>
         <CardHeader>
           <CardTitle>Tâches différées</CardTitle>
-          <CardDescription>
-            {filteredTaches.length} tâche(s) affichée(s)
-          </CardDescription>
+          <CardDescription>{filteredTaches.length} tâche(s) affichée(s)</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -316,27 +316,44 @@ export default function TachesDiffereesPage() {
                     <TableRow key={tache.id}>
                       <TableCell className="font-medium">{index + 1}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className="font-mono bg-amber-100 text-amber-800">
+                        <Badge
+                          variant="secondary"
+                          className="font-mono bg-amber-100 text-amber-800"
+                        >
                           {tache.imput}
                         </Badge>
                       </TableCell>
                       <TableCell>{getStatusBadge(tache.status)}</TableCell>
                       <TableCell>{tache.id_os}</TableCell>
-                      <TableCell className="hidden lg:table-cell max-w-[150px] truncate" title={tache.libelle_os}>
+                      <TableCell
+                        className="hidden lg:table-cell max-w-[150px] truncate"
+                        title={tache.libelle_os}
+                      >
                         {tache.libelle_os}
                       </TableCell>
                       <TableCell className="hidden md:table-cell">{tache.id_action}</TableCell>
-                      <TableCell className="hidden xl:table-cell max-w-[150px] truncate" title={tache.libelle_action}>
+                      <TableCell
+                        className="hidden xl:table-cell max-w-[150px] truncate"
+                        title={tache.libelle_action}
+                      >
                         {tache.libelle_action}
                       </TableCell>
                       <TableCell className="hidden md:table-cell">{tache.id_mission}</TableCell>
                       <TableCell>{tache.id_direction}</TableCell>
-                      <TableCell className="hidden lg:table-cell">{tache.libelle_direction}</TableCell>
-                      <TableCell className="hidden 2xl:table-cell max-w-[200px] truncate" title={tache.activites}>
+                      <TableCell className="hidden lg:table-cell">
+                        {tache.libelle_direction}
+                      </TableCell>
+                      <TableCell
+                        className="hidden 2xl:table-cell max-w-[200px] truncate"
+                        title={tache.activites}
+                      >
                         {tache.activites}
                       </TableCell>
-                      <TableCell className="hidden xl:table-cell max-w-[150px] truncate" title={tache.motif_blocage || "-"}>
-                        {tache.motif_blocage || "-"}
+                      <TableCell
+                        className="hidden xl:table-cell max-w-[150px] truncate"
+                        title={tache.motif_blocage || '-'}
+                      >
+                        {tache.motif_blocage || '-'}
                       </TableCell>
                     </TableRow>
                   ))}

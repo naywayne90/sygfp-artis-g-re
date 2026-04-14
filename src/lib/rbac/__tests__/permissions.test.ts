@@ -568,6 +568,6 @@ describe('getAccessDeniedMessage', () => {
 
   it('should return a message for execute', () => {
     const msg = getAccessDeniedMessage(ETAPES_CHAINE_DEPENSE.REGLEMENT, 'execute');
-    expect(msg).toContain('ex\u00e9cuter');
+    expect(msg).toContain('exécuter');
   });
 });

@@ -142,7 +142,6 @@ export const notesAefService = {
       const raw = data as unknown as Record<string, number> | null;
       const counts: NoteAEFCounts = {
         total: raw?.total ?? 0,
-        brouillon: raw?.brouillon ?? 0,
         soumis: raw?.soumis ?? 0,
         a_valider: raw?.a_valider ?? 0,
         a_imputer: raw?.a_imputer ?? 0,

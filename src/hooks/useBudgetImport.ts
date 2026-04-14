@@ -663,7 +663,7 @@ export function useBudgetImport() {
     ];
 
     const content = lines.join('\n');
-    const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['﻿' + content], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `rapport_erreurs_import_${new Date().toISOString().split('T')[0]}.csv`;

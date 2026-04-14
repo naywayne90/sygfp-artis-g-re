@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface DossierCompletData {
@@ -19,10 +20,6 @@ interface DossierCompletData {
 
 export function useExportDossierComplet() {
   const [isExporting, setIsExporting] = useState(false);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const formatMontant = (montant: number) =>
-    new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const formatDate = (date: string | null) => {
@@ -245,7 +242,7 @@ export function useExportDossierComplet() {
       </div>
       <div class="info-item">
         <div class="label">Montant engagé</div>
-        <div class="value amount">${formatMontant(engagement.montant)}</div>
+        <div class="value amount">${formatCurrency(engagement.montant)}</div>
       </div>
       <div class="info-item">
         <div class="label">Fournisseur</div>
@@ -281,7 +278,7 @@ export function useExportDossierComplet() {
       </div>
       <div class="info-item">
         <div class="label">Montant liquidé</div>
-        <div class="value amount">${formatMontant(liquidation.montant)}</div>
+        <div class="value amount">${formatCurrency(liquidation.montant)}</div>
       </div>
       <div class="info-item">
         <div class="label">Service fait</div>
@@ -317,7 +314,7 @@ export function useExportDossierComplet() {
       </div>
       <div class="info-item">
         <div class="label">Montant ordonnancé</div>
-        <div class="value amount">${formatMontant(ordonnancement.montant)}</div>
+        <div class="value amount">${formatCurrency(ordonnancement.montant)}</div>
       </div>
       <div class="info-item">
         <div class="label">Bénéficiaire</div>
@@ -361,18 +358,18 @@ export function useExportDossierComplet() {
           <td>${formatDate(r.date_paiement)}</td>
           <td>${r.mode_paiement}</td>
           <td>${r.reference_paiement || '-'}</td>
-          <td class="amount">${formatMontant(r.montant)}</td>
+          <td class="amount">${formatCurrency(r.montant)}</td>
         </tr>
         `
           )
           .join('')}
         <tr style="font-weight: bold; background: #e2e8f0;">
           <td colspan="4">TOTAL PAYÉ</td>
-          <td class="amount">${formatMontant(totalPaye)}</td>
+          <td class="amount">${formatCurrency(totalPaye)}</td>
         </tr>
         <tr>
           <td colspan="4">Restant à payer</td>
-          <td>${formatMontant(restant)}</td>
+          <td>${formatCurrency(restant)}</td>
         </tr>
       </tbody>
     </table>
@@ -425,7 +422,7 @@ export function useExportDossierComplet() {
 </html>
     `;
     },
-    [formatMontant, formatDate]
+    [formatDate]
   );
 
   // Générer Excel récapitulatif

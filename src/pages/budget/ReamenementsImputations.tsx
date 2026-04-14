@@ -6,11 +6,11 @@
  * les lignes budgétaires modernes pour compatibilité avec l'ancien système.
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ArrowLeftRight,
   Clock,
@@ -20,40 +20,34 @@ import {
   Download,
   FileText,
   RefreshCw,
-} from "lucide-react";
-import { format } from "date-fns";
-import * as XLSX from "xlsx";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import * as XLSX from 'xlsx';
 
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useRBAC } from "@/hooks/useRBAC";
-import { useReamenagementBudgetaire } from "@/hooks/useReamenagementBudgetaire";
-import { ReamenagementForm } from "@/components/budget/ReamenagementForm";
-import { ReamenagementsList } from "@/components/budget/ReamenagementsList";
-
-const formatMontant = (montant: number) =>
-  new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useRBAC } from '@/hooks/useRBAC';
+import { useReamenagementBudgetaire } from '@/hooks/useReamenagementBudgetaire';
+import { ReamenagementForm } from '@/components/budget/ReamenagementForm';
+import { ReamenagementsList } from '@/components/budget/ReamenagementsList';
+import { formatCurrency } from '@/lib/utils';
 
 export default function ReamenementsImputations() {
   const { exercice, exerciceId, isReadOnly } = useExercice();
   const { canCreate: rbacCanCreate, isAdmin, hasProfil } = useRBAC();
-  const canCreate = rbacCanCreate("budget");
-  const canValidate = isAdmin || hasProfil("Validateur") || hasProfil("Controleur");
+  const canCreate = rbacCanCreate('budget');
+  const canValidate = isAdmin || hasProfil('Validateur') || hasProfil('Controleur');
 
   // State
-  const [activeTab, setActiveTab] = useState("en_attente");
+  const [activeTab, setActiveTab] = useState('en_attente');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Query
-  const {
-    reamenagements,
-    countEnAttente,
-    countValides,
-    countRejetes,
-  } = useReamenagementBudgetaire(exerciceId);
+  const { reamenagements, countEnAttente, countValides, countRejetes } =
+    useReamenagementBudgetaire(exerciceId);
 
   // Stats
   const totalMontant = reamenagements
-    .filter((r) => r.statut === "valide")
+    .filter((r) => r.statut === 'valide')
     .reduce((sum, r) => sum + r.montant, 0);
 
   // Export to Excel
@@ -61,23 +55,23 @@ export default function ReamenementsImputations() {
     if (!reamenagements || reamenagements.length === 0) return;
 
     const exportData = reamenagements.map((r) => ({
-      Date: format(new Date(r.created_at), "dd/MM/yyyy"),
-      "Imputation Source": r.imputation_source,
-      "Libellé Source": r.libelle_source || "-",
-      "Imputation Destination": r.imputation_destination,
-      "Libellé Destination": r.libelle_destination || "-",
+      Date: format(new Date(r.created_at), 'dd/MM/yyyy'),
+      'Imputation Source': r.imputation_source,
+      'Libellé Source': r.libelle_source || '-',
+      'Imputation Destination': r.imputation_destination,
+      'Libellé Destination': r.libelle_destination || '-',
       Montant: r.montant,
       Motif: r.motif,
       Statut: r.statut,
-      "Validé par": r.valide_par_nom || "-",
-      "Date validation": r.date_validation
-        ? format(new Date(r.date_validation), "dd/MM/yyyy")
-        : "-",
+      'Validé par': r.valide_par_nom || '-',
+      'Date validation': r.date_validation
+        ? format(new Date(r.date_validation), 'dd/MM/yyyy')
+        : '-',
     }));
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(exportData);
-    XLSX.utils.book_append_sheet(wb, ws, "Réaménagements");
+    XLSX.utils.book_append_sheet(wb, ws, 'Réaménagements');
     XLSX.writeFile(wb, `reamenagements_imputations_${exercice}.xlsx`);
   };
 
@@ -161,7 +155,7 @@ export default function ReamenementsImputations() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total transféré</p>
-                <p className="text-lg font-bold truncate">{formatMontant(totalMontant)}</p>
+                <p className="text-lg font-bold truncate">{formatCurrency(totalMontant)}</p>
               </div>
             </div>
           </CardContent>
@@ -179,7 +173,7 @@ export default function ReamenementsImputations() {
               </p>
               <p className="text-blue-600 dark:text-blue-300">
                 Cette page gère les transferts budgétaires entre imputations (codes type 22.61.01).
-                Pour les virements entre lignes budgétaires modernes, utilisez la page{" "}
+                Pour les virements entre lignes budgétaires modernes, utilisez la page{' '}
                 <a href="/planification/virements" className="underline">
                   Virements & Ajustements
                 </a>
@@ -222,8 +216,8 @@ export default function ReamenementsImputations() {
               <CardTitle>Réaménagements en attente de validation</CardTitle>
               <CardDescription>
                 {canValidate
-                  ? "Vous pouvez valider ou rejeter ces demandes"
-                  : "Ces demandes sont en attente de validation par un validateur"}
+                  ? 'Vous pouvez valider ou rejeter ces demandes'
+                  : 'Ces demandes sont en attente de validation par un validateur'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -250,9 +244,7 @@ export default function ReamenementsImputations() {
           <Card>
             <CardHeader>
               <CardTitle>Réaménagements rejetés</CardTitle>
-              <CardDescription>
-                Ces demandes de transfert ont été refusées
-              </CardDescription>
+              <CardDescription>Ces demandes de transfert ont été refusées</CardDescription>
             </CardHeader>
             <CardContent>
               <ReamenagementsList filterStatut="rejete" showActions={false} />
@@ -264,9 +256,7 @@ export default function ReamenementsImputations() {
           <Card>
             <CardHeader>
               <CardTitle>Tous les réaménagements</CardTitle>
-              <CardDescription>
-                Historique complet des demandes de réaménagement
-              </CardDescription>
+              <CardDescription>Historique complet des demandes de réaménagement</CardDescription>
             </CardHeader>
             <CardContent>
               <ReamenagementsList filterStatut="tous" showActions={canValidate} />
@@ -281,7 +271,7 @@ export default function ReamenementsImputations() {
         onOpenChange={setShowCreateDialog}
         onSuccess={() => {
           // Optionally switch to "en_attente" tab after creation
-          setActiveTab("en_attente");
+          setActiveTab('en_attente');
         }}
       />
     </div>

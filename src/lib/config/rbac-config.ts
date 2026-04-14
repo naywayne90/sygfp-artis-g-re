@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 /**
  * Configuration centrale RBAC pour SYGFP/ARTI
  * Définit les rôles, niveaux de validation et règles d'accès
@@ -169,9 +167,9 @@ export const VALIDATION_MATRIX = {
   },
   IMPUTATION: {
     label: 'Imputation budgétaire',
-    validators: ['CB', 'ADMIN'],
-    requiredRole: 'CB',
-    description: 'Imputation par le Contrôleur Budgétaire',
+    validators: ['DAAF', 'CB', 'DG', 'ADMIN'],
+    requiredRole: 'DAAF',
+    description: 'Création par DAAF, visa CB, validation DG',
   },
   ENGAGEMENT: {
     label: 'Engagement',

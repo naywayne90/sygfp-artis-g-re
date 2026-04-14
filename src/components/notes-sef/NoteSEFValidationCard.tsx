@@ -1,18 +1,18 @@
 /**
  * Carte de validation rapide pour Note SEF
- * 
+ *
  * Affiche les informations clés et les actions de validation
  * pour un traitement rapide par les validateurs.
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { NoteSEF } from "@/hooks/useNotesSEF";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { NoteSEF } from '@/hooks/useNotesSEF';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn, formatCurrency } from '@/lib/utils';
 import {
   CheckCircle,
   XCircle,
@@ -25,7 +25,7 @@ import {
   Target,
   ArrowRight,
   Eye,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface NoteSEFValidationCardProps {
   note: NoteSEF;
@@ -40,28 +40,26 @@ interface NoteSEFValidationCardProps {
 // Badge d'urgence
 function getUrgenceBadge(urgence: string | null) {
   const variants: Record<string, { label: string; className: string; icon?: React.ReactNode }> = {
-    basse: { label: "Basse", className: "bg-muted text-muted-foreground" },
-    normale: { label: "Normale", className: "bg-secondary text-secondary-foreground" },
-    haute: { label: "Haute", className: "bg-warning text-warning-foreground", icon: <AlertTriangle className="h-3 w-3" /> },
-    urgente: { label: "URGENTE", className: "bg-destructive text-destructive-foreground animate-pulse", icon: <AlertTriangle className="h-3 w-3" /> },
+    basse: { label: 'Basse', className: 'bg-muted text-muted-foreground' },
+    normale: { label: 'Normale', className: 'bg-secondary text-secondary-foreground' },
+    haute: {
+      label: 'Haute',
+      className: 'bg-warning text-warning-foreground',
+      icon: <AlertTriangle className="h-3 w-3" />,
+    },
+    urgente: {
+      label: 'URGENTE',
+      className: 'bg-destructive text-destructive-foreground animate-pulse',
+      icon: <AlertTriangle className="h-3 w-3" />,
+    },
   };
-  const variant = variants[urgence || "normale"] || variants.normale;
+  const variant = variants[urgence || 'normale'] || variants.normale;
   return (
-    <Badge className={cn(variant.className, "gap-1")}>
+    <Badge className={cn(variant.className, 'gap-1')}>
       {variant.icon}
       {variant.label}
     </Badge>
   );
-}
-
-// Formateur de montant
-function formatMontant(montant: number | null | undefined) {
-  if (!montant) return "—";
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "XOF",
-    minimumFractionDigits: 0,
-  }).format(montant);
 }
 
 export function NoteSEFValidationCard({
@@ -73,20 +71,22 @@ export function NoteSEFValidationCard({
   isProcessing = false,
   showDetails = true,
 }: NoteSEFValidationCardProps) {
-  const isUrgent = note.urgence === "urgente" || note.urgence === "haute";
+  const isUrgent = note.urgence === 'urgente' || note.urgence === 'haute';
 
   return (
-    <Card className={cn(
-      "transition-all hover:shadow-md",
-      isUrgent && "border-warning/50",
-      note.urgence === "urgente" && "border-destructive/50"
-    )}>
+    <Card
+      className={cn(
+        'transition-all hover:shadow-md',
+        isUrgent && 'border-warning/50',
+        note.urgence === 'urgente' && 'border-destructive/50'
+      )}
+    >
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="font-mono text-lg font-semibold text-primary">
-                {note.dossier_ref || note.reference_pivot || note.numero || "Nouvelle note"}
+                {note.dossier_ref || note.reference_pivot || note.numero || 'Nouvelle note'}
               </span>
               {getUrgenceBadge(note.urgence)}
             </div>
@@ -108,15 +108,17 @@ export function NoteSEFValidationCard({
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Direction :</span>
-            <span className="font-medium">{note.direction?.sigle || note.direction?.label || "—"}</span>
+            <span className="font-medium">
+              {note.direction?.sigle || note.direction?.label || '—'}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Demandeur :</span>
             <span className="font-medium truncate max-w-[120px]">
               {note.demandeur
-                ? `${note.demandeur.first_name || ""} ${note.demandeur.last_name || ""}`.trim()
-                : "—"}
+                ? `${note.demandeur.first_name || ''} ${note.demandeur.last_name || ''}`.trim()
+                : '—'}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -124,14 +126,16 @@ export function NoteSEFValidationCard({
             <span className="text-muted-foreground">Souhaitée :</span>
             <span className="font-medium">
               {note.date_souhaitee
-                ? format(new Date(note.date_souhaitee), "dd MMM yyyy", { locale: fr })
-                : "—"}
+                ? format(new Date(note.date_souhaitee), 'dd MMM yyyy', { locale: fr })
+                : '—'}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Estimé :</span>
-            <span className="font-medium">{formatMontant(note.montant_estime)}</span>
+            <span className="font-medium">
+              {note.montant_estime ? formatCurrency(note.montant_estime) : '—'}
+            </span>
           </div>
         </div>
 
@@ -165,10 +169,10 @@ export function NoteSEFValidationCard({
         {/* Actions */}
         <div className="flex items-center justify-between gap-2">
           <div className="text-xs text-muted-foreground">
-            Soumise le{" "}
+            Soumise le{' '}
             {note.submitted_at
-              ? format(new Date(note.submitted_at), "dd/MM/yyyy à HH:mm", { locale: fr })
-              : format(new Date(note.created_at), "dd/MM/yyyy", { locale: fr })}
+              ? format(new Date(note.submitted_at), 'dd/MM/yyyy à HH:mm', { locale: fr })
+              : format(new Date(note.created_at), 'dd/MM/yyyy', { locale: fr })}
           </div>
           <div className="flex items-center gap-2">
             {onDefer && (

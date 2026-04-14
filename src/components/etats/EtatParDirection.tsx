@@ -1,6 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { ExportButtons } from "./ExportButtons";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { ExportButtons } from './ExportButtons';
+import { formatCurrency } from '@/lib/utils';
 
 interface DirectionData {
   direction: { id: string; code: string; label: string; sigle: string | null };
@@ -16,11 +17,7 @@ interface EtatParDirectionProps {
   title?: string;
 }
 
-const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat("fr-FR").format(montant);
-};
-
-export function EtatParDirection({ data, title = "État par Direction" }: EtatParDirectionProps) {
+export function EtatParDirection({ data, title = 'État par Direction' }: EtatParDirectionProps) {
   const totals = data.reduce(
     (acc, row) => ({
       dotation: acc.dotation + row.dotation,
@@ -33,15 +30,15 @@ export function EtatParDirection({ data, title = "État par Direction" }: EtatPa
   );
 
   const exportColumns = [
-    { key: "direction.sigle", label: "Sigle" },
-    { key: "direction.label", label: "Direction" },
-    { key: "dotation", label: "Dotation" },
-    { key: "engage", label: "Engagé" },
-    { key: "liquide", label: "Liquidé" },
-    { key: "ordonnance", label: "Ordonnancé" },
-    { key: "paye", label: "Payé" },
-    { key: "disponible", label: "Disponible" },
-    { key: "taux", label: "Taux (%)" },
+    { key: 'direction.sigle', label: 'Sigle' },
+    { key: 'direction.label', label: 'Direction' },
+    { key: 'dotation', label: 'Dotation' },
+    { key: 'engage', label: 'Engagé' },
+    { key: 'liquide', label: 'Liquidé' },
+    { key: 'ordonnance', label: 'Ordonnancé' },
+    { key: 'paye', label: 'Payé' },
+    { key: 'disponible', label: 'Disponible' },
+    { key: 'taux', label: 'Taux (%)' },
   ];
 
   const exportData = data.map((row) => ({
@@ -83,29 +80,35 @@ export function EtatParDirection({ data, title = "État par Direction" }: EtatPa
                 return (
                   <tr key={row.direction.id || index} className="border-b hover:bg-muted/30">
                     <td className="py-3 px-4">
-                      <span className="font-medium">{row.direction.sigle || row.direction.code}</span>
-                      <span className="text-muted-foreground ml-2 text-xs">{row.direction.label}</span>
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono">{formatMontant(row.dotation)}</td>
-                    <td className="py-3 px-4 text-right font-mono text-secondary">
-                      {formatMontant(row.engage)}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono text-amber-600">
-                      {formatMontant(row.liquide)}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono text-blue-600">
-                      {formatMontant(row.ordonnance)}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono text-success">
-                      {formatMontant(row.paye)}
+                      <span className="font-medium">
+                        {row.direction.sigle || row.direction.code}
+                      </span>
+                      <span className="text-muted-foreground ml-2 text-xs">
+                        {row.direction.label}
+                      </span>
                     </td>
                     <td className="py-3 px-4 text-right font-mono">
-                      {formatMontant(disponible)}
+                      {formatCurrency(row.dotation)}
                     </td>
+                    <td className="py-3 px-4 text-right font-mono text-secondary">
+                      {formatCurrency(row.engage)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono text-amber-600">
+                      {formatCurrency(row.liquide)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono text-blue-600">
+                      {formatCurrency(row.ordonnance)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono text-success">
+                      {formatCurrency(row.paye)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono">{formatCurrency(disponible)}</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <Progress value={Math.min(taux, 100)} className="h-2 flex-1" />
-                        <span className="text-xs font-medium w-12 text-right">{taux.toFixed(1)}%</span>
+                        <span className="text-xs font-medium w-12 text-right">
+                          {taux.toFixed(1)}%
+                        </span>
                       </div>
                     </td>
                   </tr>
@@ -115,27 +118,26 @@ export function EtatParDirection({ data, title = "État par Direction" }: EtatPa
             <tfoot>
               <tr className="bg-muted/70 font-bold">
                 <td className="py-3 px-4">TOTAL</td>
-                <td className="py-3 px-4 text-right font-mono">{formatMontant(totals.dotation)}</td>
+                <td className="py-3 px-4 text-right font-mono">
+                  {formatCurrency(totals.dotation)}
+                </td>
                 <td className="py-3 px-4 text-right font-mono text-secondary">
-                  {formatMontant(totals.engage)}
+                  {formatCurrency(totals.engage)}
                 </td>
                 <td className="py-3 px-4 text-right font-mono text-amber-600">
-                  {formatMontant(totals.liquide)}
+                  {formatCurrency(totals.liquide)}
                 </td>
                 <td className="py-3 px-4 text-right font-mono text-blue-600">
-                  {formatMontant(totals.ordonnance)}
+                  {formatCurrency(totals.ordonnance)}
                 </td>
                 <td className="py-3 px-4 text-right font-mono text-success">
-                  {formatMontant(totals.paye)}
+                  {formatCurrency(totals.paye)}
                 </td>
                 <td className="py-3 px-4 text-right font-mono">
-                  {formatMontant(totals.dotation - totals.engage)}
+                  {formatCurrency(totals.dotation - totals.engage)}
                 </td>
                 <td className="py-3 px-4 text-center">
-                  {totals.dotation > 0
-                    ? ((totals.engage / totals.dotation) * 100).toFixed(1)
-                    : 0}
-                  %
+                  {totals.dotation > 0 ? ((totals.engage / totals.dotation) * 100).toFixed(1) : 0}%
                 </td>
               </tr>
             </tfoot>

@@ -164,7 +164,6 @@ export function formatFileSize(bytes: number | null): string {
 export function calculateCounts(notes: NoteSEFEntity[]): NoteSEFCounts {
   const counts: NoteSEFCounts = {
     total: 0,
-    brouillon: 0,
     soumis: 0,
     a_valider: 0,
     valide: 0,
@@ -175,8 +174,8 @@ export function calculateCounts(notes: NoteSEFEntity[]): NoteSEFCounts {
   for (const note of notes) {
     counts.total++;
     const statut = note.statut || NoteSEFStatut.SUBMITTED;
-    // brouillon mappe vers soumis (plus de brouillon dans le nouveau systeme)
-    if (statut === 'brouillon' || statut === 'soumis') counts.soumis++;
+    // Pas de brouillon : tout est soumis des la creation
+    if (statut === 'soumis') counts.soumis++;
     else if (statut === 'a_valider') counts.a_valider++;
     else if (statut === 'valide') counts.valide++;
     else if (statut === 'differe') counts.differe++;

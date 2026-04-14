@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * EtatExecutionTachesPage - État d'exécution des tâches
  *
@@ -6,21 +5,21 @@
  * par Direction, Mission, Objectif Stratégique ou Activité.
  */
 
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -28,8 +27,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { ExportButtons } from "@/components/etats/ExportButtons";
+} from '@/components/ui/table';
+import { ExportButtons } from '@/components/etats/ExportButtons';
 import {
   BarChart3,
   Building2,
@@ -39,11 +38,12 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
-  ChevronRight
-} from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+  ChevronRight,
+} from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { formatCurrency } from '@/lib/utils';
 
-type GroupByOption = "direction" | "mission" | "os" | "activite";
+type GroupByOption = 'direction' | 'mission' | 'os' | 'activite';
 
 interface ExecutionStat {
   id: string;
@@ -68,44 +68,45 @@ interface FilterData {
 
 export default function EtatExecutionTachesPage() {
   const { exerciceId, exercice } = useExercice();
-  const [groupBy, setGroupBy] = useState<GroupByOption>("direction");
-  const [selectedDirection, setSelectedDirection] = useState<string>("all");
-  const [selectedMission, setSelectedMission] = useState<string>("all");
+  const [groupBy, setGroupBy] = useState<GroupByOption>('direction');
+  const [selectedDirection, setSelectedDirection] = useState<string>('all');
+  const [selectedMission, setSelectedMission] = useState<string>('all');
 
   // Charger les données de filtres
   const { data: filterData } = useQuery<FilterData>({
-    queryKey: ["execution-filters", exerciceId],
+    queryKey: ['execution-filters', exerciceId],
     queryFn: async () => {
       const [directionsRes, missionsRes, objectifsRes] = await Promise.all([
-        supabase.from("directions").select("id, code, label").order("code"),
-        supabase.from("missions").select("id, code, libelle").order("code"),
-        supabase.from("objectifs_strategiques").select("id, code, libelle").order("code")
+        supabase.from('directions').select('id, code, label').order('code'),
+        supabase.from('missions').select('id, code, libelle').order('code'),
+        supabase.from('objectifs_strategiques').select('id, code, libelle').order('code'),
       ]);
 
       return {
         directions: directionsRes.data || [],
         missions: missionsRes.data || [],
-        objectifs: objectifsRes.data || []
+        objectifs: objectifsRes.data || [],
       };
     },
-    enabled: !!exerciceId
+    enabled: !!exerciceId,
   });
 
   // Charger les statistiques d'exécution
-  const { data: executions, isLoading, refetch } = useQuery({
-    queryKey: ["execution-stats", exerciceId, groupBy, selectedDirection, selectedMission],
+  const {
+    data: executions,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['execution-stats', exerciceId, groupBy, selectedDirection, selectedMission],
     queryFn: async () => {
       // Récupérer toutes les tâches d'exécution avec leurs jointures
-      let query = supabase
-        .from("task_executions_view")
-        .select("*")
-        .eq("exercice_id", exerciceId);
+      let query = supabase.from('task_executions_view').select('*').eq('exercice_id', exerciceId);
 
-      if (selectedDirection !== "all") {
-        query = query.eq("direction_id", selectedDirection);
+      if (selectedDirection !== 'all') {
+        query = query.eq('direction_id', selectedDirection);
       }
-      if (selectedMission !== "all") {
-        query = query.eq("mission_id", selectedMission);
+      if (selectedMission !== 'all') {
+        query = query.eq('mission_id', selectedMission);
       }
 
       const { data, error } = await query;
@@ -121,30 +122,30 @@ export default function EtatExecutionTachesPage() {
         let groupLabel: string;
 
         switch (groupBy) {
-          case "direction":
-            groupKey = (task.direction_id as string) || "unknown";
-            groupCode = (task.direction_code as string) || "?";
-            groupLabel = (task.direction_label as string) || "Non assigné";
+          case 'direction':
+            groupKey = (task.direction_id as string) || 'unknown';
+            groupCode = (task.direction_code as string) || '?';
+            groupLabel = (task.direction_label as string) || 'Non assigné';
             break;
-          case "mission":
-            groupKey = (task.mission_id as string) || "unknown";
-            groupCode = (task.mission_code as string) || "?";
-            groupLabel = (task.mission_libelle as string) || "Non assigné";
+          case 'mission':
+            groupKey = (task.mission_id as string) || 'unknown';
+            groupCode = (task.mission_code as string) || '?';
+            groupLabel = (task.mission_libelle as string) || 'Non assigné';
             break;
-          case "os":
-            groupKey = (task.os_id as string) || "unknown";
-            groupCode = (task.os_code as string) || "?";
-            groupLabel = (task.os_libelle as string) || "Non assigné";
+          case 'os':
+            groupKey = (task.os_id as string) || 'unknown';
+            groupCode = (task.os_code as string) || '?';
+            groupLabel = (task.os_libelle as string) || 'Non assigné';
             break;
-          case "activite":
-            groupKey = (task.activite_id as string) || "unknown";
-            groupCode = (task.activite_code as string) || "?";
-            groupLabel = (task.activite_libelle as string) || "Non assigné";
+          case 'activite':
+            groupKey = (task.activite_id as string) || 'unknown';
+            groupCode = (task.activite_code as string) || '?';
+            groupLabel = (task.activite_libelle as string) || 'Non assigné';
             break;
           default:
-            groupKey = "all";
-            groupCode = "-";
-            groupLabel = "Tout";
+            groupKey = 'all';
+            groupCode = '-';
+            groupLabel = 'Tout';
         }
 
         if (!statsMap.has(groupKey)) {
@@ -160,7 +161,7 @@ export default function EtatExecutionTachesPage() {
             activites_annulees: 0,
             taux_moyen: 0,
             montant_total: 0,
-            montant_realise: 0
+            montant_realise: 0,
           });
         }
 
@@ -172,31 +173,32 @@ export default function EtatExecutionTachesPage() {
         const montant = (task.activite_montant as number) || 0;
 
         switch (status) {
-          case "non_demarre":
+          case 'non_demarre':
             stat.activites_non_demarrees++;
             break;
-          case "en_cours":
+          case 'en_cours':
             stat.activites_en_cours++;
             break;
-          case "realise":
+          case 'realise':
             stat.activites_realisees++;
             break;
-          case "bloque":
+          case 'bloque':
             stat.activites_bloquees++;
             break;
-          case "annule":
+          case 'annule':
             stat.activites_annulees++;
             break;
         }
 
         stat.montant_total += montant;
         stat.montant_realise += montant * (taux / 100);
-        stat.taux_moyen = (stat.taux_moyen * (stat.total_activites - 1) + taux) / stat.total_activites;
+        stat.taux_moyen =
+          (stat.taux_moyen * (stat.total_activites - 1) + taux) / stat.total_activites;
       });
 
       return Array.from(statsMap.values()).sort((a, b) => a.code.localeCompare(b.code));
     },
-    enabled: !!exerciceId
+    enabled: !!exerciceId,
   });
 
   // Calcul des totaux
@@ -211,80 +213,77 @@ export default function EtatExecutionTachesPage() {
         annulees: 0,
         taux_global: 0,
         montant_total: 0,
-        montant_realise: 0
+        montant_realise: 0,
       };
     }
 
-    const result = executions.reduce((acc, stat) => ({
-      total: acc.total + stat.total_activites,
-      non_demarrees: acc.non_demarrees + stat.activites_non_demarrees,
-      en_cours: acc.en_cours + stat.activites_en_cours,
-      realisees: acc.realisees + stat.activites_realisees,
-      bloquees: acc.bloquees + stat.activites_bloquees,
-      annulees: acc.annulees + stat.activites_annulees,
-      montant_total: acc.montant_total + stat.montant_total,
-      montant_realise: acc.montant_realise + stat.montant_realise
-    }), {
-      total: 0,
-      non_demarrees: 0,
-      en_cours: 0,
-      realisees: 0,
-      bloquees: 0,
-      annulees: 0,
-      montant_total: 0,
-      montant_realise: 0
-    });
+    const result = executions.reduce(
+      (acc, stat) => ({
+        total: acc.total + stat.total_activites,
+        non_demarrees: acc.non_demarrees + stat.activites_non_demarrees,
+        en_cours: acc.en_cours + stat.activites_en_cours,
+        realisees: acc.realisees + stat.activites_realisees,
+        bloquees: acc.bloquees + stat.activites_bloquees,
+        annulees: acc.annulees + stat.activites_annulees,
+        montant_total: acc.montant_total + stat.montant_total,
+        montant_realise: acc.montant_realise + stat.montant_realise,
+      }),
+      {
+        total: 0,
+        non_demarrees: 0,
+        en_cours: 0,
+        realisees: 0,
+        bloquees: 0,
+        annulees: 0,
+        montant_total: 0,
+        montant_realise: 0,
+      }
+    );
 
     return {
       ...result,
-      taux_global: result.total > 0
-        ? Math.round((result.realisees / result.total) * 100)
-        : 0
+      taux_global: result.total > 0 ? Math.round((result.realisees / result.total) * 100) : 0,
     };
   }, [executions]);
 
   // Colonnes pour l'export
   const exportColumns = [
-    { key: "code", label: "Code" },
-    { key: "label", label: "Libellé" },
-    { key: "total_activites", label: "Total Activités" },
-    { key: "activites_non_demarrees", label: "Non démarrées" },
-    { key: "activites_en_cours", label: "En cours" },
-    { key: "activites_realisees", label: "Réalisées" },
-    { key: "activites_bloquees", label: "Bloquées" },
-    { key: "taux_moyen", label: "Taux (%)", type: "number" as const },
+    { key: 'code', label: 'Code' },
+    { key: 'label', label: 'Libellé' },
+    { key: 'total_activites', label: 'Total Activités' },
+    { key: 'activites_non_demarrees', label: 'Non démarrées' },
+    { key: 'activites_en_cours', label: 'En cours' },
+    { key: 'activites_realisees', label: 'Réalisées' },
+    { key: 'activites_bloquees', label: 'Bloquées' },
+    { key: 'taux_moyen', label: 'Taux (%)', type: 'number' as const },
   ];
 
   const getGroupByIcon = () => {
     switch (groupBy) {
-      case "direction": return <Building2 className="h-4 w-4" />;
-      case "mission": return <Target className="h-4 w-4" />;
-      case "os": return <ChevronRight className="h-4 w-4" />;
-      case "activite": return <Layers className="h-4 w-4" />;
-      default: return <BarChart3 className="h-4 w-4" />;
+      case 'direction':
+        return <Building2 className="h-4 w-4" />;
+      case 'mission':
+        return <Target className="h-4 w-4" />;
+      case 'os':
+        return <ChevronRight className="h-4 w-4" />;
+      case 'activite':
+        return <Layers className="h-4 w-4" />;
+      default:
+        return <BarChart3 className="h-4 w-4" />;
     }
   };
 
   const getTauxColor = (taux: number) => {
-    if (taux >= 80) return "text-green-600";
-    if (taux >= 50) return "text-yellow-600";
-    if (taux >= 20) return "text-orange-600";
-    return "text-red-600";
+    if (taux >= 80) return 'text-green-600';
+    if (taux >= 50) return 'text-yellow-600';
+    if (taux >= 20) return 'text-orange-600';
+    return 'text-red-600';
   };
 
   const getTauxIcon = (taux: number) => {
     if (taux >= 80) return <TrendingUp className="h-4 w-4 text-green-600" />;
     if (taux >= 50) return <Minus className="h-4 w-4 text-yellow-600" />;
     return <TrendingDown className="h-4 w-4 text-red-600" />;
-  };
-
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "XAF",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(montant);
   };
 
   return (
@@ -297,7 +296,7 @@ export default function EtatExecutionTachesPage() {
             État d'Exécution des Tâches
           </h1>
           <p className="text-muted-foreground">
-            Exercice {exercice?.annee || "-"} - Taux d'exécution physique
+            Exercice {exercice?.annee || '-'} - Taux d'exécution physique
           </p>
         </div>
 
@@ -310,9 +309,9 @@ export default function EtatExecutionTachesPage() {
             <ExportButtons
               data={executions}
               columns={exportColumns}
-              filename={`etat-execution-${groupBy}-${exercice?.annee || "export"}`}
+              filename={`etat-execution-${groupBy}-${exercice?.annee || 'export'}`}
               title="État d'Exécution des Tâches"
-              subtitle={`Par ${groupBy === "direction" ? "Direction" : groupBy === "mission" ? "Mission" : groupBy === "os" ? "Objectif Stratégique" : "Activité"}`}
+              subtitle={`Par ${groupBy === 'direction' ? 'Direction' : groupBy === 'mission' ? 'Mission' : groupBy === 'os' ? 'Objectif Stratégique' : 'Activité'}`}
               showCopy
               showPrint
             />
@@ -413,15 +412,16 @@ export default function EtatExecutionTachesPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {getGroupByIcon()}
-            Récapitulatif par {
-              groupBy === "direction" ? "Direction" :
-              groupBy === "mission" ? "Mission" :
-              groupBy === "os" ? "Objectif Stratégique" : "Activité"
-            }
+            Récapitulatif par{' '}
+            {groupBy === 'direction'
+              ? 'Direction'
+              : groupBy === 'mission'
+                ? 'Mission'
+                : groupBy === 'os'
+                  ? 'Objectif Stratégique'
+                  : 'Activité'}
           </CardTitle>
-          <CardDescription>
-            {executions?.length || 0} entrées affichées
-          </CardDescription>
+          <CardDescription>{executions?.length || 0} entrées affichées</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -463,12 +463,16 @@ export default function EtatExecutionTachesPage() {
                       </TableCell>
                       <TableCell className="text-center hidden lg:table-cell">
                         {stat.activites_en_cours > 0 && (
-                          <Badge className="bg-yellow-100 text-yellow-800">{stat.activites_en_cours}</Badge>
+                          <Badge className="bg-yellow-100 text-yellow-800">
+                            {stat.activites_en_cours}
+                          </Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-center hidden md:table-cell">
                         {stat.activites_realisees > 0 && (
-                          <Badge className="bg-green-100 text-green-800">{stat.activites_realisees}</Badge>
+                          <Badge className="bg-green-100 text-green-800">
+                            {stat.activites_realisees}
+                          </Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-center hidden lg:table-cell">
@@ -485,7 +489,7 @@ export default function EtatExecutionTachesPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right hidden xl:table-cell font-mono text-sm">
-                        {formatMontant(stat.montant_total)}
+                        {formatCurrency(stat.montant_total)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -493,18 +497,28 @@ export default function EtatExecutionTachesPage() {
                   <TableRow className="font-bold bg-muted/50">
                     <TableCell>TOTAL</TableCell>
                     <TableCell>-</TableCell>
-                    <TableCell className="text-center hidden md:table-cell">{totals.total}</TableCell>
-                    <TableCell className="text-center hidden lg:table-cell">{totals.non_demarrees}</TableCell>
-                    <TableCell className="text-center hidden lg:table-cell">{totals.en_cours}</TableCell>
-                    <TableCell className="text-center hidden md:table-cell">{totals.realisees}</TableCell>
-                    <TableCell className="text-center hidden lg:table-cell">{totals.bloquees}</TableCell>
+                    <TableCell className="text-center hidden md:table-cell">
+                      {totals.total}
+                    </TableCell>
+                    <TableCell className="text-center hidden lg:table-cell">
+                      {totals.non_demarrees}
+                    </TableCell>
+                    <TableCell className="text-center hidden lg:table-cell">
+                      {totals.en_cours}
+                    </TableCell>
+                    <TableCell className="text-center hidden md:table-cell">
+                      {totals.realisees}
+                    </TableCell>
+                    <TableCell className="text-center hidden lg:table-cell">
+                      {totals.bloquees}
+                    </TableCell>
                     <TableCell className="text-center">
                       <span className={getTauxColor(totals.taux_global)}>
                         {totals.taux_global}%
                       </span>
                     </TableCell>
                     <TableCell className="text-right hidden xl:table-cell font-mono">
-                      {formatMontant(totals.montant_total)}
+                      {formatCurrency(totals.montant_total)}
                     </TableCell>
                   </TableRow>
                 </TableBody>

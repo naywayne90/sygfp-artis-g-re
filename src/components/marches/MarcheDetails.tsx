@@ -17,6 +17,7 @@ import {
   History,
 } from 'lucide-react';
 import { Marche, VALIDATION_STEPS, useMarches } from '@/hooks/useMarches';
+import { formatCurrency } from '@/lib/utils';
 import { MarcheDocumentsTab } from './MarcheDocumentsTab';
 import { MarcheHistoriqueTab } from './MarcheHistoriqueTab';
 import { MarcheOffresTab } from './MarcheOffresTab';
@@ -45,9 +46,6 @@ export function MarcheDetails({ marche }: MarcheDetailsProps) {
   useEffect(() => {
     getMarcheValidations(marche.id).then(setValidations);
   }, [marche.id, getMarcheValidations]);
-
-  const formatMontant = (montant: number) =>
-    new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -97,7 +95,7 @@ export function MarcheDetails({ marche }: MarcheDetailsProps) {
           <div className="grid gap-4 md:grid-cols-4 text-sm">
             <div>
               <span className="text-muted-foreground">Montant:</span>
-              <p className="font-bold text-lg text-primary">{formatMontant(marche.montant)}</p>
+              <p className="font-bold text-lg text-primary">{formatCurrency(marche.montant)}</p>
             </div>
             <div>
               <span className="text-muted-foreground">Mode de passation:</span>

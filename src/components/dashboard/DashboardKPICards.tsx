@@ -19,7 +19,7 @@ import {
   ArrowDownRight,
   Minus,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import type { DashboardKPIs } from '@/hooks/useDashboardData';
 
 // ============================================================================
@@ -93,9 +93,7 @@ function KPICard({
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
-          <div className={cn('p-2.5 rounded-lg', colorClasses[color])}>
-            {icon}
-          </div>
+          <div className={cn('p-2.5 rounded-lg', colorClasses[color])}>{icon}</div>
           {trend && (
             <Badge
               variant="outline"
@@ -104,8 +102,8 @@ function KPICard({
                 trend.value > 0
                   ? 'text-green-600 border-green-200 bg-green-50'
                   : trend.value < 0
-                  ? 'text-red-600 border-red-200 bg-red-50'
-                  : 'text-gray-600 border-gray-200'
+                    ? 'text-red-600 border-red-200 bg-red-50'
+                    : 'text-gray-600 border-gray-200'
               )}
             >
               {trend.value > 0 ? (
@@ -123,9 +121,7 @@ function KPICard({
         <div className="mt-4">
           <h3 className="text-2xl font-bold tracking-tight">{value}</h3>
           <p className="text-sm text-muted-foreground">{title}</p>
-          {subtitle && (
-            <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-          )}
+          {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
         </div>
 
         {progress && (
@@ -146,24 +142,12 @@ function KPICard({
 // COMPOSANT PRINCIPAL
 // ============================================================================
 
-export function DashboardKPICards({
-  data,
-  isLoading,
-  className,
-}: DashboardKPICardsProps) {
+export function DashboardKPICards({ data, isLoading, className }: DashboardKPICardsProps) {
   // Calculer les tendances (comparaison avec période précédente - simulé ici)
   const notesTotal = data?.notesSEF.total || 0;
   const dossiersTotal = data?.dossiers.total || 0;
   const budgetTotal = data?.budget.total || 0;
   const tauxExecution = data?.budget.tauxExecution || 0;
-
-  // Formatage des montants
-  const formatMontant = (montant: number): string => {
-    if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
-    if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
-    if (montant >= 1_000) return `${(montant / 1_000).toFixed(0)} K`;
-    return montant.toFixed(0);
-  };
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -194,8 +178,8 @@ export function DashboardKPICards({
         {/* Budget */}
         <KPICard
           title="Budget total"
-          value={`${formatMontant(budgetTotal)} FCFA`}
-          subtitle={`${formatMontant(data?.budget.paye || 0)} FCFA payé`}
+          value={formatCurrency(budgetTotal)}
+          subtitle={`${formatCurrency(data?.budget.paye || 0)} paye`}
           icon={<Wallet className="h-5 w-5" />}
           progress={{ value: tauxExecution, label: "Taux d'exécution" }}
           color="green"

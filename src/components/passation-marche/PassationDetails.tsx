@@ -119,7 +119,6 @@ export function PassationDetails({
   const procedureCoherente = isProcedureCoherente(montantEB, passation.mode_passation);
 
   // Helpers
-  const formatMontant = (montant: number | null) => (montant ? formatCurrency(montant) : '-');
 
   const getModeName = (value: string) =>
     MODES_PASSATION.find((m) => m.value === value)?.label || value;
@@ -248,7 +247,7 @@ export function PassationDetails({
                   </div>
                   <div>
                     <span className="text-muted-foreground">Montant estime:</span>{' '}
-                    <span className="font-medium">{formatMontant(montantEB)}</span>
+                    <span className="font-medium">{formatCurrency(montantEB)}</span>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Seuil DGMP:</span>{' '}
@@ -303,7 +302,7 @@ export function PassationDetails({
                   <Alert className="bg-yellow-50 border-yellow-300">
                     <AlertTriangle className="h-4 w-4 text-yellow-700" />
                     <AlertDescription className="text-yellow-800 text-sm">
-                      Pour un montant de {formatMontant(montantEB)}, la procedure recommandee est «{' '}
+                      Pour un montant de {formatCurrency(montantEB)}, la procedure recommandee est «{' '}
                       {seuilDGMP?.label} ». La procedure choisie (
                       {getModeName(passation.mode_passation)}) ne correspond pas au seuil.
                     </AlertDescription>
@@ -395,7 +394,7 @@ export function PassationDetails({
                     <div>
                       <span className="text-muted-foreground">Montant retenu:</span>{' '}
                       <span className="font-bold text-primary">
-                        {formatMontant(passation.montant_retenu)}
+                        {formatCurrency(passation.montant_retenu)}
                       </span>
                     </div>
                   )}
@@ -558,7 +557,7 @@ export function PassationDetails({
                         <div>
                           <span className="text-muted-foreground">Montant :</span>{' '}
                           <span className="font-bold text-primary">
-                            {formatMontant(passation.montant_retenu)}
+                            {formatCurrency(passation.montant_retenu)}
                           </span>
                         </div>
                       )}
@@ -633,7 +632,7 @@ export function PassationDetails({
                                 </div>
                               </TableCell>
                               <TableCell className="text-right font-mono">
-                                {formatMontant(lot.montant_estime)}
+                                {formatCurrency(lot.montant_estime)}
                               </TableCell>
                               <TableCell className="text-center">
                                 <Badge variant="outline" className="text-xs">
@@ -642,7 +641,7 @@ export function PassationDetails({
                               </TableCell>
                               <TableCell className="text-right font-mono">
                                 {lot.montant_retenu ? (
-                                  formatMontant(lot.montant_retenu)
+                                  formatCurrency(lot.montant_retenu)
                                 ) : (
                                   <span className="text-muted-foreground">-</span>
                                 )}
@@ -694,13 +693,13 @@ export function PassationDetails({
                         {allSoumissionnaires.length !== 1 ? 's' : ''}
                       </span>
                       <span className="font-bold">
-                        {formatMontant(lots.reduce((sum, l) => sum + (l.montant_estime || 0), 0))}
+                        {formatCurrency(lots.reduce((sum, l) => sum + (l.montant_estime || 0), 0))}
                       </span>
                     </div>
                     {/* Comparison with EB amount */}
                     {montantEB && (
                       <div className="mt-1 text-xs text-right text-muted-foreground">
-                        Montant EB: {formatMontant(montantEB)}
+                        Montant EB: {formatCurrency(montantEB)}
                         {(() => {
                           const totalLots = lots.reduce((s, l) => s + (l.montant_estime || 0), 0);
                           const diff = totalLots - montantEB;
@@ -710,7 +709,7 @@ export function PassationDetails({
                               className={diff > 0 ? 'text-orange-600 ml-2' : 'text-green-600 ml-2'}
                             >
                               ({diff > 0 ? '+' : ''}
-                              {formatMontant(diff)})
+                              {formatCurrency(diff)})
                             </span>
                           );
                         })()}
@@ -725,7 +724,7 @@ export function PassationDetails({
                         <p className="font-medium text-sm">Lot unique</p>
                         <p className="text-xs text-muted-foreground">
                           Montant total :{' '}
-                          {formatMontant(montantEB || passation.montant_retenu || null)}
+                          {formatCurrency(montantEB || passation.montant_retenu || null)}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {allSoumissionnaires.filter((s) => !s.lot_marche_id).length}{' '}

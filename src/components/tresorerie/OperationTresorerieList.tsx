@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -9,14 +9,14 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -24,39 +24,47 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useTresorerie, TYPES_OPERATION } from "@/hooks/useTresorerie";
-import { Plus, ArrowUpRight, ArrowDownRight, ArrowLeftRight, CheckCircle, Download } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useTresorerie, TYPES_OPERATION } from '@/hooks/useTresorerie';
+import {
+  Plus,
+  ArrowUpRight,
+  ArrowDownRight,
+  ArrowLeftRight,
+  CheckCircle,
+  Download,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
 
 export function OperationTresorerieList() {
   const { operations, comptes, createOperation, rapprocher } = useTresorerie();
   const [open, setOpen] = useState(false);
-  const [filter, setFilter] = useState({ compteId: "all", type: "all", rapproche: "all" });
+  const [filter, setFilter] = useState({ compteId: 'all', type: 'all', rapproche: 'all' });
   const [form, setForm] = useState({
-    compte_id: "",
-    type_operation: "entree" as "entree" | "sortie" | "virement",
-    date_operation: new Date().toISOString().split("T")[0],
-    date_valeur: "",
+    compte_id: '',
+    type_operation: 'entree' as 'entree' | 'sortie' | 'virement',
+    date_operation: new Date().toISOString().split('T')[0],
+    date_valeur: '',
     montant: 0,
-    libelle: "",
-    reference_externe: "",
-    compte_destination_id: "",
+    libelle: '',
+    reference_externe: '',
+    compte_destination_id: '',
   });
 
   const resetForm = () => {
     setForm({
-      compte_id: "",
-      type_operation: "entree",
-      date_operation: new Date().toISOString().split("T")[0],
-      date_valeur: "",
+      compte_id: '',
+      type_operation: 'entree',
+      date_operation: new Date().toISOString().split('T')[0],
+      date_valeur: '',
       montant: 0,
-      libelle: "",
-      reference_externe: "",
-      compte_destination_id: "",
+      libelle: '',
+      reference_externe: '',
+      compte_destination_id: '',
     });
   };
 
@@ -64,55 +72,65 @@ export function OperationTresorerieList() {
     await createOperation.mutateAsync({
       ...form,
       date_valeur: form.date_valeur || null,
-      compte_destination_id: form.type_operation === "virement" ? form.compte_destination_id : null,
+      compte_destination_id: form.type_operation === 'virement' ? form.compte_destination_id : null,
     });
     setOpen(false);
     resetForm();
   };
 
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
-  };
-
   const getCompteLabel = (id: string) => {
-    const compte = comptes.data?.find(c => c.id === id);
-    return compte ? `${compte.code} - ${compte.libelle}` : "-";
+    const compte = comptes.data?.find((c) => c.id === id);
+    return compte ? `${compte.code} - ${compte.libelle}` : '-';
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "entree": return <ArrowUpRight className="h-4 w-4 text-success" />;
-      case "sortie": return <ArrowDownRight className="h-4 w-4 text-destructive" />;
-      case "virement": return <ArrowLeftRight className="h-4 w-4 text-primary" />;
-      default: return null;
+      case 'entree':
+        return <ArrowUpRight className="h-4 w-4 text-success" />;
+      case 'sortie':
+        return <ArrowDownRight className="h-4 w-4 text-destructive" />;
+      case 'virement':
+        return <ArrowLeftRight className="h-4 w-4 text-primary" />;
+      default:
+        return null;
     }
   };
 
-  const filteredOperations = operations.data?.filter(op => {
-    if (filter.compteId !== "all" && op.compte_id !== filter.compteId) return false;
-    if (filter.type !== "all" && op.type_operation !== filter.type) return false;
-    if (filter.rapproche === "true" && !op.rapproche) return false;
-    if (filter.rapproche === "false" && op.rapproche) return false;
-    return true;
-  }) || [];
+  const filteredOperations =
+    operations.data?.filter((op) => {
+      if (filter.compteId !== 'all' && op.compte_id !== filter.compteId) return false;
+      if (filter.type !== 'all' && op.type_operation !== filter.type) return false;
+      if (filter.rapproche === 'true' && !op.rapproche) return false;
+      if (filter.rapproche === 'false' && op.rapproche) return false;
+      return true;
+    }) || [];
 
   const exportCSV = () => {
-    const headers = ["Numéro", "Date", "Type", "Compte", "Montant", "Libellé", "Référence", "Rapproché"];
-    const rows = filteredOperations.map(op => [
+    const headers = [
+      'Numéro',
+      'Date',
+      'Type',
+      'Compte',
+      'Montant',
+      'Libellé',
+      'Référence',
+      'Rapproché',
+    ];
+    const rows = filteredOperations.map((op) => [
       op.numero,
       op.date_operation,
       op.type_operation,
       getCompteLabel(op.compte_id),
       op.montant,
       op.libelle,
-      op.reference_externe || "",
-      op.rapproche ? "Oui" : "Non",
+      op.reference_externe || '',
+      op.rapproche ? 'Oui' : 'Non',
     ]);
-    const csv = [headers, ...rows].map(row => row.join(";")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const csv = [headers, ...rows].map((row) => row.join(';')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `operations_tresorerie_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `operations_tresorerie_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
   };
 
@@ -128,7 +146,13 @@ export function OperationTresorerieList() {
             <Download className="h-4 w-4 mr-2" />
             Exporter
           </Button>
-          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
+          <Dialog
+            open={open}
+            onOpenChange={(o) => {
+              setOpen(o);
+              if (!o) resetForm();
+            }}
+          >
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -143,42 +167,61 @@ export function OperationTresorerieList() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Type d'opération *</Label>
-                    <Select value={form.type_operation} onValueChange={(v: any) => setForm({ ...form, type_operation: v })}>
+                    <Select
+                      value={form.type_operation}
+                      onValueChange={(v: any) => setForm({ ...form, type_operation: v })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {TYPES_OPERATION.map((t) => (
-                          <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                          <SelectItem key={t.value} value={t.value}>
+                            {t.label}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>Compte *</Label>
-                    <Select value={form.compte_id} onValueChange={(v) => setForm({ ...form, compte_id: v })}>
+                    <Select
+                      value={form.compte_id}
+                      onValueChange={(v) => setForm({ ...form, compte_id: v })}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {comptes.data?.filter(c => c.est_actif).map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.code} - {c.libelle}</SelectItem>
-                        ))}
+                        {comptes.data
+                          ?.filter((c) => c.est_actif)
+                          .map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.code} - {c.libelle}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-                {form.type_operation === "virement" && (
+                {form.type_operation === 'virement' && (
                   <div className="space-y-2">
                     <Label>Compte destination *</Label>
-                    <Select value={form.compte_destination_id} onValueChange={(v) => setForm({ ...form, compte_destination_id: v })}>
+                    <Select
+                      value={form.compte_destination_id}
+                      onValueChange={(v) => setForm({ ...form, compte_destination_id: v })}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionner..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {comptes.data?.filter(c => c.est_actif && c.id !== form.compte_id).map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.code} - {c.libelle}</SelectItem>
-                        ))}
+                        {comptes.data
+                          ?.filter((c) => c.est_actif && c.id !== form.compte_id)
+                          .map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.code} - {c.libelle}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -228,12 +271,23 @@ export function OperationTresorerieList() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => { setOpen(false); resetForm(); }}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setOpen(false);
+                    resetForm();
+                  }}
+                >
                   Annuler
                 </Button>
-                <Button 
-                  onClick={handleSubmit} 
-                  disabled={!form.compte_id || !form.montant || !form.libelle || (form.type_operation === "virement" && !form.compte_destination_id)}
+                <Button
+                  onClick={handleSubmit}
+                  disabled={
+                    !form.compte_id ||
+                    !form.montant ||
+                    !form.libelle ||
+                    (form.type_operation === 'virement' && !form.compte_destination_id)
+                  }
                 >
                   Enregistrer
                 </Button>
@@ -245,14 +299,19 @@ export function OperationTresorerieList() {
       <CardContent>
         {/* Filtres */}
         <div className="flex gap-4 mb-4">
-          <Select value={filter.compteId} onValueChange={(v) => setFilter({ ...filter, compteId: v })}>
+          <Select
+            value={filter.compteId}
+            onValueChange={(v) => setFilter({ ...filter, compteId: v })}
+          >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Tous les comptes" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les comptes</SelectItem>
               {comptes.data?.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.code}</SelectItem>
+                <SelectItem key={c.id} value={c.id}>
+                  {c.code}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -263,11 +322,16 @@ export function OperationTresorerieList() {
             <SelectContent>
               <SelectItem value="all">Tous types</SelectItem>
               {TYPES_OPERATION.map((t) => (
-                <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select value={filter.rapproche} onValueChange={(v) => setFilter({ ...filter, rapproche: v })}>
+          <Select
+            value={filter.rapproche}
+            onValueChange={(v) => setFilter({ ...filter, rapproche: v })}
+          >
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Rapprochement" />
             </SelectTrigger>
@@ -282,9 +346,7 @@ export function OperationTresorerieList() {
         {operations.isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Chargement...</div>
         ) : !filteredOperations.length ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Aucune opération trouvée
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Aucune opération trouvée</div>
         ) : (
           <Table>
             <TableHeader>
@@ -304,7 +366,9 @@ export function OperationTresorerieList() {
               {filteredOperations.map((op) => (
                 <TableRow key={op.id}>
                   <TableCell className="font-mono text-sm">{op.numero}</TableCell>
-                  <TableCell>{format(new Date(op.date_operation), "dd/MM/yyyy", { locale: fr })}</TableCell>
+                  <TableCell>
+                    {format(new Date(op.date_operation), 'dd/MM/yyyy', { locale: fr })}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {getTypeIcon(op.type_operation)}
@@ -313,11 +377,14 @@ export function OperationTresorerieList() {
                   </TableCell>
                   <TableCell>{getCompteLabel(op.compte_id)}</TableCell>
                   <TableCell className="max-w-[200px] truncate">{op.libelle}</TableCell>
-                  <TableCell className={`text-right font-medium ${op.type_operation === "entree" ? "text-success" : op.type_operation === "sortie" ? "text-destructive" : ""}`}>
-                    {op.type_operation === "entree" ? "+" : "-"}{formatMontant(op.montant)}
+                  <TableCell
+                    className={`text-right font-medium ${op.type_operation === 'entree' ? 'text-success' : op.type_operation === 'sortie' ? 'text-destructive' : ''}`}
+                  >
+                    {op.type_operation === 'entree' ? '+' : '-'}
+                    {formatCurrency(op.montant)}
                   </TableCell>
                   <TableCell className="text-right font-mono text-sm">
-                    {op.solde_apres !== null ? formatMontant(op.solde_apres) : "-"}
+                    {op.solde_apres !== null ? formatCurrency(op.solde_apres) : '-'}
                   </TableCell>
                   <TableCell>
                     {op.rapproche ? (

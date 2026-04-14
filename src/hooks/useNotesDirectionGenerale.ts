@@ -21,7 +21,7 @@ const supabaseUntyped = supabase as any;
 // Types
 // ============================================================================
 
-export type NoteDGStatut = 'brouillon' | 'soumise_dg' | 'dg_valide' | 'dg_rejetee' | 'diffusee';
+export type NoteDGStatut = 'soumis' | 'soumise_dg' | 'dg_valide' | 'dg_rejetee' | 'diffusee';
 
 export type InstructionType = 'ATTRIBUTION' | 'DIFFUSION' | 'SUIVI' | 'ACTION_SUITE' | 'CLASSEMENT';
 
@@ -111,7 +111,7 @@ export interface CreateImputationInput {
 // ============================================================================
 
 export const STATUTS_NOTE_DG: Record<NoteDGStatut, string> = {
-  brouillon: 'Brouillon',
+  soumis: 'Soumis',
   soumise_dg: 'Soumise au DG',
   dg_valide: 'Validée par DG',
   dg_rejetee: 'Rejetée par DG',
@@ -134,10 +134,10 @@ export const PRIORITES: Record<ImputationPriorite, string> = {
 
 // Transitions de statut valides
 const VALID_TRANSITIONS: Record<NoteDGStatut, NoteDGStatut[]> = {
-  brouillon: ['soumise_dg'],
+  soumis: ['soumise_dg'],
   soumise_dg: ['dg_valide', 'dg_rejetee'],
   dg_valide: ['diffusee'],
-  dg_rejetee: ['brouillon'], // Peut revenir en brouillon pour correction
+  dg_rejetee: ['soumis'], // Peut revenir en soumis pour correction
   diffusee: [], // État terminal
 };
 
@@ -279,8 +279,8 @@ export function useNotesDirectionGenerale() {
 
       if (fetchError) throw new Error('Note introuvable');
 
-      // Ne peut modifier que si soumis/brouillon ou rejetée
-      if (!['brouillon', 'soumis', 'dg_rejetee'].includes(oldData.statut)) {
+      // Ne peut modifier que si soumis ou rejetee
+      if (!['soumis', 'dg_rejetee'].includes(oldData.statut)) {
         throw new Error('Cette note ne peut plus être modifiée');
       }
 
@@ -558,8 +558,8 @@ export function useNotesDirectionGenerale() {
     },
   });
 
-  // Revenir en soumis (après rejet)
-  const revertToDraftMutation = useMutation({
+  // Revenir en soumis (apres rejet)
+  const revertToSoumisMutation = useMutation({
     mutationFn: async (noteId: string) => {
       const {
         data: { user },
@@ -574,14 +574,14 @@ export function useNotesDirectionGenerale() {
 
       if (fetchError) throw new Error('Note introuvable');
 
-      if (!isValidTransition(note.statut as NoteDGStatut, 'brouillon')) {
+      if (!isValidTransition(note.statut as NoteDGStatut, 'soumis')) {
         throw new Error(`Transition invalide: ${note.statut} → soumis`);
       }
 
       const { data, error } = await supabaseUntyped
         .from('notes_direction_generale')
         .update({
-          statut: 'brouillon',
+          statut: 'soumis',
           motif_rejet: null,
           rejected_by: null,
           rejected_at: null,
@@ -595,7 +595,7 @@ export function useNotesDirectionGenerale() {
       await logAction({
         entityType: 'note_direction_generale',
         entityId: noteId,
-        action: 'revert_draft',
+        action: 'revert_soumis',
         oldValues: { statut: note.statut },
         newValues: { statut: 'soumis' },
       });
@@ -622,7 +622,7 @@ export function useNotesDirectionGenerale() {
 
       if (fetchError) throw new Error('Note introuvable');
 
-      if (note.statut !== 'brouillon' && note.statut !== 'soumis') {
+      if (note.statut !== 'soumis') {
         throw new Error('Seules les notes soumises peuvent être supprimées');
       }
 
@@ -655,7 +655,7 @@ export function useNotesDirectionGenerale() {
   // ──────────────────────────────────────────────────────────────────────────
 
   const notesByStatus = {
-    brouillon: notes.filter((n) => n.statut === 'brouillon' || n.statut === 'soumis'),
+    soumis: notes.filter((n) => n.statut === 'soumis'),
     soumise_dg: notes.filter((n) => n.statut === 'soumise_dg'),
     dg_valide: notes.filter((n) => n.statut === 'dg_valide'),
     dg_rejetee: notes.filter((n) => n.statut === 'dg_rejetee'),
@@ -677,7 +677,7 @@ export function useNotesDirectionGenerale() {
     validateNote: validateMutation.mutateAsync,
     rejectNote: rejectMutation.mutateAsync,
     diffuseNote: diffuseMutation.mutateAsync,
-    revertToDraft: revertToDraftMutation.mutateAsync,
+    revertToSoumis: revertToSoumisMutation.mutateAsync,
     deleteNote: deleteMutation.mutateAsync,
 
     // Loading states

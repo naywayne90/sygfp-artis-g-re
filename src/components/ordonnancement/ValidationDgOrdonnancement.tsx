@@ -1,19 +1,13 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Form,
   FormControl,
@@ -21,10 +15,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+} from '@/components/ui/form';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   CheckCircle,
   XCircle,
@@ -33,9 +27,10 @@ import {
   FileText,
   Building2,
   CreditCard,
-} from "lucide-react";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useAuditLog } from "@/hooks/useAuditLog";
+} from 'lucide-react';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { formatCurrency } from '@/lib/utils';
 
 interface ValidationDgOrdonnancementProps {
   ordonnancement: {
@@ -62,7 +57,10 @@ interface ValidationDgOrdonnancementProps {
 
 const validationSchema = z.object({
   commentaire: z.string().optional(),
-  motif_rejet: z.string().min(10, "Le motif du rejet doit contenir au moins 10 caractères").optional(),
+  motif_rejet: z
+    .string()
+    .min(10, 'Le motif du rejet doit contenir au moins 10 caractères')
+    .optional(),
 });
 
 // Seuil pour validation DG obligatoire
@@ -70,15 +68,12 @@ const SEUIL_VALIDATION_DG = 50_000_000; // 50 millions FCFA
 
 // Checklist DG
 const CHECKLIST_DG = [
-  { id: "conformite_budget", label: "Conformité avec le budget approuvé" },
-  { id: "pieces_completes", label: "Dossier de pièces justificatives complet" },
-  { id: "beneficiaire_verifie", label: "Bénéficiaire vérifié et conforme" },
-  { id: "montant_conforme", label: "Montant conforme aux documents" },
-  { id: "opportunite_validee", label: "Opportunité de la dépense validée" },
+  { id: 'conformite_budget', label: 'Conformité avec le budget approuvé' },
+  { id: 'pieces_completes', label: 'Dossier de pièces justificatives complet' },
+  { id: 'beneficiaire_verifie', label: 'Bénéficiaire vérifié et conforme' },
+  { id: 'montant_conforme', label: 'Montant conforme aux documents' },
+  { id: 'opportunite_validee', label: 'Opportunité de la dépense validée' },
 ];
-
-const formatMontant = (montant: number) =>
-  new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
 
 export function ValidationDgOrdonnancement({
   ordonnancement,
@@ -87,10 +82,10 @@ export function ValidationDgOrdonnancement({
   const queryClient = useQueryClient();
   const { hasAnyRole } = usePermissions();
   const { logAction } = useAuditLog();
-  const [action, setAction] = useState<"approve" | "reject" | null>(null);
+  const [action, setAction] = useState<'approve' | 'reject' | null>(null);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
 
-  const canValidate = hasAnyRole(["DG", "ADMIN"]);
+  const canValidate = hasAnyRole(['DG', 'ADMIN']);
   const isCurrentStepDG = ordonnancement.current_step === 4; // DG est l'étape 4
   const requiresDGValidation = ordonnancement.montant >= SEUIL_VALIDATION_DG;
   const allChecked = CHECKLIST_DG.every((item) => checkedItems[item.id]);
@@ -98,8 +93,8 @@ export function ValidationDgOrdonnancement({
   const form = useForm({
     resolver: zodResolver(validationSchema),
     defaultValues: {
-      commentaire: "",
-      motif_rejet: "",
+      commentaire: '',
+      motif_rejet: '',
     },
   });
 
@@ -108,86 +103,88 @@ export function ValidationDgOrdonnancement({
       if (data.approved) {
         // Valider l'étape DG
         const { error: validationError } = await supabase
-          .from("ordonnancement_validations")
+          .from('ordonnancement_validations')
           .update({
-            status: "validated",
+            status: 'validated',
             validated_at: new Date().toISOString(),
             comments: data.commentaire,
           })
-          .eq("ordonnancement_id", ordonnancement.id)
-          .eq("step_order", 4);
+          .eq('ordonnancement_id', ordonnancement.id)
+          .eq('step_order', 4);
 
         if (validationError) throw validationError;
 
         // Marquer l'ordonnancement comme validé
         const { error } = await supabase
-          .from("ordonnancements")
+          .from('ordonnancements')
           .update({
-            statut: "valide",
-            workflow_status: "valide",
+            statut: 'valide',
+            workflow_status: 'valide',
             validated_at: new Date().toISOString(),
           })
-          .eq("id", ordonnancement.id);
+          .eq('id', ordonnancement.id);
 
         if (error) throw error;
 
         await logAction({
-          entityType: "ordonnancement",
+          entityType: 'ordonnancement',
           entityId: ordonnancement.id,
-          action: "validate",
+          action: 'validate',
           newValues: {
             numero: ordonnancement.numero,
             montant: ordonnancement.montant,
-            decision: "approved",
-            validation_type: "DG",
+            decision: 'approved',
+            validation_type: 'DG',
           },
         });
       } else {
         // Rejeter l'ordonnancement
         const { error } = await supabase
-          .from("ordonnancements")
+          .from('ordonnancements')
           .update({
-            statut: "rejete",
-            workflow_status: "rejete",
+            statut: 'rejete',
+            workflow_status: 'rejete',
             rejection_reason: data.motif,
             rejected_at: new Date().toISOString(),
           })
-          .eq("id", ordonnancement.id);
+          .eq('id', ordonnancement.id);
 
         if (error) throw error;
 
         await logAction({
-          entityType: "ordonnancement",
+          entityType: 'ordonnancement',
           entityId: ordonnancement.id,
-          action: "reject",
+          action: 'reject',
           newValues: {
             numero: ordonnancement.numero,
             montant: ordonnancement.montant,
             motif: data.motif,
-            validation_type: "DG",
+            validation_type: 'DG',
           },
         });
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      toast.success(action === "approve" ? "Ordonnancement validé par le DG" : "Ordonnancement rejeté");
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      toast.success(
+        action === 'approve' ? 'Ordonnancement validé par le DG' : 'Ordonnancement rejeté'
+      );
       onSuccess?.();
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la validation");
+      toast.error(error.message || 'Erreur lors de la validation');
     },
   });
 
   const onSubmit = (values: z.infer<typeof validationSchema>) => {
-    if (action === "approve") {
+    if (action === 'approve') {
       validateMutation.mutate({
         approved: true,
         commentaire: values.commentaire,
       });
-    } else if (action === "reject") {
+    } else if (action === 'reject') {
       if (!values.motif_rejet || values.motif_rejet.length < 10) {
-        form.setError("motif_rejet", { message: "Motif de rejet obligatoire" });
+        form.setError('motif_rejet', { message: 'Motif de rejet obligatoire' });
         return;
       }
       validateMutation.mutate({
@@ -211,7 +208,7 @@ export function ValidationDgOrdonnancement({
         <CardDescription>
           {requiresDGValidation ? (
             <span className="text-amber-600 font-medium">
-              Validation DG obligatoire (montant ≥ {formatMontant(SEUIL_VALIDATION_DG)})
+              Validation DG obligatoire (montant ≥ {formatCurrency(SEUIL_VALIDATION_DG)})
             </span>
           ) : (
             <span>Validation finale de l'ordonnancement</span>
@@ -233,7 +230,7 @@ export function ValidationDgOrdonnancement({
             <div>
               <p className="text-xs text-muted-foreground">Montant</p>
               <p className="font-bold text-lg text-primary">
-                {formatMontant(ordonnancement.montant)}
+                {formatCurrency(ordonnancement.montant)}
               </p>
             </div>
           </div>
@@ -253,9 +250,7 @@ export function ValidationDgOrdonnancement({
         {/* Références */}
         {ordonnancement.liquidation && (
           <div className="flex flex-wrap gap-2">
-            <Badge variant="outline">
-              Liquidation: {ordonnancement.liquidation.numero}
-            </Badge>
+            <Badge variant="outline">Liquidation: {ordonnancement.liquidation.numero}</Badge>
             {ordonnancement.liquidation.engagement && (
               <Badge variant="outline">
                 Engagement: {ordonnancement.liquidation.engagement.numero}
@@ -274,9 +269,9 @@ export function ValidationDgOrdonnancement({
           <Alert className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/30">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
             <AlertDescription className="text-amber-700 dark:text-amber-300">
-              <strong>Attention :</strong> Ce montant dépasse le seuil de{" "}
-              {formatMontant(SEUIL_VALIDATION_DG)}. Une attention particulière est requise
-              avant validation.
+              <strong>Attention :</strong> Ce montant dépasse le seuil de{' '}
+              {formatCurrency(SEUIL_VALIDATION_DG)}. Une attention particulière est requise avant
+              validation.
             </AlertDescription>
           </Alert>
         )}
@@ -297,15 +292,10 @@ export function ValidationDgOrdonnancement({
                     setCheckedItems((prev) => ({ ...prev, [item.id]: !!checked }))
                   }
                 />
-                <label
-                  htmlFor={item.id}
-                  className="text-sm cursor-pointer flex-1"
-                >
+                <label htmlFor={item.id} className="text-sm cursor-pointer flex-1">
                   {item.label}
                 </label>
-                {checkedItems[item.id] && (
-                  <CheckCircle className="h-4 w-4 text-success" />
-                )}
+                {checkedItems[item.id] && <CheckCircle className="h-4 w-4 text-success" />}
               </div>
             ))}
           </div>
@@ -313,7 +303,7 @@ export function ValidationDgOrdonnancement({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {action === "reject" && (
+            {action === 'reject' && (
               <FormField
                 control={form.control}
                 name="motif_rejet"
@@ -333,7 +323,7 @@ export function ValidationDgOrdonnancement({
               />
             )}
 
-            {action === "approve" && (
+            {action === 'approve' && (
               <FormField
                 control={form.control}
                 name="commentaire"
@@ -341,11 +331,7 @@ export function ValidationDgOrdonnancement({
                   <FormItem>
                     <FormLabel>Commentaire (optionnel)</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Observations ou commentaires..."
-                        rows={2}
-                        {...field}
-                      />
+                      <Textarea placeholder="Observations ou commentaires..." rows={2} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -358,17 +344,17 @@ export function ValidationDgOrdonnancement({
                 type="button"
                 variant="outline"
                 className="flex-1 border-success text-success hover:bg-success/10"
-                onClick={() => setAction("approve")}
+                onClick={() => setAction('approve')}
                 disabled={!allChecked || validateMutation.isPending}
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
-                {action === "approve" ? "Confirmer la validation" : "Valider"}
+                {action === 'approve' ? 'Confirmer la validation' : 'Valider'}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
-                onClick={() => setAction("reject")}
+                onClick={() => setAction('reject')}
                 disabled={validateMutation.isPending}
               >
                 <XCircle className="h-4 w-4 mr-2" />
@@ -380,13 +366,13 @@ export function ValidationDgOrdonnancement({
               <Button
                 type="submit"
                 className="w-full"
-                disabled={validateMutation.isPending || (action === "approve" && !allChecked)}
+                disabled={validateMutation.isPending || (action === 'approve' && !allChecked)}
               >
                 {validateMutation.isPending
-                  ? "Traitement..."
-                  : action === "approve"
-                  ? "Confirmer la validation DG"
-                  : "Confirmer le rejet"}
+                  ? 'Traitement...'
+                  : action === 'approve'
+                    ? 'Confirmer la validation DG'
+                    : 'Confirmer le rejet'}
               </Button>
             )}
           </form>

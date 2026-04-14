@@ -8,6 +8,18 @@ Le module **Reglement** enregistre les paiements effectifs qui soldent les ordon
 
 **Chaine** : Note SEF > Note AEF > Imputation > Expression Besoin > Passation Marche > Engagement > Liquidation > Ordonnancement > **Reglement**
 
+## Codification ARTI
+
+| Propriété                  | Valeur                                                                       |
+| -------------------------- | ---------------------------------------------------------------------------- |
+| **Code étape**             | 8 (08 en format 14 chars)                                                    |
+| **Sigle**                  | REG                                                                          |
+| **Format référence cible** | `ARTI08MMYYNNNN` (14 chars)                                                  |
+| **Exemple**                | `ARTI0802260001` = Règlement n°1, février 2026                               |
+| **Format actuel**          | `REG-2026-NNNN` ou `ARTI4MMYYNNNN` (incohérent -- code étape 4 au lieu de 8) |
+| **Colonne DB**             | `reglements.numero`                                                          |
+| **Migration**              | Correction du code étape (4->8) et alignement format ARTI planifiés          |
+
 ## 2. Routes et acces
 
 | Route                                   | Page                                              | Roles |

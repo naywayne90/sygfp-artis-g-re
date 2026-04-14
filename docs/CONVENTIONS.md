@@ -325,6 +325,44 @@ Le module Passation a deux tables :
 
 Les deux sont utilisables pour creer un engagement.
 
+### 5.5 Codification ARTI — References Documents
+
+#### Format pivot (14 caracteres)
+
+```
+ARTI + {code_etape:2 chiffres} + {mois:2} + {annee:2} + {sequence:4}
+```
+
+Exemple : `ARTI0502260001` = Engagement n°1, fevrier 2026
+
+#### Les 10 codes d'etape
+
+| Code | Module            | Sigle | Table               |
+| ---- | ----------------- | ----- | ------------------- |
+| 00   | Note SEF          | SEF   | notes_sef           |
+| 01   | Note AEF          | AEF   | notes_dg            |
+| 02   | Imputation        | IMP   | imputations         |
+| 03   | Expression Besoin | EB    | expressions_besoin  |
+| 04   | Passation Marche  | PM    | passation_marche    |
+| 05   | Engagement        | ENG   | budget_engagements  |
+| 06   | Liquidation       | LIQ   | budget_liquidations |
+| 07   | Ordonnancement    | ORD   | ordonnancements     |
+| 08   | Reglement         | REG   | reglements          |
+| 09   | Virement          | VIR   | credit_transfers    |
+
+#### Compteur
+
+Table : `arti_reference_counters` (UNIQUE: etape, mois, annee)
+Fonction : `generate_arti_reference(p_etape INTEGER, p_date TIMESTAMPTZ)`
+Compteur mensuel par type d'etape, maximum 9999 par mois.
+
+#### Regles
+
+- La reference est **immuable** une fois generee
+- Format legacy 13 chars (`ARTI{X}{MM}{YY}{NNNN}`) encore present dans les donnees migrees
+- Donnees migrees flaggees `legacy_import = true` ou `is_migrated = true`
+- Frontend : service `referenceService.ts`, composant `ARTIReferenceBadge`
+
 ---
 
 ## 6. Backend — Edge Functions
@@ -848,7 +886,7 @@ format(new Date(date), 'dd/MM/yyyy'); // "19/02/2026"
 
 ### 17.3 References
 
-Pattern ARTI : `ARTI{00}{MM}{YY}{NNNN}` — genere par trigger DB.
+Pattern ARTI : `ARTI{XX}{MM}{YY}{NNNN}` (14 chars) — genere par trigger DB. Voir section 5.5 pour les codes d'etape.
 
 ---
 

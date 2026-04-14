@@ -518,7 +518,7 @@ describe('getNextAction', () => {
 describe('getStatutUIConfig', () => {
   it('should return config for known statut', () => {
     const config = getStatutUIConfig(STATUTS.VALIDE);
-    expect(config.label).toBe('Valid\u00e9');
+    expect(config.label).toBe('Validé');
     expect(config.icon).toBe('CheckCircle');
   });
 

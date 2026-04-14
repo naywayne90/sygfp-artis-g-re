@@ -1,27 +1,35 @@
-import { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { 
-  Search, 
-  MoreHorizontal, 
-  Eye, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
+} from '@/components/ui/dropdown-menu';
+import {
+  Search,
+  MoreHorizontal,
+  Eye,
+  CheckCircle2,
+  XCircle,
+  Clock,
   ShoppingCart,
-  AlertCircle
-} from "lucide-react";
-import { Marche, VALIDATION_STEPS } from "@/hooks/useMarches";
+  AlertCircle,
+} from 'lucide-react';
+import { Marche, VALIDATION_STEPS } from '@/hooks/useMarches';
+import { formatCurrency } from '@/lib/utils';
 
 interface MarcheListProps {
   marches: Marche[];
@@ -48,10 +56,7 @@ export function MarcheList({
   onDefer,
   onResume,
 }: MarcheListProps) {
-  const [search, setSearch] = useState("");
-
-  const formatMontant = (montant: number) =>
-    new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+  const [search, setSearch] = useState('');
 
   const filteredMarches = marches.filter(
     (m) =>
@@ -63,19 +68,19 @@ export function MarcheList({
   const getStatusBadge = (marche: Marche) => {
     const status = marche.validation_status;
     switch (status) {
-      case "valide":
+      case 'valide':
         return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Validé</Badge>;
-      case "rejete":
+      case 'rejete':
         return <Badge variant="destructive">Rejeté</Badge>;
-      case "differe":
+      case 'differe':
         return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">Différé</Badge>;
-      case "en_attente":
+      case 'en_attente':
       default: {
-        const step = VALIDATION_STEPS.find(s => s.order === marche.current_validation_step);
+        const step = VALIDATION_STEPS.find((s) => s.order === marche.current_validation_step);
         return (
           <Badge variant="outline" className="gap-1">
             <Clock className="h-3 w-3" />
-            Étape {marche.current_validation_step || 1}: {step?.label || "En attente"}
+            Étape {marche.current_validation_step || 1}: {step?.label || 'En attente'}
           </Badge>
         );
       }
@@ -84,11 +89,11 @@ export function MarcheList({
 
   const getModePassation = (mode: string) => {
     const modes: Record<string, string> = {
-      appel_offres_ouvert: "AO Ouvert",
-      appel_offres_restreint: "AO Restreint",
-      consultation: "Consultation",
-      gre_a_gre: "Gré à gré",
-      demande_cotation: "Demande cotation",
+      appel_offres_ouvert: 'AO Ouvert',
+      appel_offres_restreint: 'AO Restreint',
+      consultation: 'Consultation',
+      gre_a_gre: 'Gré à gré',
+      demande_cotation: 'Demande cotation',
     };
     return modes[mode] || mode;
   };
@@ -114,7 +119,7 @@ export function MarcheList({
             />
           </div>
           <Badge variant="outline" className="text-sm">
-            {filteredMarches.length} marché{filteredMarches.length > 1 ? "s" : ""}
+            {filteredMarches.length} marché{filteredMarches.length > 1 ? 's' : ''}
           </Badge>
         </div>
 
@@ -142,17 +147,11 @@ export function MarcheList({
               <TableBody>
                 {filteredMarches.map((marche) => (
                   <TableRow key={marche.id}>
-                    <TableCell className="font-mono text-sm">
-                      {marche.numero || "-"}
-                    </TableCell>
-                    <TableCell className="max-w-[200px] truncate">
-                      {marche.objet}
-                    </TableCell>
-                    <TableCell>
-                      {marche.prestataire?.raison_sociale || "-"}
-                    </TableCell>
+                    <TableCell className="font-mono text-sm">{marche.numero || '-'}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">{marche.objet}</TableCell>
+                    <TableCell>{marche.prestataire?.raison_sociale || '-'}</TableCell>
                     <TableCell className="text-right font-medium">
-                      {formatMontant(marche.montant)}
+                      {formatCurrency(marche.montant)}
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary">{getModePassation(marche.mode_passation)}</Badge>
@@ -171,8 +170,8 @@ export function MarcheList({
                               <Eye className="mr-2 h-4 w-4" />
                               Voir détails
                             </DropdownMenuItem>
-                            
-                            {marche.validation_status === "en_attente" && (
+
+                            {marche.validation_status === 'en_attente' && (
                               <>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={() => onValidate?.(marche)}>
@@ -183,7 +182,7 @@ export function MarcheList({
                                   <Clock className="mr-2 h-4 w-4 text-orange-600" />
                                   Différer
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   onClick={() => onReject?.(marche)}
                                   className="text-destructive"
                                 >
@@ -192,8 +191,8 @@ export function MarcheList({
                                 </DropdownMenuItem>
                               </>
                             )}
-                            
-                            {marche.validation_status === "differe" && (
+
+                            {marche.validation_status === 'differe' && (
                               <>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={() => onResume?.(marche)}>
@@ -214,22 +213,24 @@ export function MarcheList({
         )}
 
         {/* Afficher motifs pour rejetés/différés */}
-        {marches.some(m => m.rejection_reason || m.differe_motif) && (
+        {marches.some((m) => m.rejection_reason || m.differe_motif) && (
           <div className="mt-4 space-y-2">
-            {filteredMarches.filter(m => m.rejection_reason || m.differe_motif).map(m => (
-              <div key={m.id} className="p-3 bg-muted/50 rounded-lg text-sm">
-                <div className="flex items-center gap-2 mb-1">
-                  <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">{m.numero}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {m.rejection_reason ? "Motif rejet" : "Motif différé"}
-                  </Badge>
+            {filteredMarches
+              .filter((m) => m.rejection_reason || m.differe_motif)
+              .map((m) => (
+                <div key={m.id} className="p-3 bg-muted/50 rounded-lg text-sm">
+                  <div className="flex items-center gap-2 mb-1">
+                    <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">{m.numero}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {m.rejection_reason ? 'Motif rejet' : 'Motif différé'}
+                    </Badge>
+                  </div>
+                  <p className="text-muted-foreground ml-6">
+                    {m.rejection_reason || m.differe_motif}
+                  </p>
                 </div>
-                <p className="text-muted-foreground ml-6">
-                  {m.rejection_reason || m.differe_motif}
-                </p>
-              </div>
-            ))}
+              ))}
           </div>
         )}
       </CardContent>

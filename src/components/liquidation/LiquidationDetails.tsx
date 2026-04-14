@@ -590,7 +590,9 @@ export function LiquidationDetails({ liquidation, onRefresh }: LiquidationDetail
                       )}
                       <div className="flex-1">
                         <div className="font-medium text-sm">{step.label}</div>
-                        <div className="text-xs text-muted-foreground">{step.role}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {step.shortLabel ?? step.role}
+                        </div>
                       </div>
                       <Badge
                         variant="outline"

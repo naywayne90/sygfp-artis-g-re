@@ -1692,7 +1692,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
   },
   {
     id: 'taches',
-    name: 'Mes Tâches',
+    name: 'Centre de pilotage',
     icon: CheckSquare,
     route: '/taches',
     parent: null,

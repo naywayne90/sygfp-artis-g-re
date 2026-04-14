@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -19,14 +19,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,46 +36,37 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { 
-  Plus, 
-  Trophy, 
-  FileText, 
-  Loader2, 
-  Star, 
-  Trash2,
-  Building2
-} from "lucide-react";
-import { useMarcheOffres, CreateOffreData } from "@/hooks/useMarcheOffres";
-import { useMarches, Prestataire } from "@/hooks/useMarches";
+} from '@/components/ui/alert-dialog';
+import { Plus, Trophy, FileText, Loader2, Star, Trash2, Building2 } from 'lucide-react';
+import { useMarcheOffres, CreateOffreData } from '@/hooks/useMarcheOffres';
+import { useMarches, Prestataire } from '@/hooks/useMarches';
+import { formatCurrency } from '@/lib/utils';
 
 interface MarcheOffresListProps {
   marcheId: string;
   isReadOnly?: boolean;
 }
 
-const formatMontant = (montant: number) =>
-  new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
-
 export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresListProps) {
-  const { offres, offreRetenue, createOffre, selectWinner, deleteOffre, isCreating, isSelecting } = useMarcheOffres(marcheId);
+  const { offres, offreRetenue, createOffre, selectWinner, deleteOffre, isCreating, isSelecting } =
+    useMarcheOffres(marcheId);
   const { prestataires } = useMarches();
 
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showAttributionDialog, setShowAttributionDialog] = useState(false);
   const [selectedOffreId, setSelectedOffreId] = useState<string | null>(null);
-  const [motifAttribution, setMotifAttribution] = useState("");
+  const [motifAttribution, setMotifAttribution] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const [newOffre, setNewOffre] = useState<CreateOffreData>({
     marche_id: marcheId,
     prestataire_id: null,
-    nom_fournisseur: "",
+    nom_fournisseur: '',
     montant_offre: 0,
     delai_execution: 30,
     note_technique: 70,
     note_financiere: 70,
-    observations: "",
+    observations: '',
   });
 
   const handleAddOffre = async () => {
@@ -84,12 +75,12 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
     setNewOffre({
       marche_id: marcheId,
       prestataire_id: null,
-      nom_fournisseur: "",
+      nom_fournisseur: '',
       montant_offre: 0,
       delai_execution: 30,
       note_technique: 70,
       note_financiere: 70,
-      observations: "",
+      observations: '',
     });
   };
 
@@ -98,7 +89,7 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
     await selectWinner({ offreId: selectedOffreId, motif: motifAttribution });
     setShowAttributionDialog(false);
     setSelectedOffreId(null);
-    setMotifAttribution("");
+    setMotifAttribution('');
   };
 
   const handleDeleteOffre = async () => {
@@ -128,9 +119,7 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
       </CardHeader>
       <CardContent>
         {offres.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Aucune offre enregistrée
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Aucune offre enregistrée</div>
         ) : (
           <Table>
             <TableHeader>
@@ -147,10 +136,7 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
             </TableHeader>
             <TableBody>
               {offres.map((offre) => (
-                <TableRow 
-                  key={offre.id}
-                  className={offre.est_retenu ? "bg-success/10" : ""}
-                >
+                <TableRow key={offre.id} className={offre.est_retenu ? 'bg-success/10' : ''}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -158,23 +144,23 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
                     </div>
                   </TableCell>
                   <TableCell className="text-right font-mono">
-                    {formatMontant(offre.montant_offre)}
+                    {formatCurrency(offre.montant_offre)}
+                  </TableCell>
+                  <TableCell className="text-center">{offre.delai_execution || '-'}</TableCell>
+                  <TableCell className="text-center">
+                    {offre.note_technique != null ? `${offre.note_technique}/100` : '-'}
                   </TableCell>
                   <TableCell className="text-center">
-                    {offre.delai_execution || "-"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {offre.note_technique != null ? `${offre.note_technique}/100` : "-"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {offre.note_financiere != null ? `${offre.note_financiere}/100` : "-"}
+                    {offre.note_financiere != null ? `${offre.note_financiere}/100` : '-'}
                   </TableCell>
                   <TableCell className="text-center">
                     {offre.note_globale != null ? (
-                      <Badge variant={offre.note_globale >= 70 ? "default" : "secondary"}>
+                      <Badge variant={offre.note_globale >= 70 ? 'default' : 'secondary'}>
                         {offre.note_globale.toFixed(1)}/100
                       </Badge>
-                    ) : "-"}
+                    ) : (
+                      '-'
+                    )}
                   </TableCell>
                   <TableCell>
                     {offre.est_retenu ? (
@@ -220,7 +206,10 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
               Fournisseur retenu
             </h4>
             <p className="text-sm mt-1">
-              <strong>{offreRetenue.prestataire?.raison_sociale || offreRetenue.nom_fournisseur}</strong> - {formatMontant(offreRetenue.montant_offre)}
+              <strong>
+                {offreRetenue.prestataire?.raison_sociale || offreRetenue.nom_fournisseur}
+              </strong>{' '}
+              - {formatCurrency(offreRetenue.montant_offre)}
             </p>
             {offreRetenue.motif_selection && (
               <p className="text-sm text-muted-foreground mt-1">
@@ -241,12 +230,14 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
             <div>
               <Label>Fournisseur (existant)</Label>
               <Select
-                value={newOffre.prestataire_id || ""}
-                onValueChange={(v) => setNewOffre({ 
-                  ...newOffre, 
-                  prestataire_id: v || null,
-                  nom_fournisseur: ""
-                })}
+                value={newOffre.prestataire_id || ''}
+                onValueChange={(v) =>
+                  setNewOffre({
+                    ...newOffre,
+                    prestataire_id: v || null,
+                    nom_fournisseur: '',
+                  })
+                }
               >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue placeholder="Sélectionner un prestataire" />
@@ -265,7 +256,7 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
               <div>
                 <Label>Ou nom du fournisseur (nouveau)</Label>
                 <Input
-                  value={newOffre.nom_fournisseur || ""}
+                  value={newOffre.nom_fournisseur || ''}
                   onChange={(e) => setNewOffre({ ...newOffre, nom_fournisseur: e.target.value })}
                   placeholder="Raison sociale"
                   className="mt-1.5"
@@ -278,8 +269,10 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
                 <Label>Montant (FCFA) *</Label>
                 <Input
                   type="number"
-                  value={newOffre.montant_offre || ""}
-                  onChange={(e) => setNewOffre({ ...newOffre, montant_offre: parseFloat(e.target.value) || 0 })}
+                  value={newOffre.montant_offre || ''}
+                  onChange={(e) =>
+                    setNewOffre({ ...newOffre, montant_offre: parseFloat(e.target.value) || 0 })
+                  }
                   className="mt-1.5"
                 />
               </div>
@@ -287,8 +280,13 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
                 <Label>Délai (jours)</Label>
                 <Input
                   type="number"
-                  value={newOffre.delai_execution || ""}
-                  onChange={(e) => setNewOffre({ ...newOffre, delai_execution: parseInt(e.target.value) || undefined })}
+                  value={newOffre.delai_execution || ''}
+                  onChange={(e) =>
+                    setNewOffre({
+                      ...newOffre,
+                      delai_execution: parseInt(e.target.value) || undefined,
+                    })
+                  }
                   className="mt-1.5"
                 />
               </div>
@@ -299,8 +297,13 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
                 <Label>Note technique (/100)</Label>
                 <Input
                   type="number"
-                  value={newOffre.note_technique || ""}
-                  onChange={(e) => setNewOffre({ ...newOffre, note_technique: parseFloat(e.target.value) || undefined })}
+                  value={newOffre.note_technique || ''}
+                  onChange={(e) =>
+                    setNewOffre({
+                      ...newOffre,
+                      note_technique: parseFloat(e.target.value) || undefined,
+                    })
+                  }
                   className="mt-1.5"
                   min={0}
                   max={100}
@@ -310,8 +313,13 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
                 <Label>Note financière (/100)</Label>
                 <Input
                   type="number"
-                  value={newOffre.note_financiere || ""}
-                  onChange={(e) => setNewOffre({ ...newOffre, note_financiere: parseFloat(e.target.value) || undefined })}
+                  value={newOffre.note_financiere || ''}
+                  onChange={(e) =>
+                    setNewOffre({
+                      ...newOffre,
+                      note_financiere: parseFloat(e.target.value) || undefined,
+                    })
+                  }
                   className="mt-1.5"
                   min={0}
                   max={100}
@@ -322,7 +330,7 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
             <div>
               <Label>Observations</Label>
               <Textarea
-                value={newOffre.observations || ""}
+                value={newOffre.observations || ''}
                 onChange={(e) => setNewOffre({ ...newOffre, observations: e.target.value })}
                 className="mt-1.5"
                 rows={2}
@@ -333,9 +341,13 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
               Annuler
             </Button>
-            <Button 
-              onClick={handleAddOffre} 
-              disabled={isCreating || (!newOffre.prestataire_id && !newOffre.nom_fournisseur) || !newOffre.montant_offre}
+            <Button
+              onClick={handleAddOffre}
+              disabled={
+                isCreating ||
+                (!newOffre.prestataire_id && !newOffre.nom_fournisseur) ||
+                !newOffre.montant_offre
+              }
             >
               {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Ajouter
@@ -352,7 +364,8 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Vous êtes sur le point de retenir cette offre et d'attribuer le marché au fournisseur sélectionné.
+              Vous êtes sur le point de retenir cette offre et d'attribuer le marché au fournisseur
+              sélectionné.
             </p>
             <div>
               <Label>Motif d'attribution *</Label>
@@ -369,10 +382,7 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
             <Button variant="outline" onClick={() => setShowAttributionDialog(false)}>
               Annuler
             </Button>
-            <Button 
-              onClick={handleAttribuer} 
-              disabled={isSelecting || !motifAttribution.trim()}
-            >
+            <Button onClick={handleAttribuer} disabled={isSelecting || !motifAttribution.trim()}>
               {isSelecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Confirmer l'attribution
             </Button>
@@ -385,13 +395,14 @@ export function MarcheOffresList({ marcheId, isReadOnly = false }: MarcheOffresL
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer cette offre ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Cette action est irréversible.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Cette action est irréversible.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteOffre} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction
+              onClick={handleDeleteOffre}
+              className="bg-destructive text-destructive-foreground"
+            >
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

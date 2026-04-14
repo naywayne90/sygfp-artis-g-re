@@ -2,13 +2,13 @@
  * Dashboard pour les utilisateurs sans direction assignée
  * Affiche des statistiques globales en lecture seule et des raccourcis utiles
  */
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useDashboardStats } from "@/hooks/useDashboardStats";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useExercice } from '@/contexts/ExerciceContext';
 import {
   MapPin,
   FileText,
@@ -25,15 +25,9 @@ import {
   Sparkles,
   BarChart3,
   Wallet,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-
-function formatMontant(montant: number): string {
-  if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
-  if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
-  if (montant >= 1_000) return `${(montant / 1_000).toFixed(0)} K`;
-  return montant.toFixed(0);
-}
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { formatCurrency } from '@/lib/utils';
 
 function StatCard({
   title,
@@ -89,7 +83,9 @@ function QuickAction({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold group-hover:text-primary transition-colors">{title}</h3>
+                <h3 className="font-semibold group-hover:text-primary transition-colors">
+                  {title}
+                </h3>
                 <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
               </div>
               <p className="text-sm text-muted-foreground mt-1">{description}</p>
@@ -139,11 +135,14 @@ export function DashboardNoDirection() {
                 Direction non assignée
               </h3>
               <p className="text-amber-700 dark:text-amber-300">
-                Votre profil n'est pas encore rattaché à une direction.
-                En attendant, vous pouvez consulter les statistiques globales ci-dessous.
+                Votre profil n'est pas encore rattaché à une direction. En attendant, vous pouvez
+                consulter les statistiques globales ci-dessous.
               </p>
             </div>
-            <Button variant="outline" className="border-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50">
+            <Button
+              variant="outline"
+              className="border-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50"
+            >
               <Mail className="h-4 w-4 mr-2" />
               Contacter l'admin
             </Button>
@@ -156,18 +155,22 @@ export function DashboardNoDirection() {
         <div className="flex items-center gap-3">
           <BarChart3 className="h-5 w-5 text-primary" />
           <h2 className="text-xl font-semibold">Statistiques Globales</h2>
-          <Badge variant="secondary" className="ml-2">Lecture seule</Badge>
+          <Badge variant="secondary" className="ml-2">
+            Lecture seule
+          </Badge>
         </div>
 
         {isLoading ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {Array(4).fill(0).map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-4">
-                  <Skeleton className="h-20" />
-                </CardContent>
-              </Card>
-            ))}
+            {Array(4)
+              .fill(0)
+              .map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-4">
+                    <Skeleton className="h-20" />
+                  </CardContent>
+                </Card>
+              ))}
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -217,7 +220,7 @@ export function DashboardNoDirection() {
             <div className="grid gap-6 md:grid-cols-4">
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Budget Total</p>
-                <p className="text-2xl font-bold">{formatMontant(stats.budgetTotal)} F</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats.budgetTotal)}</p>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
@@ -225,7 +228,7 @@ export function DashboardNoDirection() {
                   <span className="font-medium">{stats.tauxEngagement.toFixed(1)}%</span>
                 </div>
                 <Progress value={stats.tauxEngagement} className="h-2" />
-                <p className="text-sm font-medium">{formatMontant(stats.budgetEngage)} F</p>
+                <p className="text-sm font-medium">{formatCurrency(stats.budgetEngage)}</p>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
@@ -233,7 +236,7 @@ export function DashboardNoDirection() {
                   <span className="font-medium">{stats.tauxLiquidation.toFixed(1)}%</span>
                 </div>
                 <Progress value={stats.tauxLiquidation} className="h-2 [&>div]:bg-purple-500" />
-                <p className="text-sm font-medium">{formatMontant(stats.budgetLiquide)} F</p>
+                <p className="text-sm font-medium">{formatCurrency(stats.budgetLiquide)}</p>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
@@ -241,7 +244,7 @@ export function DashboardNoDirection() {
                   <span className="font-medium">{stats.tauxPaiement.toFixed(1)}%</span>
                 </div>
                 <Progress value={stats.tauxPaiement} className="h-2 [&>div]:bg-emerald-500" />
-                <p className="text-sm font-medium">{formatMontant(stats.budgetPaye)} F</p>
+                <p className="text-sm font-medium">{formatCurrency(stats.budgetPaye)}</p>
               </div>
             </div>
           </CardContent>

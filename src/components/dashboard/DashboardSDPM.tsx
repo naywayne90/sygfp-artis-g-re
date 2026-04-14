@@ -4,13 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useSDPMDashboard } from '@/hooks/useDashboardByRole';
 import { ShoppingCart, FileText, Clock, Users, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const formatMontant = (montant: number): string => {
-  if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
-  if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
-  if (montant >= 1_000) return `${(montant / 1_000).toFixed(0)} K`;
-  return montant.toFixed(0);
-};
+import { formatCurrency } from '@/lib/utils';
 
 export function DashboardSDPM() {
   const { data: stats, isLoading } = useSDPMDashboard();
@@ -139,9 +133,8 @@ export function DashboardSDPM() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatMontant(stats?.marchesMontantTotal || 0)}
+              {formatCurrency(stats?.marchesMontantTotal || 0)}
             </div>
-            <p className="text-xs text-muted-foreground">FCFA</p>
           </CardContent>
         </Card>
       </div>
@@ -200,7 +193,7 @@ export function DashboardSDPM() {
                       </p>
                     </div>
                   </div>
-                  <span className="font-medium">{formatMontant(fournisseur.montantTotal)}</span>
+                  <span className="font-medium">{formatCurrency(fournisseur.montantTotal)}</span>
                 </div>
               ))}
               {(!stats?.topFournisseurs || stats.topFournisseurs.length === 0) && (

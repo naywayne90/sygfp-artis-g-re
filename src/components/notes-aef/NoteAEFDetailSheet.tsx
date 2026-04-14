@@ -29,6 +29,7 @@ import { LignesEstimativesReadonly } from '@/components/notes-aef/LignesEstimati
 import { NoteAEFRejectDialog } from '@/components/notes-aef/NoteAEFRejectDialog';
 import { NoteAEFDeferDialog } from '@/components/notes-aef/NoteAEFDeferDialog';
 import { NoteAEFImputeDialog } from '@/components/notes-aef/NoteAEFImputeDialog';
+import { formatCurrency } from '@/lib/utils';
 import { formatMontant } from '@/lib/config/sygfp-constants';
 import { useNoteAccessControl } from '@/hooks/useNoteAccessControl';
 import { supabase } from '@/integrations/supabase/client';

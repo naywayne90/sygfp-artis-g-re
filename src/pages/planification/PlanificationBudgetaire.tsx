@@ -224,7 +224,7 @@ export default function PlanificationBudgetaire() {
     );
 
     const content = [headers, ...rows].join('\n');
-    const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['﻿' + content], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `budget_${exercice}.csv`;

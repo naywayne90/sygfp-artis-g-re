@@ -3,19 +3,12 @@
  * Affiche les informations budgétaires clés : dotation, engagé, disponible
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { 
-  CreditCard, 
-  TrendingUp, 
-  CheckCircle2,
-  Banknote,
-  Lock,
-  Calculator
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { CreditCard, TrendingUp, CheckCircle2, Banknote, Lock, Calculator } from 'lucide-react';
+import { cn, formatCurrency } from '@/lib/utils';
 
 interface BudgetLineInfo {
   id: string;
@@ -45,7 +38,7 @@ interface DossierImputationSummaryProps {
   /** Mode compact */
   compact?: boolean;
   /** Afficher dans une carte ou inline */
-  variant?: "card" | "inline" | "minimal";
+  variant?: 'card' | 'inline' | 'minimal';
 }
 
 export function DossierImputationSummary({
@@ -57,11 +50,8 @@ export function DossierImputationSummary({
   imputedAt,
   imputedBy,
   compact = false,
-  variant = "card",
+  variant = 'card',
 }: DossierImputationSummaryProps) {
-  const formatMontant = (montant: number) =>
-    new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
-
   const formatMontantShort = (montant: number) => {
     if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mrd`;
     if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
@@ -71,7 +61,7 @@ export function DossierImputationSummary({
 
   if (!budgetLine) {
     // Pas encore imputé
-    if (variant === "minimal") {
+    if (variant === 'minimal') {
       return (
         <Badge variant="outline" className="text-muted-foreground">
           <Lock className="h-3 w-3 mr-1" />
@@ -99,16 +89,18 @@ export function DossierImputationSummary({
   const tauxPaiement = montantLiquide > 0 ? (montantPaye / montantLiquide) * 100 : 0;
 
   // Variant minimal : juste un badge
-  if (variant === "minimal") {
+  if (variant === 'minimal') {
     return (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Badge 
-              variant="outline" 
+            <Badge
+              variant="outline"
               className={cn(
-                "cursor-help",
-                tauxEngagement > 80 ? "border-orange-500 text-orange-600" : "border-green-500 text-green-600"
+                'cursor-help',
+                tauxEngagement > 80
+                  ? 'border-orange-500 text-orange-600'
+                  : 'border-green-500 text-green-600'
               )}
             >
               <CreditCard className="h-3 w-3 mr-1" />
@@ -118,9 +110,11 @@ export function DossierImputationSummary({
           <TooltipContent className="max-w-xs">
             <div className="space-y-1 text-sm">
               <p className="font-medium">{budgetLine.label}</p>
-              <p>Dotation: {formatMontant(dotation)}</p>
-              <p>Engagé: {formatMontant(engage)} ({tauxEngagement.toFixed(0)}%)</p>
-              <p>Disponible: {formatMontant(disponible)}</p>
+              <p>Dotation: {formatCurrency(dotation)}</p>
+              <p>
+                Engagé: {formatCurrency(engage)} ({tauxEngagement.toFixed(0)}%)
+              </p>
+              <p>Disponible: {formatCurrency(disponible)}</p>
             </div>
           </TooltipContent>
         </Tooltip>
@@ -129,14 +123,14 @@ export function DossierImputationSummary({
   }
 
   // Variant inline : ligne compacte
-  if (variant === "inline" || compact) {
+  if (variant === 'inline' || compact) {
     return (
       <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg border">
         <div className="flex items-center gap-2">
           <CreditCard className="h-4 w-4 text-primary" />
           <span className="font-mono text-sm font-medium">{budgetLine.code}</span>
         </div>
-        
+
         <div className="flex items-center gap-3 text-sm">
           <TooltipProvider>
             <Tooltip>
@@ -144,42 +138,41 @@ export function DossierImputationSummary({
                 <Banknote className="h-3 w-3 text-muted-foreground" />
                 <span>{formatMontantShort(dotation)}</span>
               </TooltipTrigger>
-              <TooltipContent>Dotation: {formatMontant(dotation)}</TooltipContent>
+              <TooltipContent>Dotation: {formatCurrency(dotation)}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          
+
           <span className="text-muted-foreground">|</span>
-          
+
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger className="flex items-center gap-1">
                 <span className="text-orange-600">{formatMontantShort(engage)}</span>
               </TooltipTrigger>
-              <TooltipContent>Engagé: {formatMontant(engage)}</TooltipContent>
+              <TooltipContent>Engagé: {formatCurrency(engage)}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          
+
           <span className="text-muted-foreground">|</span>
-          
+
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger className={cn(
-                "flex items-center gap-1 font-medium",
-                disponible < 0 ? "text-destructive" : "text-green-600"
-              )}>
+              <TooltipTrigger
+                className={cn(
+                  'flex items-center gap-1 font-medium',
+                  disponible < 0 ? 'text-destructive' : 'text-green-600'
+                )}
+              >
                 {formatMontantShort(disponible)}
               </TooltipTrigger>
-              <TooltipContent>Disponible: {formatMontant(disponible)}</TooltipContent>
+              <TooltipContent>Disponible: {formatCurrency(disponible)}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
           <Progress value={tauxEngagement} className="w-16 h-2" />
-          <span className={cn(
-            "text-xs font-medium",
-            tauxEngagement > 80 ? "text-orange-600" : ""
-          )}>
+          <span className={cn('text-xs font-medium', tauxEngagement > 80 ? 'text-orange-600' : '')}>
             {tauxEngagement.toFixed(0)}%
           </span>
           {tauxEngagement > 80 && <TrendingUp className="h-3 w-3 text-orange-600" />}
@@ -231,15 +224,19 @@ export function DossierImputationSummary({
             <p className="text-xs text-muted-foreground">Réservé</p>
             <p className="font-bold text-sm text-amber-600">{formatMontantShort(reserve)}</p>
           </div>
-          <div className={cn(
-            "p-2 rounded border",
-            disponible < 0 ? "bg-red-50 dark:bg-red-950/20" : "bg-green-50 dark:bg-green-950/20"
-          )}>
+          <div
+            className={cn(
+              'p-2 rounded border',
+              disponible < 0 ? 'bg-red-50 dark:bg-red-950/20' : 'bg-green-50 dark:bg-green-950/20'
+            )}
+          >
             <p className="text-xs text-muted-foreground">Disponible</p>
-            <p className={cn(
-              "font-bold text-sm",
-              disponible < 0 ? "text-destructive" : "text-green-600"
-            )}>
+            <p
+              className={cn(
+                'font-bold text-sm',
+                disponible < 0 ? 'text-destructive' : 'text-green-600'
+              )}
+            >
               {formatMontantShort(disponible)}
             </p>
           </div>
@@ -249,7 +246,7 @@ export function DossierImputationSummary({
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Taux d'engagement</span>
-            <span className={tauxEngagement > 80 ? "text-orange-600 font-medium" : ""}>
+            <span className={tauxEngagement > 80 ? 'text-orange-600 font-medium' : ''}>
               {tauxEngagement.toFixed(1)}%
             </span>
           </div>
@@ -263,7 +260,7 @@ export function DossierImputationSummary({
               <Calculator className="h-4 w-4 text-primary" />
               <span className="text-sm">Montant de ce dossier:</span>
             </div>
-            <span className="font-bold text-primary">{formatMontant(montantImpute)}</span>
+            <span className="font-bold text-primary">{formatCurrency(montantImpute)}</span>
           </div>
         )}
 
@@ -295,7 +292,7 @@ export function DossierImputationSummary({
         {/* Info imputation */}
         {imputedAt && (
           <p className="text-xs text-muted-foreground text-right">
-            Imputé le {new Date(imputedAt).toLocaleDateString("fr-FR")}
+            Imputé le {new Date(imputedAt).toLocaleDateString('fr-FR')}
             {imputedBy && ` par ${imputedBy.first_name} ${imputedBy.last_name}`}
           </p>
         )}
@@ -314,9 +311,6 @@ export function DossierImputationBadge({
   budgetLine?: BudgetLineInfo | null;
   montantImpute: number;
 }) {
-  const formatMontant = (montant: number) =>
-    new Intl.NumberFormat("fr-FR").format(montant);
-
   if (!budgetLine) {
     return (
       <Badge variant="secondary" className="gap-1">
@@ -337,13 +331,15 @@ export function DossierImputationBadge({
             </Badge>
             <Badge variant="secondary" className="gap-1">
               <Banknote className="h-3 w-3" />
-              {formatMontant(montantImpute)} FCFA
+              {formatCurrency(montantImpute)}
             </Badge>
           </div>
         </TooltipTrigger>
         <TooltipContent>
           <p className="font-medium">{budgetLine.label}</p>
-          <p className="text-xs text-muted-foreground">Montant imputé: {formatMontant(montantImpute)} FCFA</p>
+          <p className="text-xs text-muted-foreground">
+            Montant imputé: {formatCurrency(montantImpute)}
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

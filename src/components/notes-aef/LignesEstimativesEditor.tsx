@@ -7,21 +7,21 @@
  * - Quantité × Prix unitaire = Montant
  */
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   Table,
   TableBody,
@@ -29,7 +29,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,57 +39,43 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   useLignesEstimativesAEF,
   CATEGORIES_LIGNE,
   CategorieTypeLigne,
   LigneEstimativeAEF,
-} from "@/hooks/useLignesEstimativesAEF";
-import {
-  Plus,
-  Trash2,
-  Edit,
-  Copy,
-  Calculator,
-  Loader2,
-  Package,
-  Save,
-  X,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+} from '@/hooks/useLignesEstimativesAEF';
+import { Plus, Trash2, Edit, Copy, Calculator, Loader2, Package, Save, X } from 'lucide-react';
+import { cn, formatCurrency } from '@/lib/utils';
 
 interface LignesEstimativesEditorProps {
   noteAefId: string;
   readonly?: boolean;
 }
 
-const formatMontant = (value: number) => {
-  return new Intl.NumberFormat("fr-FR").format(value);
-};
-
 const formatInputNumber = (value: string) => {
-  const number = value.replace(/\D/g, "");
-  return number ? parseInt(number, 10).toLocaleString("fr-FR") : "";
+  const number = value.replace(/\D/g, '');
+  return number ? parseInt(number, 10).toLocaleString('fr-FR') : '';
 };
 
 const parseInputNumber = (value: string) => {
-  return parseInt(value.replace(/\s/g, "").replace(/,/g, ""), 10) || 0;
+  return parseInt(value.replace(/\s/g, '').replace(/,/g, ''), 10) || 0;
 };
 
 // Couleurs par catégorie
 const CATEGORIE_COLORS: Record<CategorieTypeLigne, string> = {
-  fournitures: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  equipement: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  services: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  travaux: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-  honoraires: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
-  transport: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
-  hebergement: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
-  restauration: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  communication: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
-  formation: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
-  autre: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+  fournitures: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  equipement: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  services: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  travaux: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  honoraires: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+  transport: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+  hebergement: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+  restauration: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  communication: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
+  formation: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
+  autre: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
 };
 
 interface NewLigneFormData {
@@ -100,10 +86,10 @@ interface NewLigneFormData {
 }
 
 const defaultFormData: NewLigneFormData = {
-  categorie: "fournitures",
-  description: "",
-  quantite: "1",
-  prix_unitaire: "",
+  categorie: 'fournitures',
+  description: '',
+  quantite: '1',
+  prix_unitaire: '',
 };
 
 export function LignesEstimativesEditor({
@@ -204,11 +190,7 @@ export function LignesEstimativesEditor({
             <Badge variant="secondary">{lignes.length}</Badge>
           </CardTitle>
           {!readonly && !showNewForm && !editingLigne && (
-            <Button
-              size="sm"
-              onClick={() => setShowNewForm(true)}
-              className="gap-2"
-            >
+            <Button size="sm" onClick={() => setShowNewForm(true)} className="gap-2">
               <Plus className="h-4 w-4" />
               Ajouter
             </Button>
@@ -238,8 +220,8 @@ export function LignesEstimativesEditor({
                           <div className="flex items-center gap-2">
                             <div
                               className={cn(
-                                "w-2 h-2 rounded-full",
-                                CATEGORIE_COLORS[cat.value].replace(/text-\S+/, "bg-current")
+                                'w-2 h-2 rounded-full',
+                                CATEGORIE_COLORS[cat.value].replace(/text-\S+/, 'bg-current')
                               )}
                             />
                             {cat.label}
@@ -257,9 +239,7 @@ export function LignesEstimativesEditor({
                       type="number"
                       min="1"
                       value={formData.quantite}
-                      onChange={(e) =>
-                        setFormData({ ...formData, quantite: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, quantite: e.target.value })}
                       className="text-center"
                     />
                   </div>
@@ -283,7 +263,7 @@ export function LignesEstimativesEditor({
                       Montant
                     </Label>
                     <div className="h-10 flex items-center justify-end px-3 rounded-md border bg-muted font-mono font-medium">
-                      {formatMontant(calculatedMontant)}
+                      {formatCurrency(calculatedMontant, { showSymbol: false })}
                     </div>
                   </div>
                 </div>
@@ -293,9 +273,7 @@ export function LignesEstimativesEditor({
                 <Label>Description</Label>
                 <Textarea
                   value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Décrivez cette ligne de dépense..."
                   rows={2}
                 />
@@ -324,7 +302,7 @@ export function LignesEstimativesEditor({
                   ) : (
                     <Save className="h-4 w-4" />
                   )}
-                  {editingLigne ? "Mettre à jour" : "Ajouter"}
+                  {editingLigne ? 'Mettre à jour' : 'Ajouter'}
                 </Button>
               </div>
             </CardContent>
@@ -336,9 +314,7 @@ export function LignesEstimativesEditor({
           <div className="text-center py-8 text-muted-foreground">
             <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
             <p>Aucune ligne estimative</p>
-            {!readonly && (
-              <p className="text-sm">Cliquez sur "Ajouter" pour créer une ligne</p>
-            )}
+            {!readonly && <p className="text-sm">Cliquez sur "Ajouter" pour créer une ligne</p>}
           </div>
         ) : (
           <div className="border rounded-lg overflow-hidden">
@@ -359,7 +335,7 @@ export function LignesEstimativesEditor({
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className={cn("text-xs", CATEGORIE_COLORS[ligne.categorie])}
+                        className={cn('text-xs', CATEGORIE_COLORS[ligne.categorie])}
                       >
                         {CATEGORIES_LIGNE.find((c) => c.value === ligne.categorie)?.label ||
                           ligne.categorie}
@@ -370,14 +346,12 @@ export function LignesEstimativesEditor({
                         {ligne.description}
                       </span>
                     </TableCell>
-                    <TableCell className="text-center font-mono">
-                      {ligne.quantite}
-                    </TableCell>
+                    <TableCell className="text-center font-mono">{ligne.quantite}</TableCell>
                     <TableCell className="text-right font-mono">
-                      {formatMontant(ligne.prix_unitaire)}
+                      {formatCurrency(ligne.prix_unitaire, { showSymbol: false })}
                     </TableCell>
                     <TableCell className="text-right font-mono font-medium">
-                      {formatMontant(ligne.montant)}
+                      {formatCurrency(ligne.montant, { showSymbol: false })}
                     </TableCell>
                     {!readonly && (
                       <TableCell>
@@ -426,7 +400,7 @@ export function LignesEstimativesEditor({
             <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
               <span className="font-medium">Total estimé</span>
               <span className="text-xl font-bold font-mono text-primary">
-                {formatMontant(total)} FCFA
+                {formatCurrency(total)}
               </span>
             </div>
           </>

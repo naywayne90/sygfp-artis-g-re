@@ -33,11 +33,7 @@ import {
   getEtapeOrder,
   type DossierEtapeDetail,
 } from '@/hooks/useDossierDetails';
-
-const formatMontant = (montant: number | null | undefined) => {
-  if (montant == null) return '0 FCFA';
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-};
+import { formatCurrency } from '@/lib/utils';
 
 const formatDate = (date: string | null | undefined) => {
   if (!date) return '-';
@@ -398,7 +394,7 @@ export default function DossierDetails() {
                     {lastEtape ? (
                       <div className="text-sm text-muted-foreground space-y-1">
                         {lastEtape.montant != null && lastEtape.montant > 0 && (
-                          <p>Montant: {formatMontant(lastEtape.montant)}</p>
+                          <p>Montant: {formatCurrency(lastEtape.montant)}</p>
                         )}
                         <p>Date: {formatDateTime(lastEtape.created_at)}</p>
                         {lastEtape.creator?.full_name && <p>Par: {lastEtape.creator.full_name}</p>}
@@ -437,7 +433,7 @@ export default function DossierDetails() {
                       {getStatutEtapeBadge(etape.statut)}
                       {etape.montant != null && etape.montant > 0 && (
                         <span className="text-sm text-muted-foreground">
-                          - {formatMontant(etape.montant)}
+                          - {formatCurrency(etape.montant)}
                         </span>
                       )}
                     </div>
@@ -491,7 +487,7 @@ function MontantRow({
   return (
     <div className="flex justify-between items-center">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className={`text-sm font-medium ${colorClass}`}>{formatMontant(value)}</span>
+      <span className={`text-sm font-medium ${colorClass}`}>{formatCurrency(value)}</span>
     </div>
   );
 }

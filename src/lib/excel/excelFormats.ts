@@ -41,12 +41,9 @@ export const DATE_FORMATS = {
 // ============================================================================
 
 /**
- * Formate un montant en FCFA pour affichage
+ * @deprecated Utiliser formatCurrency de @/lib/utils directement
  */
-export function formatMontant(value: number | null | undefined): string {
-  if (value === null || value === undefined) return '-';
-  return new Intl.NumberFormat('fr-FR').format(value) + ' FCFA';
-}
+export { formatCurrency as formatMontant } from '@/lib/utils';
 
 /**
  * Formate une date pour affichage

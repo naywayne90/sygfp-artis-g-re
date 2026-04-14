@@ -65,7 +65,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 
 export default function Reamenagement() {
   const { exercice, isReadOnly } = useExercice();
@@ -96,11 +96,6 @@ export default function Reamenagement() {
   const virements = useMemo(() => {
     return transfers?.filter((t) => t.type_transfer === 'virement') || [];
   }, [transfers]);
-
-  // Format currency
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-  };
 
   // Get status badge
   const getStatusBadge = (status: string) => {
@@ -225,7 +220,7 @@ export default function Reamenagement() {
               <ArrowLeftRight className="h-5 w-5 text-indigo-500" />
               <div>
                 <p className="text-sm text-muted-foreground">Montant total</p>
-                <p className="text-lg font-bold">{formatMontant(stats.totalExecutedAmount)}</p>
+                <p className="text-lg font-bold">{formatCurrency(stats.totalExecutedAmount)}</p>
               </div>
             </div>
           </CardContent>
@@ -320,7 +315,7 @@ export default function Reamenagement() {
                               </div>
                             </TableCell>
                             <TableCell className="text-right font-medium">
-                              {formatMontant(v.amount)}
+                              {formatCurrency(v.amount)}
                             </TableCell>
                             <TableCell>{getStatusBadge(v.status || 'soumis')}</TableCell>
                             <TableCell>
@@ -433,7 +428,7 @@ export default function Reamenagement() {
                             </div>
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            {formatMontant(v.amount)}
+                            {formatCurrency(v.amount)}
                           </TableCell>
                           <TableCell>{getStatusBadge(v.status || 'execute')}</TableCell>
                           <TableCell>

@@ -49,6 +49,7 @@ import { useCanValidateOrdonnancement } from '@/hooks/useDelegations';
 import { usePermissionCheck } from '@/components/auth/PermissionGuard';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
 import { NotesPagination } from '@/components/shared/NotesPagination';
@@ -58,7 +59,7 @@ export default function Ordonnancements() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
-  const { ordonnancements, liquidationsValidees, isLoading: _isLoading } = useOrdonnancements();
+  const { ordonnancements, liquidationsValidees, isLoading } = useOrdonnancements();
   const {
     canValidate: canValidateViaDelegation,
     viaDelegation: ordonnancementViaDelegation,
@@ -71,12 +72,17 @@ export default function Ordonnancements() {
     canPerform('ordonnancement.validate') || canValidateViaDelegation;
 
   // RBAC: seul le DG (ordonnateur) et ADMIN peuvent créer des ordonnancements
-  const { canCreate: canCreateRBAC } = useRBAC();
+  const { canCreate: canCreateRBAC, isDG } = useRBAC();
   const canCreateOrdonnancement = canWrite && canCreateRBAC('ordonnancement');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [activeTab, setActiveTab] = useState('a_traiter');
+  const [activeTab, setActiveTab] = useState(isDG ? 'en_signature' : 'a_traiter');
+
+  // DG : ouvrir directement sur "En signature" (fallback si isDG charge après le mount)
+  useEffect(() => {
+    if (isDG) setActiveTab('en_signature');
+  }, [isDG]);
   const [preselectedLiqId, setPreselectedLiqId] = useState<string>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedOrdForDetails, setSelectedOrdForDetails] = useState<any>(null);
@@ -129,6 +135,20 @@ export default function Ordonnancements() {
   const handleCreateReglement = (ordonnancementId: string) => {
     navigate(`/reglements?sourceOrdonnancement=${ordonnancementId}`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <Skeleton className="h-10 w-full" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className="h-20" />
+          ))}
+        </div>
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">

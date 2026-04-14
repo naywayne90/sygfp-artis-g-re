@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ARTIReferenceInline } from '@/components/shared/ARTIReferenceBadge';
+import { formatCurrency } from '@/lib/utils';
 
 type NoteAEFWithExtras = NoteAEF & { attachments_count?: number };
 
@@ -125,11 +126,6 @@ const _getUrgenceBadge = (urgence: string | null) => {
   };
   const variant = variants[urgence || 'normale'] || variants.normale;
   return <Badge className={variant.className}>{variant.label}</Badge>;
-};
-
-const formatMontant = (montant: number | null) => {
-  if (!montant) return '—';
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
 
 // Composant skeleton pour le chargement
@@ -327,7 +323,9 @@ export function NoteAEFList({
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-right">{formatMontant(note.montant_estime)}</TableCell>
+                  <TableCell className="text-right">
+                    {note.montant_estime ? formatCurrency(note.montant_estime) : '—'}
+                  </TableCell>
                   <TableCell>{getOriginBadge(note)}</TableCell>
                   <TableCell>{getStatusBadge(note.statut)}</TableCell>
                   <TableCell className="hidden xl:table-cell text-center">

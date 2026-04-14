@@ -133,7 +133,6 @@ export default function MonModule() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="all">Tous</TabsTrigger>
-          <TabsTrigger value="brouillon">Brouillons</TabsTrigger>
           <TabsTrigger value="soumis">Soumis</TabsTrigger>
           <TabsTrigger value="valide">Validés</TabsTrigger>
         </TabsList>
@@ -212,7 +211,7 @@ export function useMonModule() {
           ...values,
           exercice,
           created_by: user?.id,
-          statut: 'brouillon',
+          statut: 'soumis',
         })
         .select()
         .single();
@@ -674,8 +673,8 @@ Après migration, les types sont automatiquement régénérés dans `src/integra
 
 ### 7.1 Tests manuels
 
-1. Créer un élément en brouillon
-2. Le soumettre
+1. Créer et soumettre un élément (statut soumis dès la création)
+2. Vérifier le statut
 3. Se connecter avec un autre rôle
 4. Valider ou rejeter
 5. Vérifier l'audit trail

@@ -12,7 +12,7 @@ import {
   CheckCircle,
   X,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import type { DMGAlerte } from '@/hooks/useDMGDashboard';
@@ -60,14 +60,6 @@ export function DMGAlertCard({ alerte, onAction }: DMGAlertCardProps) {
   const config = severityConfig[alerte.severite] || severityConfig.info;
   const Icon = config.icon;
 
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(montant) + ' FCFA';
-  };
-
   return (
     <Card
       className={cn(
@@ -105,7 +97,9 @@ export function DMGAlertCard({ alerte, onAction }: DMGAlertCardProps) {
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {alerte.type === 'liquidation_urgente' ? 'Liquidation urgente' : 'Engagement en attente'}
+                {alerte.type === 'liquidation_urgente'
+                  ? 'Liquidation urgente'
+                  : 'Engagement en attente'}
               </p>
             </div>
           </div>
@@ -122,7 +116,7 @@ export function DMGAlertCard({ alerte, onAction }: DMGAlertCardProps) {
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Clock className="h-3.5 w-3.5" />
-            <span>{formatMontant(alerte.montant)}</span>
+            <span>{formatCurrency(alerte.montant)}</span>
           </div>
         </div>
       </CardContent>
@@ -162,8 +156,8 @@ interface DMGAlertListProps {
 
 export function DMGAlertList({ alertes, onAction, maxItems }: DMGAlertListProps) {
   const displayAlertes = maxItems ? alertes.slice(0, maxItems) : alertes;
-  const criticalCount = alertes.filter(a => a.severite === 'critical').length;
-  const warningCount = alertes.filter(a => a.severite === 'warning').length;
+  const criticalCount = alertes.filter((a) => a.severite === 'critical').length;
+  const warningCount = alertes.filter((a) => a.severite === 'warning').length;
 
   if (alertes.length === 0) {
     return (
@@ -192,7 +186,10 @@ export function DMGAlertList({ alertes, onAction, maxItems }: DMGAlertListProps)
           </Badge>
         )}
         {warningCount > 0 && (
-          <Badge variant="outline" className="gap-1 border-orange-300 text-orange-700 bg-orange-100/50">
+          <Badge
+            variant="outline"
+            className="gap-1 border-orange-300 text-orange-700 bg-orange-100/50"
+          >
             <AlertCircle className="h-3 w-3" />
             {warningCount} attention
           </Badge>
@@ -202,11 +199,7 @@ export function DMGAlertList({ alertes, onAction, maxItems }: DMGAlertListProps)
       {/* Alert cards */}
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {displayAlertes.map((alerte) => (
-          <DMGAlertCard
-            key={alerte.entity_id}
-            alerte={alerte}
-            onAction={onAction}
-          />
+          <DMGAlertCard key={alerte.entity_id} alerte={alerte} onAction={onAction} />
         ))}
       </div>
 

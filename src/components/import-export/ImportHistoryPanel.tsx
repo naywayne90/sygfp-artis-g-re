@@ -162,7 +162,7 @@ export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelPr
 
       const csvContent = [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\n');
 
-      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `erreurs_import_${run.id.slice(0, 8)}.csv`;

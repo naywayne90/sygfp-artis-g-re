@@ -12,7 +12,7 @@
  * Statuts possibles d'une Note SEF dans son cycle de vie
  */
 export const NoteSEFStatut = {
-  /** Soumis - note envoyée pour examen (statut initial depuis suppression brouillon) */
+  /** Soumis - note envoyee pour examen (statut initial, pas de brouillon) */
   SUBMITTED: 'soumis',
   /** À valider - en attente de décision du validateur */
   PENDING_VALIDATION: 'a_valider',

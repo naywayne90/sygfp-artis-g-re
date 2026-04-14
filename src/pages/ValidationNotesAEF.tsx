@@ -45,7 +45,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import {
   CheckCircle,
   XCircle,
@@ -328,11 +328,6 @@ export default function ValidationNotesAEF() {
 
   // ── Helpers ────────────────────────────────────────────────────────────
 
-  const formatMontant = (montant: number | null) => {
-    if (!montant) return '—';
-    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-  };
-
   const getUrgenceBadge = (urgence: string | null) => {
     const isHigh = urgence === 'haute' || urgence === 'urgente';
     const variants: Record<string, { label: string; className: string }> = {
@@ -376,7 +371,7 @@ export default function ValidationNotesAEF() {
       <span
         className={cn('px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap', colorClasses)}
       >
-        {formatMontant(budgetInfo.disponible)}
+        {formatCurrency(budgetInfo.disponible)}
       </span>
     );
   };
@@ -637,7 +632,7 @@ export default function ValidationNotesAEF() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right font-medium whitespace-nowrap">
-                          {formatMontant(note.montant_estime)}
+                          {formatCurrency(note.montant_estime)}
                         </TableCell>
                         <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
                           {note.budget_line?.code || '—'}
@@ -739,7 +734,7 @@ export default function ValidationNotesAEF() {
                           {note.direction?.sigle || note.direction?.label || '—'}
                         </TableCell>
                         <TableCell className="text-right">
-                          {formatMontant(note.montant_estime)}
+                          {formatCurrency(note.montant_estime)}
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate text-orange-700">
                           {note.motif_differe || '—'}
@@ -822,7 +817,7 @@ export default function ValidationNotesAEF() {
                           {note.direction?.sigle || note.direction?.label || '—'}
                         </TableCell>
                         <TableCell className="text-right">
-                          {formatMontant(note.montant_estime)}
+                          {formatCurrency(note.montant_estime)}
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="bg-success/10 text-success">
@@ -873,7 +868,7 @@ export default function ValidationNotesAEF() {
               <br />
               Objet : {selectedNote?.objet}
               <br />
-              Montant : {formatMontant(selectedNote?.montant_estime ?? null)}
+              Montant : {formatCurrency(selectedNote?.montant_estime ?? null)}
             </DialogDescription>
           </DialogHeader>
 

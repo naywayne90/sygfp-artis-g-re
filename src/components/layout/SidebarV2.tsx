@@ -508,7 +508,7 @@ export function SidebarV2() {
                     item.url === '/planification/soumissions-feuilles-route'
                       ? badges?.roadmapSoumissions || 0
                       : item.url === '/planification/projets'
-                        ? badges?.roadmapPlansBrouillon || 0
+                        ? badges?.roadmapPlansSoumis || 0
                         : item.url === '/planification/roadmap-dashboard'
                           ? badges?.roadmapTachesEnRetard || 0
                           : 0;

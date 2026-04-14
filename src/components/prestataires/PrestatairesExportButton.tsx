@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import * as XLSX from "xlsx";
-import type { Prestataire } from "@/hooks/usePrestataires";
+} from '@/components/ui/dropdown-menu';
+import { Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
+import type { Prestataire } from '@/hooks/usePrestataires';
 
 interface PrestatairesExportButtonProps {
   prestataires: Prestataire[];
@@ -30,33 +30,33 @@ export function PrestatairesExportButton({ prestataires, filters }: Prestataires
       // Transform data for export
       const exportData = prestataires.map((p) => ({
         Code: p.code,
-        "Raison sociale": p.raison_sociale,
-        Sigle: p.sigle || "",
-        NINEA: p.ninea || "",
-        NIF: p.nif || "",
-        IFU: p.ifu || "",
-        RCCM: p.rccm || "",
-        CC: p.cc || "",
-        Adresse: p.adresse || "",
-        Ville: p.ville || "",
-        Téléphone: p.telephone || "",
-        Email: p.email || "",
-        "Contact Nom": p.contact_nom || "",
-        "Contact Téléphone": p.contact_telephone || "",
-        "Contact Email": p.contact_email || "",
-        "Secteur d'activité": p.secteur_activite || "",
-        "Type prestataire": p.type_prestataire || "",
-        Statut: p.statut || "",
-        "Date qualification": p.date_qualification
-          ? new Date(p.date_qualification).toLocaleDateString("fr-FR")
-          : "",
-        "Créé le": new Date(p.created_at).toLocaleDateString("fr-FR"),
+        'Raison sociale': p.raison_sociale,
+        Sigle: p.sigle || '',
+        NINEA: p.ninea || '',
+        NIF: p.nif || '',
+        IFU: p.ifu || '',
+        RCCM: p.rccm || '',
+        CC: p.cc || '',
+        Adresse: p.adresse || '',
+        Ville: p.ville || '',
+        Téléphone: p.telephone || '',
+        Email: p.email || '',
+        'Contact Nom': p.contact_nom || '',
+        'Contact Téléphone': p.contact_telephone || '',
+        'Contact Email': p.contact_email || '',
+        "Secteur d'activité": p.secteur_activite || '',
+        'Type prestataire': p.type_prestataire || '',
+        Statut: p.statut || '',
+        'Date qualification': p.date_qualification
+          ? new Date(p.date_qualification).toLocaleDateString('fr-FR')
+          : '',
+        'Créé le': new Date(p.created_at).toLocaleDateString('fr-FR'),
       }));
 
       const ws = XLSX.utils.json_to_sheet(exportData);
 
       // Set column widths
-      ws["!cols"] = [
+      ws['!cols'] = [
         { wch: 15 }, // Code
         { wch: 30 }, // Raison sociale
         { wch: 10 }, // Sigle
@@ -80,28 +80,28 @@ export function PrestatairesExportButton({ prestataires, filters }: Prestataires
       ];
 
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Prestataires");
+      XLSX.utils.book_append_sheet(wb, ws, 'Prestataires');
 
       // Generate filename with date
-      const date = new Date().toISOString().split("T")[0];
+      const date = new Date().toISOString().split('T')[0];
       const filename = `prestataires_export_${date}.xlsx`;
 
       XLSX.writeFile(wb, filename);
 
       // Audit log
-      await supabase.from("audit_logs").insert({
-        entity_type: "prestataires",
-        action: "export",
+      await supabase.from('audit_logs').insert({
+        entity_type: 'prestataires',
+        action: 'export',
         new_values: {
           count: prestataires.length,
-          format: "xlsx",
+          format: 'xlsx',
           filters,
         },
       });
 
       toast.success(`${prestataires.length} prestataires exportés`);
     } catch (error) {
-      console.error("Erreur export:", error);
+      console.error('Erreur export:', error);
       toast.error("Erreur lors de l'export");
     } finally {
       setIsExporting(false);
@@ -112,96 +112,96 @@ export function PrestatairesExportButton({ prestataires, filters }: Prestataires
     setIsExporting(true);
     try {
       // BOM for UTF-8
-      const BOM = "\uFEFF";
-      const separator = ";";
-      
+      const BOM = '﻿';
+      const separator = ';';
+
       // Headers
       const headers = [
-        "Code",
-        "Raison sociale",
-        "Sigle",
-        "NINEA",
-        "NIF",
-        "IFU",
-        "RCCM",
-        "CC",
-        "Adresse",
-        "Ville",
-        "Téléphone",
-        "Email",
-        "Contact Nom",
-        "Contact Téléphone",
-        "Contact Email",
+        'Code',
+        'Raison sociale',
+        'Sigle',
+        'NINEA',
+        'NIF',
+        'IFU',
+        'RCCM',
+        'CC',
+        'Adresse',
+        'Ville',
+        'Téléphone',
+        'Email',
+        'Contact Nom',
+        'Contact Téléphone',
+        'Contact Email',
         "Secteur d'activité",
-        "Type prestataire",
-        "Statut",
-        "Date qualification",
-        "Créé le",
+        'Type prestataire',
+        'Statut',
+        'Date qualification',
+        'Créé le',
       ];
 
       // Rows
       const rows = prestataires.map((p) => [
         p.code,
         p.raison_sociale,
-        p.sigle || "",
-        p.ninea || "",
-        p.nif || "",
-        p.ifu || "",
-        p.rccm || "",
-        p.cc || "",
-        p.adresse || "",
-        p.ville || "",
-        p.telephone || "",
-        p.email || "",
-        p.contact_nom || "",
-        p.contact_telephone || "",
-        p.contact_email || "",
-        p.secteur_activite || "",
-        p.type_prestataire || "",
-        p.statut || "",
-        p.date_qualification
-          ? new Date(p.date_qualification).toLocaleDateString("fr-FR")
-          : "",
-        new Date(p.created_at).toLocaleDateString("fr-FR"),
+        p.sigle || '',
+        p.ninea || '',
+        p.nif || '',
+        p.ifu || '',
+        p.rccm || '',
+        p.cc || '',
+        p.adresse || '',
+        p.ville || '',
+        p.telephone || '',
+        p.email || '',
+        p.contact_nom || '',
+        p.contact_telephone || '',
+        p.contact_email || '',
+        p.secteur_activite || '',
+        p.type_prestataire || '',
+        p.statut || '',
+        p.date_qualification ? new Date(p.date_qualification).toLocaleDateString('fr-FR') : '',
+        new Date(p.created_at).toLocaleDateString('fr-FR'),
       ]);
 
       // Escape CSV values
       const escapeCSV = (value: string) => {
-        if (value.includes(separator) || value.includes('"') || value.includes("\n")) {
+        if (value.includes(separator) || value.includes('"') || value.includes('\n')) {
           return `"${value.replace(/"/g, '""')}"`;
         }
         return value;
       };
 
-      const csvContent = BOM + [
-        headers.join(separator),
-        ...rows.map((row) => row.map((cell) => escapeCSV(String(cell))).join(separator)),
-      ].join("\n");
+      const csvContent =
+        BOM +
+        [
+          headers.join(separator),
+          ...rows.map((row) => row.map((cell) => escapeCSV(String(cell))).join(separator)),
+        ].join('\n');
 
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
-      a.download = `prestataires_export_${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `prestataires_export_${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
       // Audit log
-      await supabase.from("audit_logs").insert({
-        entity_type: "prestataires",
-        action: "export",
+      await supabase.from('audit_logs').insert({
+        entity_type: 'prestataires',
+        action: 'export',
         new_values: {
           count: prestataires.length,
-          format: "csv",
+          format: 'csv',
           filters,
         },
       });
 
       toast.success(`${prestataires.length} prestataires exportés (CSV)`);
     } catch (error) {
-      console.error("Erreur export CSV:", error);
+      console.error('Erreur export CSV:', error);
       toast.error("Erreur lors de l'export");
     } finally {
       setIsExporting(false);

@@ -170,7 +170,7 @@ export function getExportHtmlHeader(options: {
               Union - Discipline - Travail
             </div>
             <div style="font-size:12px;font-weight:bold;color:${ARTI_COLORS.primary};">
-              ARTI - Autorit\u00e9 de R\u00e9gulation du Transport Int\u00e9rieur
+              ARTI - Autorité de Régulation du Transport Intérieur
             </div>
           </td>
           <td style="width:120px;border:none;text-align:right;vertical-align:middle;padding:0;font-size:9px;color:${ARTI_COLORS.textSecondary};">
@@ -208,11 +208,11 @@ export function getExportHtmlFooter(): string {
       <table style="width:100%;border:none;border-collapse:collapse;">
         <tr>
           <td style="border:none;padding:0;text-align:left;">
-            SYGFP - Syst\u00e8me de Gestion des Finances Publiques<br/>
-            Document g\u00e9n\u00e9r\u00e9 automatiquement le ${dateStr} \u00e0 ${timeStr} - Ne pas modifier
+            SYGFP - Système de Gestion des Finances Publiques<br/>
+            Document généré automatiquement le ${dateStr} à ${timeStr} - Ne pas modifier
           </td>
           <td style="border:none;padding:0;text-align:right;">
-            ARTI - C\u00f4te d'Ivoire
+            ARTI - Côte d'Ivoire
           </td>
         </tr>
       </table>

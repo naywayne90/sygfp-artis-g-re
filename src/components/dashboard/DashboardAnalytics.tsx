@@ -2,13 +2,12 @@
  * DashboardAnalytics - Dashboard spécialisé Suivi et Évaluation (DSESP)
  * Focalisé sur: Graphiques d'évolution, Comparatifs, Indicateurs de performance
  */
-// @ts-nocheck - Types seront mis à jour après exécution de la migration et régénération des types
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   BarChart3,
   TrendingUp,
@@ -24,10 +23,13 @@ import {
   Clock,
   Zap,
   Building2,
-} from "lucide-react";
-import { useDirectionDashboard, useAllDirectionsStats } from "@/hooks/dashboard/useDirectionDashboard";
-import { formatMontant, formatMontantCompact } from "@/lib/config/sygfp-constants";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import {
+  useDirectionDashboard,
+  useAllDirectionsStats,
+} from '@/hooks/dashboard/useDirectionDashboard';
+import { formatMontant, formatMontantCompact } from '@/lib/config/sygfp-constants';
+import { cn } from '@/lib/utils';
 
 interface DashboardAnalyticsProps {
   directionId: string;
@@ -65,16 +67,18 @@ export function DashboardAnalytics({
     .slice(0, 5);
 
   // Calcul taux global
-  const tauxGlobal = totalStats.totalSEF > 0
-    ? Math.round((totalStats.totalOrdonnancements / totalStats.totalEngagements) * 100)
-    : 0;
+  const tauxGlobal =
+    totalStats.totalSEF > 0
+      ? Math.round((totalStats.totalOrdonnancements / totalStats.totalEngagements) * 100)
+      : 0;
 
   // Évolution mensuelle
   const evolutionData = evolution || [];
   const currentMonth = new Date().getMonth();
-  const evolutionTrend = evolutionData.length >= 2
-    ? evolutionData[currentMonth]?.engagements > evolutionData[currentMonth - 1]?.engagements
-    : null;
+  const evolutionTrend =
+    evolutionData.length >= 2
+      ? evolutionData[currentMonth]?.engagements > evolutionData[currentMonth - 1]?.engagements
+      : null;
 
   return (
     <div className="space-y-6">
@@ -112,8 +116,8 @@ export function DashboardAnalytics({
               {formatMontantCompact(totalStats.totalEngagements)}
             </div>
             <div className="flex items-center gap-1 mt-1">
-              {evolutionTrend !== null && (
-                evolutionTrend ? (
+              {evolutionTrend !== null &&
+                (evolutionTrend ? (
                   <span className="text-success flex items-center text-xs">
                     <ArrowUpRight className="h-3 w-3" /> En hausse
                   </span>
@@ -121,8 +125,7 @@ export function DashboardAnalytics({
                   <span className="text-warning flex items-center text-xs">
                     <ArrowDownRight className="h-3 w-3" /> En baisse
                   </span>
-                )
-              )}
+                ))}
             </div>
           </CardContent>
         </Card>
@@ -137,9 +140,7 @@ export function DashboardAnalytics({
             <div className="text-2xl font-bold">
               {formatMontantCompact(totalStats.totalLiquidations)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Toutes directions confondues
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Toutes directions confondues</p>
           </CardContent>
         </Card>
 
@@ -153,9 +154,7 @@ export function DashboardAnalytics({
             <div className="text-2xl font-bold">
               {formatMontantCompact(totalStats.totalOrdonnancements)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Montant total ordonnancé
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Montant total ordonnancé</p>
           </CardContent>
         </Card>
 
@@ -167,9 +166,7 @@ export function DashboardAnalytics({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{tauxGlobal}%</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Ordo / Engagements
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Ordo / Engagements</p>
           </CardContent>
         </Card>
       </div>
@@ -189,20 +186,18 @@ export function DashboardAnalytics({
               {/* Mini bar chart simulé */}
               <div className="flex items-end gap-1 h-32">
                 {evolutionData.map((month, index) => {
-                  const maxValue = Math.max(...evolutionData.map(m => m.engagements || 0));
+                  const maxValue = Math.max(...evolutionData.map((m) => m.engagements || 0));
                   const height = maxValue > 0 ? ((month.engagements || 0) / maxValue) * 100 : 0;
                   return (
                     <div key={index} className="flex-1 flex flex-col items-center gap-1">
                       <div
                         className={cn(
-                          "w-full rounded-t transition-all",
-                          index === currentMonth ? "bg-emerald-500" : "bg-muted-foreground/30"
+                          'w-full rounded-t transition-all',
+                          index === currentMonth ? 'bg-emerald-500' : 'bg-muted-foreground/30'
                         )}
                         style={{ height: `${Math.max(height, 4)}%` }}
                       />
-                      <span className="text-[10px] text-muted-foreground">
-                        {month.mois_nom}
-                      </span>
+                      <span className="text-[10px] text-muted-foreground">{month.mois_nom}</span>
                     </div>
                   );
                 })}
@@ -254,15 +249,16 @@ export function DashboardAnalytics({
         <CardContent>
           <div className="space-y-4">
             {topDirections.map((dir, index) => {
-              const percent = totalStats.totalEngagements > 0
-                ? Math.round((dir.total_engagements / totalStats.totalEngagements) * 100)
-                : 0;
+              const percent =
+                totalStats.totalEngagements > 0
+                  ? Math.round((dir.total_engagements / totalStats.totalEngagements) * 100)
+                  : 0;
               const colors = [
-                "bg-emerald-500",
-                "bg-blue-500",
-                "bg-purple-500",
-                "bg-orange-500",
-                "bg-pink-500",
+                'bg-emerald-500',
+                'bg-blue-500',
+                'bg-purple-500',
+                'bg-orange-500',
+                'bg-pink-500',
               ];
               return (
                 <div key={dir.direction_code} className="space-y-2">
@@ -280,7 +276,7 @@ export function DashboardAnalytics({
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div
-                      className={cn("h-full rounded-full transition-all", colors[index])}
+                      className={cn('h-full rounded-full transition-all', colors[index])}
                       style={{ width: `${percent}%` }}
                     />
                   </div>
@@ -300,27 +296,19 @@ export function DashboardAnalytics({
           <CardContent>
             <div className="grid gap-4 md:grid-cols-4">
               <div className="text-center p-4 bg-emerald-500/10 rounded-lg">
-                <div className="text-2xl font-bold text-emerald-600">
-                  {kpis.notes_sef.total}
-                </div>
+                <div className="text-2xl font-bold text-emerald-600">{kpis.notes_sef.total}</div>
                 <p className="text-xs text-muted-foreground">Notes SEF</p>
               </div>
               <div className="text-center p-4 bg-blue-500/10 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">
-                  {kpis.engagements.total}
-                </div>
+                <div className="text-2xl font-bold text-blue-600">{kpis.engagements.total}</div>
                 <p className="text-xs text-muted-foreground">Engagements</p>
               </div>
               <div className="text-center p-4 bg-purple-500/10 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">
-                  {kpis.liquidations.total}
-                </div>
+                <div className="text-2xl font-bold text-purple-600">{kpis.liquidations.total}</div>
                 <p className="text-xs text-muted-foreground">Liquidations</p>
               </div>
               <div className="text-center p-4 bg-orange-500/10 rounded-lg">
-                <div className="text-2xl font-bold text-orange-600">
-                  {kpis.taux_execution}%
-                </div>
+                <div className="text-2xl font-bold text-orange-600">{kpis.taux_execution}%</div>
                 <p className="text-xs text-muted-foreground">Taux exécution</p>
               </div>
             </div>
@@ -338,7 +326,7 @@ export function DashboardAnalytics({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/etats-execution")}
+              onClick={() => navigate('/etats-execution')}
             >
               <BarChart3 className="h-4 w-4" />
               États d'Exécution
@@ -346,7 +334,7 @@ export function DashboardAnalytics({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/planification/structure")}
+              onClick={() => navigate('/planification/structure')}
             >
               <Target className="h-4 w-4" />
               Structure Budget
@@ -354,7 +342,7 @@ export function DashboardAnalytics({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/admin/journal-audit")}
+              onClick={() => navigate('/admin/journal-audit')}
             >
               <Activity className="h-4 w-4" />
               Journal Activité
@@ -362,7 +350,7 @@ export function DashboardAnalytics({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/recherche")}
+              onClick={() => navigate('/recherche')}
             >
               <Building2 className="h-4 w-4" />
               Rechercher

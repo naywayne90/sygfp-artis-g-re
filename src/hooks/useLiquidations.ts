@@ -148,7 +148,6 @@ export interface LiquidationQueryOptions {
 /** Compteurs par statut pour KPIs et onglets */
 export interface LiquidationCounts {
   total: number;
-  brouillon: number;
   certifie_sf: number;
   soumis: number;
   valide_daaf: number;
@@ -167,10 +166,18 @@ export const VALIDATION_STEPS = [
     order: 1,
     role: 'DAAF',
     label: 'Directeur Administratif et Financier',
+    shortLabel: 'Dir DAAF',
     statut: 'validé_daaf',
     visaPrefix: 'visa_daaf',
   },
-  { order: 2, role: 'DG', label: 'Directeur Général', statut: 'validé_dg', visaPrefix: 'visa_dg' },
+  {
+    order: 2,
+    role: 'DG',
+    label: 'Directeur Général',
+    shortLabel: 'DG',
+    statut: 'validé_dg',
+    visaPrefix: 'visa_dg',
+  },
 ];
 
 /** Seuil de validation DG en FCFA — au-delà, la liquidation requiert la signature DG */
@@ -508,18 +515,9 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // Generate atomic sequence number
-      const { data: seqData, error: seqError } = await supabase.rpc('get_next_sequence', {
-        p_doc_type: 'LIQ',
-        p_exercice: exercice || new Date().getFullYear(),
-        p_direction_code: null,
-        p_scope: 'global',
-      });
-
-      if (seqError) throw seqError;
-      if (!seqData || seqData.length === 0) throw new Error('Échec génération numéro');
-
-      const numero = seqData[0].full_code;
+      // Numéro auto-généré par trigger DB (format ARTI06MMYYNNNN)
+      // Le trigger trg_liquidation_arti_ref appelle generate_arti_reference(6)
+      const numero = ''; // Sera remplacé par le trigger BEFORE INSERT
 
       // Check for required documents
       const requiredDocs = DOCUMENTS_REQUIS.filter((d) => d.obligatoire).map((d) => d.code);
@@ -825,7 +823,7 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
       if (fetchError) throw fetchError;
 
       const currentStep = liquidationBefore?.current_step || 1;
-      const montant = liquidationBefore?.net_a_payer || liquidationBefore?.montant || 0;
+      const montant = liquidationBefore?.montant || 0;
       // Skip DG step if DAAF validates and amount is below threshold
       const skipDgStep = currentStep === 1 && !requiresDgValidation(montant);
       const isLastStep = skipDgStep || currentStep >= VALIDATION_STEPS.length;
@@ -1652,7 +1650,6 @@ export function useLiquidationCounts() {
       const items = data || [];
       return {
         total: items.length,
-        brouillon: items.filter((i) => i.statut === 'soumis').length,
         certifie_sf: items.filter((i) => i.statut === 'certifié_sf').length,
         soumis: items.filter((i) => i.statut === 'soumis').length,
         valide_daaf: items.filter((i) => i.statut === 'validé_daaf').length,

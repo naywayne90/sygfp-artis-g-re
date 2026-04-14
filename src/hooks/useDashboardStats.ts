@@ -188,10 +188,11 @@ export function useDashboardStats() {
           ?.filter((r) => r.statut === 'paye')
           .reduce((sum, r) => sum + (r.montant || 0), 0) || 0;
 
-      // Fetch marches stats
+      // Fetch marches stats (filtre par exercice)
       const { data: marches, error: marchesError } = await supabase
         .from('marches')
-        .select('id, statut');
+        .select('id, statut')
+        .eq('exercice', exercice);
 
       if (marchesError) throw marchesError;
 
@@ -637,8 +638,7 @@ export function useDashboardDirectionStats(directionId: string | null) {
   const missionsQuery = useQuery({
     queryKey: ['dashboard-missions-direction', exerciceId, directionId],
     queryFn: async (): Promise<MissionStats[]> => {
-      const { data: missions } = await (supabase
-        .from('missions') as any)
+      const { data: missions } = await (supabase.from('missions') as any)
         .select('id, code, libelle')
         .eq('direction_id', directionId!)
         .order('code');

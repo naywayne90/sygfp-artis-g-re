@@ -1,15 +1,15 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useAuditLog } from "@/hooks/useAuditLog";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 export interface WorkflowInstance {
   id: string;
   dossier_id: string;
   etape_code: string;
   entity_id: string | null;
-  statut: "brouillon" | "soumis" | "a_valider" | "valide" | "rejete" | "annule" | "differe";
+  statut: 'soumis' | 'a_valider' | 'valide' | 'rejete' | 'annule' | 'differe';
   assigned_to: string | null;
   date_debut: string;
   date_fin: string | null;
@@ -41,13 +41,14 @@ export function useWorkflowDossier(dossierId: string | undefined) {
 
   // Récupérer les instances de workflow pour ce dossier
   const instances = useQuery({
-    queryKey: ["workflow-instances", dossierId],
+    queryKey: ['workflow-instances', dossierId],
     queryFn: async () => {
       if (!dossierId) return [];
-      
+
       const { data, error } = await supabase
-        .from("workflow_instances")
-        .select(`
+        .from('workflow_instances')
+        .select(
+          `
           *,
           workflow_etapes (
             code,
@@ -55,9 +56,10 @@ export function useWorkflowDossier(dossierId: string | undefined) {
             ordre,
             description
           )
-        `)
-        .eq("dossier_id", dossierId)
-        .order("created_at", { ascending: true });
+        `
+        )
+        .eq('dossier_id', dossierId)
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
       return data;
@@ -67,12 +69,13 @@ export function useWorkflowDossier(dossierId: string | undefined) {
 
   // Récupérer la progression complète du dossier via la fonction RPC
   const progress = useQuery({
-    queryKey: ["workflow-progress", dossierId],
+    queryKey: ['workflow-progress', dossierId],
     queryFn: async () => {
       if (!dossierId) return [];
-      
-      const { data, error } = await supabase
-        .rpc("get_dossier_workflow_progress", { p_dossier_id: dossierId });
+
+      const { data, error } = await supabase.rpc('get_dossier_workflow_progress', {
+        p_dossier_id: dossierId,
+      });
 
       if (error) throw error;
       return data as WorkflowProgress[];
@@ -82,12 +85,13 @@ export function useWorkflowDossier(dossierId: string | undefined) {
 
   // Récupérer l'étape courante
   const currentStep = useQuery({
-    queryKey: ["workflow-current-step", dossierId],
+    queryKey: ['workflow-current-step', dossierId],
     queryFn: async () => {
       if (!dossierId) return null;
-      
-      const { data, error } = await supabase
-        .rpc("get_dossier_current_step", { p_dossier_id: dossierId });
+
+      const { data, error } = await supabase.rpc('get_dossier_current_step', {
+        p_dossier_id: dossierId,
+      });
 
       if (error) throw error;
       return data?.[0] || null;
@@ -108,12 +112,12 @@ export function useWorkflowDossier(dossierId: string | undefined) {
       assignedTo?: string;
       commentaire?: string;
     }) => {
-      if (!dossierId) throw new Error("Dossier ID requis");
+      if (!dossierId) throw new Error('Dossier ID requis');
 
       const { data: user } = await supabase.auth.getUser();
-      
+
       const { data, error } = await supabase
-        .from("workflow_instances")
+        .from('workflow_instances')
         .insert({
           dossier_id: dossierId,
           etape_code: etapeCode,
@@ -128,25 +132,25 @@ export function useWorkflowDossier(dossierId: string | undefined) {
       if (error) throw error;
 
       await logAction({
-        entityType: "workflow_instance",
+        entityType: 'workflow_instance',
         entityId: data.id,
-        action: "create",
+        action: 'create',
         newValues: data,
       });
-      
+
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workflow-instances", dossierId] });
-      queryClient.invalidateQueries({ queryKey: ["workflow-progress", dossierId] });
-      queryClient.invalidateQueries({ queryKey: ["workflow-current-step", dossierId] });
-      toast({ title: "Étape créée", description: "L'étape workflow a été initialisée." });
+      queryClient.invalidateQueries({ queryKey: ['workflow-instances', dossierId] });
+      queryClient.invalidateQueries({ queryKey: ['workflow-progress', dossierId] });
+      queryClient.invalidateQueries({ queryKey: ['workflow-current-step', dossierId] });
+      toast({ title: 'Étape créée', description: "L'étape workflow a été initialisée." });
     },
     onError: (error) => {
-      toast({ 
-        title: "Erreur", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: 'Erreur',
+        description: error.message,
+        variant: 'destructive',
       });
     },
   });
@@ -159,13 +163,13 @@ export function useWorkflowDossier(dossierId: string | undefined) {
       commentaire,
     }: {
       instanceId: string;
-      newStatus: WorkflowInstance["statut"];
+      newStatus: WorkflowInstance['statut'];
       commentaire?: string;
     }) => {
       const { data: oldData } = await supabase
-        .from("workflow_instances")
+        .from('workflow_instances')
         .select()
-        .eq("id", instanceId)
+        .eq('id', instanceId)
         .single();
 
       const updates: Partial<WorkflowInstance> = {
@@ -174,40 +178,40 @@ export function useWorkflowDossier(dossierId: string | undefined) {
       };
 
       // Si validé, ajouter la date de fin
-      if (newStatus === "valide") {
+      if (newStatus === 'valide') {
         updates.date_fin = new Date().toISOString();
       }
 
       const { data, error } = await supabase
-        .from("workflow_instances")
+        .from('workflow_instances')
         .update(updates)
-        .eq("id", instanceId)
+        .eq('id', instanceId)
         .select()
         .single();
 
       if (error) throw error;
 
       await logAction({
-        entityType: "workflow_instance",
+        entityType: 'workflow_instance',
         entityId: instanceId,
-        action: "update",
+        action: 'update',
         oldValues: oldData,
         newValues: data,
       });
-      
+
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workflow-instances", dossierId] });
-      queryClient.invalidateQueries({ queryKey: ["workflow-progress", dossierId] });
-      queryClient.invalidateQueries({ queryKey: ["workflow-current-step", dossierId] });
-      toast({ title: "Statut mis à jour" });
+      queryClient.invalidateQueries({ queryKey: ['workflow-instances', dossierId] });
+      queryClient.invalidateQueries({ queryKey: ['workflow-progress', dossierId] });
+      queryClient.invalidateQueries({ queryKey: ['workflow-current-step', dossierId] });
+      toast({ title: 'Statut mis à jour' });
     },
     onError: (error) => {
-      toast({ 
-        title: "Erreur", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: 'Erreur',
+        description: error.message,
+        variant: 'destructive',
       });
     },
   });
@@ -215,34 +219,34 @@ export function useWorkflowDossier(dossierId: string | undefined) {
   // Avancer à l'étape suivante
   const advanceToNextStep = useMutation({
     mutationFn: async (nextEtapeCode: string) => {
-      if (!dossierId) throw new Error("Dossier ID requis");
+      if (!dossierId) throw new Error('Dossier ID requis');
 
       // D'abord valider l'étape courante si elle existe
       const currentStepData = currentStep.data;
       if (currentStepData) {
         const { data: currentInstance } = await supabase
-          .from("workflow_instances")
-          .select("id")
-          .eq("dossier_id", dossierId)
-          .eq("etape_code", currentStepData.etape_code)
+          .from('workflow_instances')
+          .select('id')
+          .eq('dossier_id', dossierId)
+          .eq('etape_code', currentStepData.etape_code)
           .single();
 
         if (currentInstance) {
           await supabase
-            .from("workflow_instances")
-            .update({ 
-              statut: "valide", 
-              date_fin: new Date().toISOString() 
+            .from('workflow_instances')
+            .update({
+              statut: 'valide',
+              date_fin: new Date().toISOString(),
             })
-            .eq("id", currentInstance.id);
+            .eq('id', currentInstance.id);
         }
       }
 
       // Créer la nouvelle étape
       const { data: user } = await supabase.auth.getUser();
-      
+
       const { data, error } = await supabase
-        .from("workflow_instances")
+        .from('workflow_instances')
         .insert({
           dossier_id: dossierId,
           etape_code: nextEtapeCode,
@@ -255,16 +259,16 @@ export function useWorkflowDossier(dossierId: string | undefined) {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workflow-instances", dossierId] });
-      queryClient.invalidateQueries({ queryKey: ["workflow-progress", dossierId] });
-      queryClient.invalidateQueries({ queryKey: ["workflow-current-step", dossierId] });
+      queryClient.invalidateQueries({ queryKey: ['workflow-instances', dossierId] });
+      queryClient.invalidateQueries({ queryKey: ['workflow-progress', dossierId] });
+      queryClient.invalidateQueries({ queryKey: ['workflow-current-step', dossierId] });
       toast({ title: "Passage à l'étape suivante" });
     },
     onError: (error) => {
-      toast({ 
-        title: "Erreur", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: 'Erreur',
+        description: error.message,
+        variant: 'destructive',
       });
     },
   });

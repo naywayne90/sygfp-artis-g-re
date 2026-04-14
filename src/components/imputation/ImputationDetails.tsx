@@ -18,6 +18,7 @@ import {
   Send,
 } from 'lucide-react';
 import { Imputation } from '@/hooks/useImputations';
+import { formatCurrency } from '@/lib/utils';
 
 interface ImputationDetailsProps {
   imputation: Imputation;
@@ -65,9 +66,6 @@ export function ImputationDetails({
   onGoToDossier,
   canValidate = false,
 }: ImputationDetailsProps) {
-  const formatMontant = (montant: number) =>
-    new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -136,7 +134,9 @@ export function ImputationDetails({
 
             <div>
               <span className="text-muted-foreground text-sm">Montant:</span>
-              <p className="text-2xl font-bold text-primary">{formatMontant(imputation.montant)}</p>
+              <p className="text-2xl font-bold text-primary">
+                {formatCurrency(imputation.montant)}
+              </p>
             </div>
 
             {imputation.commentaire && (

@@ -1,13 +1,16 @@
-// @ts-nocheck
-import { useState, useMemo } from "react";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useBudgetLines, BudgetLineWithRelations, getDisplayBudgetCode } from "@/hooks/useBudgetLines";
-import { useBudgetHistory } from "@/hooks/useBudgetTransfers";
-import { useDirections } from "@/hooks/useDirections";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useState, useMemo } from 'react';
+import { useExercice } from '@/contexts/ExerciceContext';
+import {
+  useBudgetLines,
+  BudgetLineWithRelations,
+  getDisplayBudgetCode,
+} from '@/hooks/useBudgetLines';
+import { useBudgetHistory } from '@/hooks/useBudgetTransfers';
+import { useDirections } from '@/hooks/useDirections';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -15,27 +18,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/select';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Search,
   ChevronDown,
@@ -49,10 +43,11 @@ import {
   TrendingUp,
   TrendingDown,
   Wallet,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import * as XLSX from "xlsx";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import * as XLSX from 'xlsx';
+import { formatCurrency } from '@/lib/utils';
 
 // Types for grouped view
 interface GroupedBudget {
@@ -71,24 +66,19 @@ interface GroupedBudget {
 
 export default function ListeBudget() {
   const { exercice } = useExercice();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [directionFilter, setDirectionFilter] = useState<string>("all");
-  const [statutFilter, setStatutFilter] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<"list" | "grouped">("list");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [directionFilter, setDirectionFilter] = useState<string>('all');
+  const [statutFilter, setStatutFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'list' | 'grouped'>('list');
   const [selectedLine, setSelectedLine] = useState<BudgetLineWithRelations | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const { directions } = useDirections();
   const { budgetLines, isLoading, _totals } = useBudgetLines({
-    direction_id: directionFilter !== "all" ? directionFilter : undefined,
-    statut: statutFilter !== "all" ? statutFilter : undefined,
+    direction_id: directionFilter !== 'all' ? directionFilter : undefined,
+    statut: statutFilter !== 'all' ? statutFilter : undefined,
     keyword: searchTerm || undefined,
   });
-
-  // Format currency
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
-  };
 
   // Calculate line disponible
   const getLineDisponible = (line: BudgetLineWithRelations) => {
@@ -112,16 +102,16 @@ export default function ListeBudget() {
     const groups: Record<string, GroupedBudget> = {};
 
     budgetLines.forEach((line) => {
-      const dirKey = line.direction_id || "sans-direction";
-      const dirLabel = line.direction?.label || "Sans direction";
-      const dirCode = line.direction?.code || "XX";
+      const dirKey = line.direction_id || 'sans-direction';
+      const dirLabel = line.direction?.label || 'Sans direction';
+      const dirCode = line.direction?.code || 'XX';
 
       if (!groups[dirKey]) {
         groups[dirKey] = {
           id: dirKey,
           code: dirCode,
           label: dirLabel,
-          level: "direction",
+          level: 'direction',
           dotation: 0,
           engage: 0,
           liquide: 0,
@@ -158,28 +148,29 @@ export default function ListeBudget() {
     if (!budgetLines || budgetLines.length === 0) return;
 
     const exportData = budgetLines.map((line) => ({
-      "Code budgétaire": getDisplayBudgetCode(line).code,
+      'Code budgétaire': getDisplayBudgetCode(line).code,
       Libellé: line.label,
-      Direction: line.direction?.label || "-",
-      "Dotation initiale": line.dotation_initiale || 0,
-      "Total engagé": line.total_engage || 0,
-      "Total liquidé": line.total_liquide || 0,
-      "Total ordonnancé": line.total_ordonnance || 0,
-      "Total payé": line.total_paye || 0,
+      Direction: line.direction?.label || '-',
+      'Dotation initiale': line.dotation_initiale || 0,
+      'Total engagé': line.total_engage || 0,
+      'Total liquidé': line.total_liquide || 0,
+      'Total ordonnancé': line.total_ordonnance || 0,
+      'Total payé': line.total_paye || 0,
       Disponible: getLineDisponible(line),
-      "Consommation (%)": getConsommationPct(line),
-      Statut: line.statut || "actif",
+      'Consommation (%)': getConsommationPct(line),
+      Statut: line.statut || 'actif',
     }));
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(exportData);
-    XLSX.utils.book_append_sheet(wb, ws, "Budget");
+    XLSX.utils.book_append_sheet(wb, ws, 'Budget');
     XLSX.writeFile(wb, `budget_${exercice}.xlsx`);
   };
 
   // Stats
   const stats = useMemo(() => {
-    if (!budgetLines) return { totalDotation: 0, totalEngage: 0, totalDisponible: 0, lignesCount: 0 };
+    if (!budgetLines)
+      return { totalDotation: 0, totalEngage: 0, totalDisponible: 0, lignesCount: 0 };
 
     return {
       totalDotation: budgetLines.reduce((s, l) => s + (l.dotation_initiale || 0), 0),
@@ -218,7 +209,7 @@ export default function ListeBudget() {
               <Wallet className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-muted-foreground">Dotation totale</p>
-                <p className="text-lg font-bold">{formatMontant(stats.totalDotation)}</p>
+                <p className="text-lg font-bold">{formatCurrency(stats.totalDotation)}</p>
               </div>
             </div>
           </CardContent>
@@ -229,7 +220,7 @@ export default function ListeBudget() {
               <TrendingDown className="h-5 w-5 text-orange-500" />
               <div>
                 <p className="text-sm text-muted-foreground">Total engagé</p>
-                <p className="text-lg font-bold">{formatMontant(stats.totalEngage)}</p>
+                <p className="text-lg font-bold">{formatCurrency(stats.totalEngage)}</p>
               </div>
             </div>
           </CardContent>
@@ -240,7 +231,7 @@ export default function ListeBudget() {
               <TrendingUp className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-muted-foreground">Disponible</p>
-                <p className="text-lg font-bold">{formatMontant(stats.totalDisponible)}</p>
+                <p className="text-lg font-bold">{formatCurrency(stats.totalDisponible)}</p>
               </div>
             </div>
           </CardContent>
@@ -301,16 +292,16 @@ export default function ListeBudget() {
 
             <div className="flex gap-2 border rounded-md p-1">
               <Button
-                variant={viewMode === "list" ? "secondary" : "ghost"}
+                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                 size="sm"
-                onClick={() => setViewMode("list")}
+                onClick={() => setViewMode('list')}
               >
                 <List className="h-4 w-4" />
               </Button>
               <Button
-                variant={viewMode === "grouped" ? "secondary" : "ghost"}
+                variant={viewMode === 'grouped' ? 'secondary' : 'ghost'}
                 size="sm"
-                onClick={() => setViewMode("grouped")}
+                onClick={() => setViewMode('grouped')}
               >
                 <BarChart3 className="h-4 w-4" />
               </Button>
@@ -320,7 +311,7 @@ export default function ListeBudget() {
       </Card>
 
       {/* Content */}
-      {viewMode === "list" ? (
+      {viewMode === 'list' ? (
         <Card>
           <CardContent className="pt-4">
             <ScrollArea className="h-[600px]">
@@ -364,18 +355,18 @@ export default function ListeBudget() {
                             {line.label}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">
-                              {line.direction?.code || "-"}
-                            </Badge>
+                            <Badge variant="outline">{line.direction?.code || '-'}</Badge>
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            {formatMontant(line.dotation_initiale || 0)}
+                            {formatCurrency(line.dotation_initiale || 0)}
                           </TableCell>
                           <TableCell className="text-right text-orange-600">
-                            {formatMontant(line.total_engage || 0)}
+                            {formatCurrency(line.total_engage || 0)}
                           </TableCell>
-                          <TableCell className={`text-right font-medium ${disponible < 0 ? "text-red-600" : "text-green-600"}`}>
-                            {formatMontant(disponible)}
+                          <TableCell
+                            className={`text-right font-medium ${disponible < 0 ? 'text-red-600' : 'text-green-600'}`}
+                          >
+                            {formatCurrency(disponible)}
                           </TableCell>
                           <TableCell className="text-center">
                             <div className="flex items-center gap-2">
@@ -383,10 +374,10 @@ export default function ListeBudget() {
                                 <div
                                   className={`h-full ${
                                     consoPct > 90
-                                      ? "bg-red-500"
+                                      ? 'bg-red-500'
                                       : consoPct > 70
-                                      ? "bg-orange-500"
-                                      : "bg-green-500"
+                                        ? 'bg-orange-500'
+                                        : 'bg-green-500'
                                   }`}
                                   style={{ width: `${Math.min(consoPct, 100)}%` }}
                                 />
@@ -397,22 +388,18 @@ export default function ListeBudget() {
                           <TableCell>
                             <Badge
                               variant={
-                                line.statut === "valide"
-                                  ? "default"
-                                  : line.statut === "cloture"
-                                  ? "secondary"
-                                  : "outline"
+                                line.statut === 'valide'
+                                  ? 'default'
+                                  : line.statut === 'cloture'
+                                    ? 'secondary'
+                                    : 'outline'
                               }
                             >
-                              {line.statut || "actif"}
+                              {line.statut || 'actif'}
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedLine(line)}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => setSelectedLine(line)}>
                               <Eye className="h-4 w-4" />
                             </Button>
                           </TableCell>
@@ -451,16 +438,20 @@ export default function ListeBudget() {
                         <div className="flex items-center gap-6 text-sm">
                           <div>
                             <span className="text-muted-foreground">Dotation: </span>
-                            <span className="font-medium">{formatMontant(group.dotation)}</span>
+                            <span className="font-medium">{formatCurrency(group.dotation)}</span>
                           </div>
                           <div>
                             <span className="text-muted-foreground">Engagé: </span>
-                            <span className="font-medium text-orange-600">{formatMontant(group.engage)}</span>
+                            <span className="font-medium text-orange-600">
+                              {formatCurrency(group.engage)}
+                            </span>
                           </div>
                           <div>
                             <span className="text-muted-foreground">Disponible: </span>
-                            <span className={`font-medium ${group.disponible < 0 ? "text-red-600" : "text-green-600"}`}>
-                              {formatMontant(group.disponible)}
+                            <span
+                              className={`font-medium ${group.disponible < 0 ? 'text-red-600' : 'text-green-600'}`}
+                            >
+                              {formatCurrency(group.disponible)}
                             </span>
                           </div>
                         </div>
@@ -481,10 +472,16 @@ export default function ListeBudget() {
                               <span className="truncate max-w-[300px]">{line.label}</span>
                             </div>
                             <div className="flex items-center gap-4 text-sm">
-                              <span>{formatMontant(line.dotation_initiale || 0)}</span>
-                              <span className="text-orange-600">{formatMontant(line.total_engage || 0)}</span>
-                              <span className={getLineDisponible(line) < 0 ? "text-red-600" : "text-green-600"}>
-                                {formatMontant(getLineDisponible(line))}
+                              <span>{formatCurrency(line.dotation_initiale || 0)}</span>
+                              <span className="text-orange-600">
+                                {formatCurrency(line.total_engage || 0)}
+                              </span>
+                              <span
+                                className={
+                                  getLineDisponible(line) < 0 ? 'text-red-600' : 'text-green-600'
+                                }
+                              >
+                                {formatCurrency(getLineDisponible(line))}
                               </span>
                               <Eye className="h-4 w-4 text-muted-foreground" />
                             </div>
@@ -562,7 +559,7 @@ function BudgetLineDetail({
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Direction</p>
-                <p>{line.direction?.label || "-"}</p>
+                <p>{line.direction?.label || '-'}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Niveau</p>
@@ -570,27 +567,27 @@ function BudgetLineDetail({
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Objectif stratégique</p>
-                <p>{line.objectif_strategique?.libelle || "-"}</p>
+                <p>{line.objectif_strategique?.libelle || '-'}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Mission</p>
-                <p>{line.mission?.libelle || "-"}</p>
+                <p>{line.mission?.libelle || '-'}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Action</p>
-                <p>{line.action?.libelle || "-"}</p>
+                <p>{line.action?.libelle || '-'}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Activité</p>
-                <p>{line.activite?.libelle || "-"}</p>
+                <p>{line.activite?.libelle || '-'}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Source financement</p>
-                <p>{line.source_financement || "-"}</p>
+                <p>{line.source_financement || '-'}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Statut</p>
-                <Badge>{line.statut || "actif"}</Badge>
+                <Badge>{line.statut || 'actif'}</Badge>
               </div>
             </div>
           </TabsContent>
@@ -605,13 +602,15 @@ function BudgetLineDetail({
                   <div>
                     <p className="text-sm text-muted-foreground">Dotation initiale</p>
                     <p className="text-xl font-bold">
-                      {new Intl.NumberFormat("fr-FR").format(line.dotation_initiale || 0)} FCFA
+                      {new Intl.NumberFormat('fr-FR').format(line.dotation_initiale || 0)} FCFA
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Disponible</p>
-                    <p className={`text-xl font-bold ${disponible < 0 ? "text-red-600" : "text-green-600"}`}>
-                      {new Intl.NumberFormat("fr-FR").format(disponible)} FCFA
+                    <p
+                      className={`text-xl font-bold ${disponible < 0 ? 'text-red-600' : 'text-green-600'}`}
+                    >
+                      {new Intl.NumberFormat('fr-FR').format(disponible)} FCFA
                     </p>
                   </div>
                 </div>
@@ -622,7 +621,11 @@ function BudgetLineDetail({
                     <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
                       <div
                         className={`h-full ${
-                          consoPct > 90 ? "bg-red-500" : consoPct > 70 ? "bg-orange-500" : "bg-green-500"
+                          consoPct > 90
+                            ? 'bg-red-500'
+                            : consoPct > 70
+                              ? 'bg-orange-500'
+                              : 'bg-green-500'
                         }`}
                         style={{ width: `${Math.min(consoPct, 100)}%` }}
                       />
@@ -635,25 +638,25 @@ function BudgetLineDetail({
                   <div>
                     <p className="text-sm text-muted-foreground">Total engagé</p>
                     <p className="font-medium text-orange-600">
-                      {new Intl.NumberFormat("fr-FR").format(line.total_engage || 0)} FCFA
+                      {new Intl.NumberFormat('fr-FR').format(line.total_engage || 0)} FCFA
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total liquidé</p>
                     <p className="font-medium">
-                      {new Intl.NumberFormat("fr-FR").format(line.total_liquide || 0)} FCFA
+                      {new Intl.NumberFormat('fr-FR').format(line.total_liquide || 0)} FCFA
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total ordonnancé</p>
                     <p className="font-medium">
-                      {new Intl.NumberFormat("fr-FR").format(line.total_ordonnance || 0)} FCFA
+                      {new Intl.NumberFormat('fr-FR').format(line.total_ordonnance || 0)} FCFA
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total payé</p>
                     <p className="font-medium text-green-600">
-                      {new Intl.NumberFormat("fr-FR").format(line.total_paye || 0)} FCFA
+                      {new Intl.NumberFormat('fr-FR').format(line.total_paye || 0)} FCFA
                     </p>
                   </div>
                 </div>
@@ -676,13 +679,15 @@ function BudgetLineDetail({
                         <div className="flex items-center justify-between">
                           <Badge variant="outline">{h.event_type}</Badge>
                           <span className="text-xs text-muted-foreground">
-                            {format(new Date(h.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
+                            {format(new Date(h.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
                           </span>
                         </div>
                         {h.delta !== 0 && (
-                          <p className={`text-sm font-medium mt-1 ${h.delta > 0 ? "text-green-600" : "text-red-600"}`}>
-                            {h.delta > 0 ? "+" : ""}
-                            {new Intl.NumberFormat("fr-FR").format(h.delta)} FCFA
+                          <p
+                            className={`text-sm font-medium mt-1 ${h.delta > 0 ? 'text-green-600' : 'text-red-600'}`}
+                          >
+                            {h.delta > 0 ? '+' : ''}
+                            {new Intl.NumberFormat('fr-FR').format(h.delta)} FCFA
                           </p>
                         )}
                         {h.commentaire && (

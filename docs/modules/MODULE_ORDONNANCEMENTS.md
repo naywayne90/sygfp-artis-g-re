@@ -8,6 +8,18 @@ Le module **Ordonnancement** emet les ordres de paiement a partir des liquidatio
 
 **Chaine** : Note SEF > Note AEF > Imputation > Expression Besoin > Passation Marche > Engagement > Liquidation > **Ordonnancement** > Reglement
 
+## Codification ARTI
+
+| Propriété                  | Valeur                                                   |
+| -------------------------- | -------------------------------------------------------- |
+| **Code étape**             | 7 (07 en format 14 chars)                                |
+| **Sigle**                  | ORD                                                      |
+| **Format référence cible** | `ARTI07MMYYNNNN` (14 chars)                              |
+| **Exemple**                | `ARTI0702260001` = Ordonnancement n°1, février 2026      |
+| **Format actuel**          | `ORD-2026-NNNN` (via `generate_ordonnancement_numero()`) |
+| **Colonne DB**             | `ordonnancements.numero`                                 |
+| **Migration**              | Alignement vers format ARTI planifié                     |
+
 ## 2. Routes et acces
 
 | Route                                     | Page                             | Roles |

@@ -9,15 +9,12 @@ import { CompteBancaireList } from '@/components/tresorerie/CompteBancaireList';
 import { OperationTresorerieList } from '@/components/tresorerie/OperationTresorerieList';
 import { PlanTresorerie } from '@/components/tresorerie/PlanTresorerie';
 import { PaiementsAVenir } from '@/components/tresorerie/PaiementsAVenir';
+import { formatCurrency } from '@/lib/utils';
 
 export default function GestionTresorerie() {
   const { exercice: _exercice } = useExercice();
   const { stats } = useTresorerie();
   const { positionTresorerie, kpis } = usePaymentKPIs();
-
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -37,7 +34,7 @@ export default function GestionTresorerie() {
             <Wallet className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatMontant(stats.data?.soldeTotal || 0)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(stats.data?.soldeTotal || 0)}</div>
             <p className="text-xs text-muted-foreground">Trésorerie</p>
           </CardContent>
         </Card>
@@ -51,7 +48,7 @@ export default function GestionTresorerie() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">
-              +{formatMontant(stats.data?.entreeMois || 0)}
+              +{formatCurrency(stats.data?.entreeMois || 0)}
             </div>
             <p className="text-xs text-muted-foreground">Ce mois</p>
           </CardContent>
@@ -66,7 +63,7 @@ export default function GestionTresorerie() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">
-              -{formatMontant(stats.data?.sortieMois || 0)}
+              -{formatCurrency(stats.data?.sortieMois || 0)}
             </div>
             <p className="text-xs text-muted-foreground">Ce mois</p>
           </CardContent>

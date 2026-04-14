@@ -158,14 +158,19 @@ export function RBACProvider({ children }: RBACProviderProps) {
   }, [profile]);
 
   // Profils fonctionnels
+  // Note: l'enum profil_fonctionnel n'a que Admin|Validateur|Operationnel|Controleur|Auditeur
+  // Le DG a profil_fonctionnel='Validateur' + role_hierarchique='DG'
+  // On détecte donc le DG via role_hierarchique en complément
   const isAdmin = user?.profilFonctionnel === 'ADMIN' || user?.profilFonctionnel === 'Admin';
-  const isDG = user?.profilFonctionnel === 'DG';
-  const isCB = user?.profilFonctionnel === 'CB';
+  const isDG = user?.profilFonctionnel === 'DG' || user?.roleHierarchique === 'DG';
+  const isCB = user?.profilFonctionnel === 'CB' || user?.profilFonctionnel === 'Controleur';
   const isDAF = user?.profilFonctionnel === 'DAAF';
   const isTresorerie = user?.profilFonctionnel === 'TRESORERIE';
-  const isAuditeur = user?.profilFonctionnel === 'AUDITEUR';
+  const isAuditeur =
+    user?.profilFonctionnel === 'AUDITEUR' || user?.profilFonctionnel === 'Auditeur';
   const isDirecteur = user?.profilFonctionnel === 'DIRECTEUR';
-  const isOperateur = user?.profilFonctionnel === 'OPERATEUR';
+  const isOperateur =
+    user?.profilFonctionnel === 'OPERATEUR' || user?.profilFonctionnel === 'Operationnel';
 
   // Niveau hiérarchique
   const hierarchyLevel = useMemo(() => {
@@ -181,10 +186,19 @@ export function RBACProvider({ children }: RBACProviderProps) {
   const isDGHierarchique = hierarchyLevel === 5;
 
   // Vérifier l'accès à une route
+  // Le profil effectif tient compte du rôle hiérarchique :
+  //   DG → profil_fonctionnel='Validateur' mais role_hierarchique='DG' → effectif='DG'
+  const effectiveProfile = useMemo(() => {
+    if (!user) return '';
+    if (user.roleHierarchique === 'DG') return 'DG';
+    return user.profilFonctionnel;
+  }, [user]);
+
   const canAccess = (route: string): boolean => {
     if (!user) return false;
     if (isAdmin) return true;
-    return canAccessRoute(route, user.profilFonctionnel, user.roleHierarchique);
+    if (isDG) return canAccessRoute(route, 'DG', user.roleHierarchique);
+    return canAccessRoute(route, effectiveProfile, user.roleHierarchique);
   };
 
   // Vérifier si peut valider
@@ -223,7 +237,7 @@ export function RBACProvider({ children }: RBACProviderProps) {
       case 'liquidation':
         return isDAF;
       case 'ordonnancement':
-        return isDG;
+        return isDAF; // La DAAF crée, le DG signe
       case 'reglement':
         return isTresorerie;
       default:

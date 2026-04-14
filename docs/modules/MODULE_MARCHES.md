@@ -1,12 +1,25 @@
 # Module Passation de Marche — SYGFP (Etape 5/9)
 
-> Derniere mise a jour : 24/03/2026
+> Derniere mise a jour : 14/04/2026
 
 ## 1. Vue d'ensemble
 
 Le module **Passation de Marche** gere le cycle complet d'un marche public : de la publication a la signature. Il suit un workflow en 7 etapes (brouillon > publie > cloture > en_evaluation > attribue > approuve > signe). Le module est **certifie 100/100** avec 94 tests unitaires et 66 tests E2E.
 
 **Chaine** : Note SEF > Note AEF > Imputation > Expression Besoin > **Passation Marche** > Engagement > Liquidation > Ordonnancement > Reglement
+
+## Codification ARTI
+
+| Propriété            | Valeur                                                                         |
+| -------------------- | ------------------------------------------------------------------------------ |
+| **Code étape**       | 4 (04 en format 14 chars)                                                      |
+| **Sigle**            | PM                                                                             |
+| **Format référence** | `ARTI04MMYYNNNN` (14 chars)                                                    |
+| **Exemple**          | `ARTI0402260001` = Passation n°1, février 2026                                 |
+| **Colonne DB**       | `passation_marche.reference`                                                   |
+| **Génération**       | Trigger `trg_generate_passation_reference` (BEFORE INSERT)                     |
+| **Compteur**         | `arti_reference_counters` (étape=4, par mois)                                  |
+| **Note**             | Format legacy 13 chars (`ARTI4MMYYNNNN`) encore présent dans certaines données |
 
 ## 2. Routes et acces
 
@@ -107,3 +120,72 @@ Le module **Passation de Marche** gere le cycle complet d'un marche public : de 
 - **94 tests unitaires** + **66 tests E2E** Playwright
 - **Certifie 100/100** — voir `docs/CERTIFICATION_PASSATION_MARCHE.md`
 - Verification : `npx vitest run --grep "passation"`
+
+## 10. Ameliorations UX DG (14/04/2026)
+
+Ajouts **additifs** (aucune regression sur le module certifie, 94 tests passation toujours verts) visibles uniquement pour le role DG hors admin :
+
+### 10.1 KPIs DG enrichis
+
+- **KPI "Traitees"** devient cliquable > filtre vers onglet `approuve`
+- **KPI "Rejetees"** (conditionnel) : 4eme carte rouge visible si `counts.rejete > 0`, clic > onglet `rejete`
+- Les KPIs "A approuver" et "Pipeline en cours" restaient deja cliquables
+
+### 10.2 Pipeline Progress Bar
+
+Nouvelle carte `border-dashed` positionnee sous les KPIs (DG uniquement), affichant les 7 etapes du lifecycle en pastilles horizontales avec fleches :
+
+```
+Soumis (5) > Publies > Clotures > Evaluation > [Attribution] > Approuve DG > Signe
+```
+
+- Chaque pastille est cliquable > filtre l'onglet correspondant
+- L'etape `attribue` est stylee en violet avec ring pour marquer le point d'entree DG
+- Les pastilles avec count > 0 ont un fond `bg-primary/10`, les autres `bg-muted`
+- Composant : `BarChart3` + `ChevronRight` + boucle sur un array de 7 etapes dans `PassationMarche.tsx`
+
+### 10.3 Empty state enrichi ("A approuver" avec pipeline non vide)
+
+Quand `counts.attribue === 0` mais `dgPipeline > 0`, au lieu du message generique "Aucune passation", le DG voit :
+
+- Icone `Clock` violette (bg-purple-100)
+- Titre "Aucune passation en attente d'approbation"
+- Sous-titre "N passation(s) en cours dans le pipeline"
+- **Mini-funnel visuel** : liste verticale des etapes actives avec :
+  - Barre coloree (slate/cyan/indigo/amber selon l'etape)
+  - Label + description ("Soumis — En attente de publication")
+  - Badge `font-mono` avec le count
+  - Bouton cliquable > filtre vers l'onglet
+- **Destination DG** : encart avec `border-2 border-dashed border-purple-300` et label "Approbation DG > Vous"
+
+### 10.4 Empty state "tout est a jour"
+
+Quand `counts.attribue === 0` ET `dgPipeline === 0`, le DG voit un message positif :
+
+- Icone `CheckCircle2` verte
+- "Tout est a jour" en vert
+- "Aucune passation en cours dans le pipeline"
+
+### 10.5 Nouveaux imports utilises
+
+```typescript
+import {
+  ArrowRight,
+  ChevronRight,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  BarChart3,
+} from 'lucide-react';
+```
+
+### 10.6 Variables ajoutees
+
+```typescript
+const dgRejetees = counts.rejete || 0;
+```
+
+### 10.7 Fichier impacte
+
+- `src/pages/execution/PassationMarche.tsx` (seul fichier modifie, ~110 lignes ajoutees)
+- Aucune modification sur les hooks, le backend, les RLS ou les tests

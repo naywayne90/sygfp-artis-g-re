@@ -3,6 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useToast } from '@/hooks/use-toast';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useNotificationsAuto } from '@/hooks/useNotificationsAuto';
+import { formatCurrency } from '@/lib/utils';
+
+/** Profil minimal pour affichage traçabilité */
+interface ProfileRef {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+}
 
 export interface Imputation {
   id: string;
@@ -29,10 +38,21 @@ export interface Imputation {
   created_at: string;
   updated_at: string;
   submitted_at: string | null;
+  // Visa CB (étape 2)
+  vise_at: string | null;
+  vise_by: string | null;
+  // Validation DG (étape 3)
   validated_at: string | null;
+  validated_by: string | null;
+  // Rejet
   rejected_at: string | null;
+  rejected_by: string | null;
   motif_rejet: string | null;
+  // Report
+  differed_at: string | null;
+  differed_by: string | null;
   motif_differe: string | null;
+  date_differe: string | null;
   is_migrated: boolean | null;
   // Relations
   direction?: { id: string; label: string; sigle: string | null } | null;
@@ -46,11 +66,15 @@ export interface Imputation {
     total_engage: number | null;
     montant_reserve: number | null;
   } | null;
-  created_by_profile?: { id: string; first_name: string | null; last_name: string | null } | null;
-  validated_by_profile?: { id: string; first_name: string | null; last_name: string | null } | null;
+  // Profils de traçabilité
+  created_by_profile?: ProfileRef | null;
+  vise_by_profile?: ProfileRef | null;
+  validated_by_profile?: ProfileRef | null;
+  rejected_by_profile?: ProfileRef | null;
+  differed_by_profile?: ProfileRef | null;
 }
 
-export type ImputationStatus = 'brouillon' | 'a_valider' | 'valide' | 'rejete' | 'differe';
+export type ImputationStatus = 'soumis' | 'vise' | 'valide' | 'rejete' | 'differe';
 
 export interface ImputationFilters {
   statut?: ImputationStatus | ImputationStatus[];
@@ -65,6 +89,7 @@ export function useImputations(filters?: ImputationFilters) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { logAction } = useAuditLog();
+  const { notifyRole, onValidation, onRejet, onDiffere } = useNotificationsAuto();
 
   const page = filters?.page ?? 1;
   const pageSize = filters?.pageSize ?? 50;
@@ -81,50 +106,89 @@ export function useImputations(filters?: ImputationFilters) {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      let query = supabase
-        .from('imputations')
-        .select(
-          `
-          *,
-          direction:directions(id, label, sigle),
-          note_aef:notes_dg!imputations_note_aef_id_fkey(id, numero, objet),
-          budget_line:budget_lines(id, code, label, dotation_initiale, dotation_modifiee, total_engage, montant_reserve),
-          created_by_profile:profiles!imputations_created_by_fkey(id, first_name, last_name),
-          validated_by_profile:profiles!imputations_validated_by_fkey(id, first_name, last_name)
-        `,
-          { count: 'exact' }
-        )
-        .eq('exercice', exercice || new Date().getFullYear())
-        .order('created_at', { ascending: false })
-        .range(from, to);
+      // Requête avec traçabilité complète (tous les profils)
+      const fullSelect = `
+        *,
+        direction:directions(id, label, sigle),
+        note_aef:notes_dg!imputations_note_aef_id_fkey(id, numero, objet),
+        budget_line:budget_lines(id, code, label, dotation_initiale, dotation_modifiee, total_engage, montant_reserve),
+        created_by_profile:profiles!imputations_created_by_fkey(id, first_name, last_name),
+        vise_by_profile:profiles!imputations_vise_by_fkey(id, first_name, last_name),
+        validated_by_profile:profiles!imputations_validated_by_fkey(id, first_name, last_name),
+        rejected_by_profile:profiles!imputations_rejected_by_fkey(id, first_name, last_name),
+        differed_by_profile:profiles!imputations_differed_by_fkey(id, first_name, last_name)
+      `;
 
-      // Filtrer par statut
-      if (filters?.statut) {
-        if (Array.isArray(filters.statut)) {
-          query = query.in('statut', filters.statut);
-        } else {
-          query = query.eq('statut', filters.statut);
+      // Fallback sans vise_by_profile (si FK non résolue)
+      const safeSelect = `
+        *,
+        direction:directions(id, label, sigle),
+        note_aef:notes_dg!imputations_note_aef_id_fkey(id, numero, objet),
+        budget_line:budget_lines(id, code, label, dotation_initiale, dotation_modifiee, total_engage, montant_reserve),
+        created_by_profile:profiles!imputations_created_by_fkey(id, first_name, last_name),
+        validated_by_profile:profiles!imputations_validated_by_fkey(id, first_name, last_name),
+        rejected_by_profile:profiles!imputations_rejected_by_fkey(id, first_name, last_name),
+        differed_by_profile:profiles!imputations_differed_by_fkey(id, first_name, last_name)
+      `;
+
+      const buildQuery = (selectStr: string) => {
+        let q = supabase
+          .from('imputations')
+          .select(selectStr, { count: 'exact' })
+          .eq('exercice', exercice || new Date().getFullYear())
+          .order('created_at', { ascending: false })
+          .range(from, to);
+
+        if (filters?.statut) {
+          if (Array.isArray(filters.statut)) {
+            q = q.in('statut', filters.statut);
+          } else {
+            q = q.eq('statut', filters.statut);
+          }
         }
-      }
+        if (filters?.directionId) {
+          q = q.eq('direction_id', filters.directionId);
+        }
+        if (filters?.search?.trim()) {
+          const term = `%${filters.search.trim()}%`;
+          q = q.or(`objet.ilike.${term},reference.ilike.${term},code_imputation.ilike.${term}`);
+        }
+        return q;
+      };
 
-      // Filtrer par direction
-      if (filters?.directionId) {
-        query = query.eq('direction_id', filters.directionId);
-      }
-
-      // Recherche serveur
-      if (filters?.search?.trim()) {
-        const term = `%${filters.search.trim()}%`;
-        query = query.or(
-          `objet.ilike.${term},reference.ilike.${term},code_imputation.ilike.${term}`
+      // Essayer la requête complète, fallback si FK vise_by non résolue
+      let result = await buildQuery(fullSelect);
+      if (result.error) {
+        console.warn(
+          'Requête complète échouée, fallback sans vise_by_profile:',
+          result.error.message
         );
+        result = await buildQuery(safeSelect);
+        if (result.error) throw result.error;
+
+        // Résoudre vise_by_profile manuellement
+        const items = result.data as unknown as Imputation[];
+        const viseByIds = [...new Set(items.map((i) => i.vise_by).filter(Boolean))] as string[];
+        if (viseByIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, first_name, last_name')
+            .in('id', viseByIds);
+          if (profiles) {
+            const profileMap = Object.fromEntries(profiles.map((p) => [p.id, p]));
+            items.forEach((item) => {
+              if (item.vise_by) {
+                item.vise_by_profile = profileMap[item.vise_by] || null;
+              }
+            });
+          }
+        }
+        return { items, totalCount: result.count ?? 0 };
       }
 
-      const { data, error, count } = await query;
-      if (error) throw error;
       return {
-        items: data as unknown as Imputation[],
-        totalCount: count ?? 0,
+        items: result.data as unknown as Imputation[],
+        totalCount: result.count ?? 0,
       };
     },
     enabled: !!exercice,
@@ -137,80 +201,85 @@ export function useImputations(filters?: ImputationFilters) {
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   // Compteurs par statut
-  const {
-    data: counts = { brouillon: 0, a_valider: 0, valide: 0, rejete: 0, differe: 0, total: 0 },
-  } = useQuery({
-    queryKey: ['imputations-counts', exercice],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('imputations')
-        .select('statut')
-        .eq('exercice', exercice || new Date().getFullYear());
+  const { data: counts = { soumis: 0, vise: 0, valide: 0, rejete: 0, differe: 0, total: 0 } } =
+    useQuery({
+      queryKey: ['imputations-counts', exercice],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('imputations')
+          .select('statut')
+          .eq('exercice', exercice || new Date().getFullYear());
 
-      if (error) throw error;
+        if (error) throw error;
 
-      const counts = {
-        brouillon: 0,
-        a_valider: 0,
-        valide: 0,
-        rejete: 0,
-        differe: 0,
-        total: data.length,
-      };
+        const counts = {
+          soumis: 0,
+          vise: 0,
+          valide: 0,
+          rejete: 0,
+          differe: 0,
+          total: data.length,
+        };
 
-      data.forEach((imp) => {
-        if (imp.statut in counts) {
-          counts[imp.statut as keyof typeof counts]++;
-        }
-      });
+        data.forEach((imp) => {
+          if (imp.statut in counts) {
+            counts[imp.statut as keyof typeof counts]++;
+          }
+        });
 
-      return counts;
-    },
-    enabled: !!exercice,
-    staleTime: 30_000,
-    refetchOnWindowFocus: true,
-  });
+        return counts;
+      },
+      enabled: !!exercice,
+      staleTime: 30_000,
+      refetchOnWindowFocus: true,
+    });
 
-  // Soumettre une imputation
-  const submitMutation = useMutation({
+  // Visa CB : soumis → vise (contrôle a priori du Contrôleur Budgétaire)
+  // Utilise la RPC atomique viser_imputation (verrouillage + audit côté serveur)
+  const visaMutation = useMutation({
     mutationFn: async (id: string) => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
-
-      const { data, error } = await supabase
-        .from('imputations')
-        .update({
-          statut: 'a_valider',
-          submitted_at: new Date().toISOString(),
-          submitted_by: user.id,
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
+      const { data, error } = await supabase.rpc(
+        'viser_imputation' as 'acknowledge_budget_alert',
+        { p_imputation_id: id } as never
+      );
       if (error) throw error;
-
-      await logAction({
-        entityType: 'imputation',
-        entityId: id,
-        action: 'submit',
-        newValues: { statut: 'a_valider' },
-      });
-
-      return data;
+      const result = data as unknown as {
+        success: boolean;
+        error?: string;
+        reference?: string;
+        montant?: number;
+        [key: string]: unknown;
+      };
+      if (!result.success) throw new Error(result.error || 'Visa échoué');
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['imputations'] });
       queryClient.invalidateQueries({ queryKey: ['imputations-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
       toast({
-        title: 'Imputation soumise',
-        description: "L'imputation a été soumise pour validation.",
+        title: 'Visa CB accordé',
+        description:
+          "L'imputation a reçu le visa du Contrôleur Budgétaire. En attente de validation DG.",
+      });
+      // Notifier le DG qu'une imputation est prête pour validation
+      const ref = typeof result.reference === 'string' ? result.reference : '';
+      const montant = typeof result.montant === 'number' ? result.montant : 0;
+      notifyRole({
+        type: 'dossier_a_valider',
+        title: 'Imputation visée — à valider',
+        message: `L'imputation ${ref} (${formatCurrency(montant)}) a reçu le visa du CB et nécessite votre validation.`,
+        entityType: 'imputation',
+        entityId:
+          typeof result === 'object' && result !== null
+            ? String((result as Record<string, unknown>).imputation_id || '')
+            : '',
+        isUrgent: false,
+        recipientRole: 'DG',
       });
     },
     onError: (error: Error) => {
-      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+      toast({ title: 'Erreur visa', description: error.message, variant: 'destructive' });
     },
   });
 
@@ -240,11 +309,25 @@ export function useImputations(filters?: ImputationFilters) {
       queryClient.invalidateQueries({ queryKey: ['budget-line-detail'] });
       queryClient.invalidateQueries({ queryKey: ['budget-impact-preview'] });
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
       const montant = typeof result.montant === 'number' ? result.montant : 0;
       const disponible = typeof result.disponible_apres === 'number' ? result.disponible_apres : 0;
+      const ref = typeof result.reference === 'string' ? result.reference : '';
       toast({
         title: 'Imputation validée',
-        description: `${new Intl.NumberFormat('fr-FR').format(montant)} FCFA réservés. Disponible: ${new Intl.NumberFormat('fr-FR').format(disponible)} FCFA`,
+        description: `${formatCurrency(montant)} réservés. Disponible: ${formatCurrency(disponible)}`,
+      });
+      // Notifier la DAAF que l'imputation est validée (peut créer EB)
+      notifyRole({
+        type: 'validation',
+        title: 'Imputation validée par le DG',
+        message: `L'imputation ${ref} (${formatCurrency(montant)}) a été validée. Vous pouvez créer l'Expression de Besoin.`,
+        entityType: 'imputation',
+        entityId:
+          typeof result === 'object' && result !== null
+            ? String((result as Record<string, unknown>).imputation_id || '')
+            : '',
+        recipientRole: 'DAAF',
       });
     },
     onError: (error: Error) => {
@@ -269,7 +352,9 @@ export function useImputations(filters?: ImputationFilters) {
           rejected_by: user.id,
         })
         .eq('id', id)
-        .select()
+        .select(
+          '*, created_by_profile:profiles!imputations_created_by_fkey(id, first_name, last_name)'
+        )
         .single();
 
       if (error) throw error;
@@ -281,12 +366,23 @@ export function useImputations(filters?: ImputationFilters) {
         newValues: { statut: 'rejete', motif },
       });
 
-      return data;
+      return data as Imputation;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['imputations'] });
       queryClient.invalidateQueries({ queryKey: ['imputations-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
       toast({ title: 'Imputation rejetée', description: "L'imputation a été rejetée." });
+      // Notifier le créateur (DAAF)
+      if (data.created_by) {
+        onRejet(
+          'Imputation',
+          data.id,
+          data.reference || data.id,
+          data.created_by,
+          data.motif_rejet || 'Rejetée par le DG'
+        );
+      }
     },
     onError: (error: Error) => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
@@ -319,7 +415,9 @@ export function useImputations(filters?: ImputationFilters) {
           differed_by: user.id,
         })
         .eq('id', id)
-        .select()
+        .select(
+          '*, created_by_profile:profiles!imputations_created_by_fkey(id, first_name, last_name)'
+        )
         .single();
 
       if (error) throw error;
@@ -331,12 +429,24 @@ export function useImputations(filters?: ImputationFilters) {
         newValues: { statut: 'differe', motif },
       });
 
-      return data;
+      return data as Imputation;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['imputations'] });
       queryClient.invalidateQueries({ queryKey: ['imputations-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
       toast({ title: 'Imputation différée', description: "L'imputation a été mise en attente." });
+      // Notifier le créateur (DAAF)
+      if (data.created_by) {
+        onDiffere(
+          'Imputation',
+          data.id,
+          data.reference || data.id,
+          data.created_by,
+          data.motif_differe || 'Différée par le DG',
+          data.date_differe || undefined
+        );
+      }
     },
     onError: (error: Error) => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
@@ -375,12 +485,12 @@ export function useImputations(filters?: ImputationFilters) {
     isLoading,
     error: error?.message || null,
     refetch,
-    submitImputation: submitMutation.mutateAsync,
+    viserImputation: visaMutation.mutateAsync,
     validateImputation: validateMutation.mutateAsync,
     rejectImputation: rejectMutation.mutateAsync,
     deferImputation: deferMutation.mutateAsync,
     deleteImputation: deleteMutation.mutateAsync,
-    isSubmitting: submitMutation.isPending,
+    isVisaing: visaMutation.isPending,
     isValidating: validateMutation.isPending,
     isRejecting: rejectMutation.isPending,
     isDeferring: deferMutation.isPending,

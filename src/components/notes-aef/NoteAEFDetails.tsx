@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
+import { formatCurrency } from '@/lib/utils';
 import {
   Building2,
   Calendar,
@@ -55,11 +56,6 @@ const getStatusBadge = (status: string | null) => {
       {variant.label}
     </Badge>
   );
-};
-
-const formatMontant = (montant: number | null) => {
-  if (!montant) return 'Non spécifié';
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
 
 export function NoteAEFDetails({ open, onOpenChange, note }: NoteAEFDetailsProps) {
@@ -239,7 +235,9 @@ export function NoteAEFDetails({ open, onOpenChange, note }: NoteAEFDetailsProps
             <div className="flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">Montant estimé:</span>
-              <span className="font-medium">{formatMontant(note.montant_estime)}</span>
+              <span className="font-medium">
+                {note.montant_estime ? formatCurrency(note.montant_estime) : 'Non spécifié'}
+              </span>
             </div>
 
             {note.type_depense && (

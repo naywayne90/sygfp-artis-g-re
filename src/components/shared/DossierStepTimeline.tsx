@@ -22,7 +22,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
 // Define the expense chain steps
@@ -272,15 +272,6 @@ export function DossierStepTimeline({
     }
   };
 
-  const formatMontant = (montant: number) => {
-    return (
-      new Intl.NumberFormat('fr-FR', {
-        notation: 'compact',
-        maximumFractionDigits: 1,
-      }).format(montant) + ' F'
-    );
-  };
-
   const handleStepClick = (etape: (typeof ETAPES_CHAINE_DEPENSE)[0], stepData?: StepData) => {
     if (onStepClick) {
       onStepClick(etape.key, stepData?.entityId);
@@ -363,7 +354,7 @@ export function DossierStepTimeline({
                         </span>
                         {showAmounts && stepData?.montant && !compact && (
                           <span className="text-[10px] text-muted-foreground">
-                            {formatMontant(stepData.montant)}
+                            {formatCurrency(stepData.montant)}
                           </span>
                         )}
                         {stepData?.date && !compact && (
@@ -392,9 +383,7 @@ export function DossierStepTimeline({
                           <p className="text-xs">Réf: {stepData.reference}</p>
                         )}
                         {stepData?.montant && (
-                          <p className="text-xs">
-                            Montant: {new Intl.NumberFormat('fr-FR').format(stepData.montant)} FCFA
-                          </p>
+                          <p className="text-xs">Montant: {formatCurrency(stepData.montant)}</p>
                         )}
                         {stepData?.date && (
                           <p className="text-xs">

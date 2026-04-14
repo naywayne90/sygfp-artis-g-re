@@ -1,62 +1,90 @@
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Upload, Download, FileSpreadsheet, Database, Building2, Target, Briefcase } from "lucide-react";
-import { BudgetImportWizard } from "@/components/import-export/BudgetImportWizard";
-import { BudgetExport } from "@/components/import-export/BudgetExport";
-import { BudgetTemplateDownload } from "@/components/budget/BudgetTemplateDownload";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Upload,
+  Download,
+  FileSpreadsheet,
+  Database,
+  Building2,
+  Target,
+  Briefcase,
+} from 'lucide-react';
+import { BudgetImportWizard } from '@/components/import-export/BudgetImportWizard';
+import { BudgetExport } from '@/components/import-export/BudgetExport';
+import { BudgetTemplateDownload } from '@/components/budget/BudgetTemplateDownload';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { toast } from 'sonner';
 
 const REFERENTIEL_TEMPLATES = [
   {
-    id: "budget",
-    label: "Lignes Budgétaires",
+    id: 'budget',
+    label: 'Lignes Budgétaires',
     icon: FileSpreadsheet,
-    description: "Structure budgétaire avec codes, libellés, dotations",
-    columns: ["code", "label", "level", "dotation_initiale", "direction_code", "os_code", "mission_code", "nbe_code", "sysco_code"],
+    description: 'Structure budgétaire avec codes, libellés, dotations',
+    columns: [
+      'code',
+      'label',
+      'level',
+      'dotation_initiale',
+      'direction_code',
+      'os_code',
+      'mission_code',
+      'nbe_code',
+      'sysco_code',
+    ],
   },
   {
-    id: "directions",
-    label: "Directions",
+    id: 'directions',
+    label: 'Directions',
     icon: Building2,
-    description: "Référentiel des directions et services",
-    columns: ["code", "label", "sigle", "responsable", "email"],
+    description: 'Référentiel des directions et services',
+    columns: ['code', 'label', 'sigle', 'responsable', 'email'],
   },
   {
-    id: "os",
-    label: "Objectifs Stratégiques",
+    id: 'os',
+    label: 'Objectifs Stratégiques',
     icon: Target,
     description: "Référentiel des OS pour l'imputation",
-    columns: ["code", "libelle", "mission_code"],
+    columns: ['code', 'libelle', 'mission_code'],
   },
   {
-    id: "missions",
-    label: "Missions",
+    id: 'missions',
+    label: 'Missions',
     icon: Briefcase,
-    description: "Référentiel des missions budgétaires",
-    columns: ["code", "libelle"],
+    description: 'Référentiel des missions budgétaires',
+    columns: ['code', 'libelle'],
   },
   {
-    id: "prestataires",
-    label: "Prestataires",
+    id: 'prestataires',
+    label: 'Prestataires',
     icon: Database,
-    description: "Référentiel des fournisseurs et prestataires",
-    columns: ["code", "raison_sociale", "nif", "rccm", "adresse", "telephone", "email", "iban", "banque"],
+    description: 'Référentiel des fournisseurs et prestataires',
+    columns: [
+      'code',
+      'raison_sociale',
+      'nif',
+      'rccm',
+      'adresse',
+      'telephone',
+      'email',
+      'iban',
+      'banque',
+    ],
   },
 ];
 
 export default function ImportExport() {
   const { exercice } = useExercice();
-  const [activeTab, setActiveTab] = useState("import");
+  const [activeTab, setActiveTab] = useState('import');
 
-  const handleDownloadTemplate = (template: typeof REFERENTIEL_TEMPLATES[0]) => {
+  const handleDownloadTemplate = (template: (typeof REFERENTIEL_TEMPLATES)[0]) => {
     // Create CSV template with headers
-    const csvContent = template.columns.join(";") + "\n";
-    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const csvContent = template.columns.join(';') + '\n';
+    const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `template_${template.id}_${exercice}.csv`;
     link.click();
@@ -100,7 +128,8 @@ export default function ImportExport() {
                 <div>
                   <CardTitle>Import de données budgétaires</CardTitle>
                   <CardDescription>
-                    Utilisez l'assistant pour importer votre structure budgétaire depuis un fichier Excel
+                    Utilisez l'assistant pour importer votre structure budgétaire depuis un fichier
+                    Excel
                   </CardDescription>
                 </div>
                 <BudgetTemplateDownload />

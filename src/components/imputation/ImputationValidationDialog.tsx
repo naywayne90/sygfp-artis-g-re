@@ -14,7 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
-import { formatMontant } from '@/lib/config/sygfp-constants';
+import { formatCurrency } from '@/lib/utils';
 import { type Imputation } from '@/hooks/useImputations';
 import { CheckCircle, AlertTriangle, Loader2, Info, ShieldAlert } from 'lucide-react';
 
@@ -111,9 +111,9 @@ export function ImputationValidationDialog({
           </AlertDialogTitle>
           <AlertDialogDescription>
             Ref: <span className="font-medium">{imputation?.reference || 'N/A'}</span>
-            {' \u2014 '}Montant:{' '}
+            {' — '}Montant:{' '}
             <span className="font-semibold text-foreground">
-              {formatMontant(imputation?.montant ?? 0)}
+              {formatCurrency(imputation?.montant ?? 0)}
             </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -173,14 +173,14 @@ export function ImputationValidationDialog({
                 {/* Dotation */}
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Dotation actuelle</span>
-                  <span className="font-mono">{formatMontant(preview.dotation ?? 0)}</span>
+                  <span className="font-mono">{formatCurrency(preview.dotation ?? 0)}</span>
                 </div>
 
                 {/* Engage */}
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Déjà engagé</span>
                   <span className="font-mono text-orange-600">
-                    {formatMontant(preview.engage ?? 0)}
+                    {formatCurrency(preview.engage ?? 0)}
                   </span>
                 </div>
 
@@ -188,7 +188,7 @@ export function ImputationValidationDialog({
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Déjà réservé</span>
                   <span className="font-mono text-orange-600">
-                    {formatMontant(preview.reserve ?? 0)}
+                    {formatCurrency(preview.reserve ?? 0)}
                   </span>
                 </div>
 
@@ -196,7 +196,7 @@ export function ImputationValidationDialog({
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Disponible avant</span>
                   <span className="font-mono font-medium">
-                    {formatMontant(preview.disponible_avant ?? 0)}
+                    {formatCurrency(preview.disponible_avant ?? 0)}
                   </span>
                 </div>
 
@@ -206,7 +206,7 @@ export function ImputationValidationDialog({
                 <div className="flex justify-between text-sm">
                   <span className="font-semibold text-primary">Montant à réserver</span>
                   <span className="font-mono font-bold text-primary">
-                    {formatMontant(imputation?.montant ?? 0)}
+                    {formatCurrency(imputation?.montant ?? 0)}
                   </span>
                 </div>
 
@@ -218,7 +218,7 @@ export function ImputationValidationDialog({
                       (preview.disponible_apres ?? 0) >= 0 ? 'text-green-600' : 'text-destructive'
                     }`}
                   >
-                    {formatMontant(preview.disponible_apres ?? 0)}
+                    {formatCurrency(preview.disponible_apres ?? 0)}
                   </span>
                 </div>
 

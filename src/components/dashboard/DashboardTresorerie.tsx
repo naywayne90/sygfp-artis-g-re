@@ -1,23 +1,17 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useTresorerieDashboard } from "@/hooks/useDashboardByRole";
-import { 
-  Wallet, 
-  CreditCard, 
-  ArrowDownRight, 
-  Clock, 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useTresorerieDashboard } from '@/hooks/useDashboardByRole';
+import {
+  Wallet,
+  CreditCard,
+  ArrowDownRight,
+  Clock,
   Calendar,
   ArrowRight,
-  CheckCircle2
-} from "lucide-react";
-import { Link } from "react-router-dom";
-
-const formatMontant = (montant: number): string => {
-  if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
-  if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
-  if (montant >= 1_000) return `${(montant / 1_000).toFixed(0)} K`;
-  return montant.toFixed(0);
-};
+  CheckCircle2,
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { formatCurrency } from '@/lib/utils';
 
 export function DashboardTresorerie() {
   const { data: stats, isLoading } = useTresorerieDashboard();
@@ -26,9 +20,15 @@ export function DashboardTresorerie() {
     return (
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-4">
-          {Array(4).fill(0).map((_, i) => (
-            <Card key={i}><CardContent className="p-6"><Skeleton className="h-20" /></CardContent></Card>
-          ))}
+          {Array(4)
+            .fill(0)
+            .map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <Skeleton className="h-20" />
+                </CardContent>
+              </Card>
+            ))}
         </div>
       </div>
     );
@@ -41,49 +41,65 @@ export function DashboardTresorerie() {
         <Link to="/ordonnancements?filter=valides">
           <Card className="hover:border-primary/30 transition-colors cursor-pointer h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Ordres à payer</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Ordres à payer
+              </CardTitle>
               <CreditCard className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.ordresPayerEnAttente || 0}</div>
               <p className="text-xs text-muted-foreground">En attente de paiement</p>
-              <p className="text-sm font-medium text-primary mt-2">{formatMontant(stats?.ordresPayerMontant || 0)} FCFA</p>
+              <p className="text-sm font-medium text-primary mt-2">
+                {formatCurrency(stats?.ordresPayerMontant || 0)}
+              </p>
             </CardContent>
           </Card>
         </Link>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Règlements du jour</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Règlements du jour
+            </CardTitle>
             <CheckCircle2 className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">{stats?.reglementsDuJour || 0}</div>
             <p className="text-xs text-muted-foreground">Paiements effectués</p>
-            <p className="text-sm font-medium mt-2">{formatMontant(stats?.reglementsMontantJour || 0)} FCFA</p>
+            <p className="text-sm font-medium mt-2">
+              {formatCurrency(stats?.reglementsMontantJour || 0)}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Règlements semaine</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Règlements semaine
+            </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.reglementsSemaine || 0}</div>
             <p className="text-xs text-muted-foreground">7 derniers jours</p>
-            <p className="text-sm font-medium mt-2">{formatMontant(stats?.reglementsMontantSemaine || 0)} FCFA</p>
+            <p className="text-sm font-medium mt-2">
+              {formatCurrency(stats?.reglementsMontantSemaine || 0)}
+            </p>
           </CardContent>
         </Card>
 
         <Link to="/reglements?filter=partiels">
           <Card className="hover:border-warning/30 transition-colors cursor-pointer h-full border-warning/20">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Partiels en attente</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Partiels en attente
+              </CardTitle>
               <Clock className="h-4 w-4 text-warning" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-warning">{stats?.reglementsPartiels || 0}</div>
+              <div className="text-2xl font-bold text-warning">
+                {stats?.reglementsPartiels || 0}
+              </div>
               <p className="text-xs text-muted-foreground">Paiements partiels</p>
             </CardContent>
           </Card>
@@ -110,7 +126,9 @@ export function DashboardTresorerie() {
                     <p className="text-xs text-muted-foreground">Paiements prévus</p>
                   </div>
                 </div>
-                <span className="text-xl font-bold">{formatMontant(stats?.previsionSorties7j || 0)}</span>
+                <span className="text-xl font-bold">
+                  {formatCurrency(stats?.previsionSorties7j || 0)}
+                </span>
               </div>
               <div className="flex items-center justify-between p-4 rounded-lg bg-warning/10">
                 <div className="flex items-center gap-3">
@@ -120,7 +138,9 @@ export function DashboardTresorerie() {
                     <p className="text-xs text-muted-foreground">Paiements prévus</p>
                   </div>
                 </div>
-                <span className="text-xl font-bold">{formatMontant(stats?.previsionSorties30j || 0)}</span>
+                <span className="text-xl font-bold">
+                  {formatCurrency(stats?.previsionSorties30j || 0)}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -138,7 +158,9 @@ export function DashboardTresorerie() {
             <div className="space-y-4">
               <div className="p-4 rounded-lg bg-primary/10">
                 <p className="text-sm text-muted-foreground">À régler</p>
-                <p className="text-3xl font-bold">{formatMontant(stats?.ordresPayerMontant || 0)}</p>
+                <p className="text-3xl font-bold">
+                  {formatCurrency(stats?.ordresPayerMontant || 0)}
+                </p>
                 <p className="text-xs text-muted-foreground">FCFA en attente</p>
               </div>
               <div className="grid grid-cols-2 gap-4">

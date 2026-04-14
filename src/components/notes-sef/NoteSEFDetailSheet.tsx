@@ -11,6 +11,7 @@ import { type NoteSEF, type NoteSEFHistory } from '@/hooks/useNotesSEF';
 import { ARTIReferenceInline } from '@/components/shared/ARTIReferenceBadge';
 import { QRCodeGenerator } from '@/components/qrcode/QRCodeGenerator';
 import { ChaineDepenseCompact } from '@/components/workflow/ChaineDepenseCompact';
+import { formatCurrency } from '@/lib/utils';
 import { formatMontant } from '@/lib/config/sygfp-constants';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';

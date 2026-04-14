@@ -16,13 +16,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const formatMontant = (montant: number): string => {
-  if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
-  if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
-  if (montant >= 1_000) return `${(montant / 1_000).toFixed(0)} K`;
-  return montant.toFixed(0);
-};
+import { formatCurrency } from '@/lib/utils';
 
 export function DashboardMoyensGen() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
@@ -166,16 +160,16 @@ export function DashboardMoyensGen() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Budget alloué</span>
-                <span className="font-medium">{formatMontant(stats?.budgetTotal || 0)}</span>
+                <span className="font-medium">{formatCurrency(stats?.budgetTotal || 0)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Engagé</span>
-                <span className="font-medium">{formatMontant(stats?.montantEngage || 0)}</span>
+                <span className="font-medium">{formatCurrency(stats?.montantEngage || 0)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Disponible</span>
                 <span className="font-medium text-success">
-                  {formatMontant(stats?.budgetDisponible || 0)}
+                  {formatCurrency(stats?.budgetDisponible || 0)}
                 </span>
               </div>
             </div>

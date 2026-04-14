@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Progress } from "@/components/ui/progress";
+import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   FileText,
   CheckCircle,
@@ -34,16 +34,17 @@ import {
   ClipboardList,
   Hash,
   FileSpreadsheet,
-  Loader2
-} from "lucide-react";
-import { Dossier, DossierEtape, DossierDocument, useDossiers } from "@/hooks/useDossiers";
-import { DossierTimeline } from "./DossierTimeline";
-import { DossierAuditLog } from "./DossierAuditLog";
-import { useExportDossierComplet } from "@/hooks/useExportDossierComplet";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useNavigate } from "react-router-dom";
-import { ARTIReferenceBadge } from "@/components/shared/ARTIReferenceBadge";
+  Loader2,
+} from 'lucide-react';
+import { Dossier, DossierEtape, DossierDocument, useDossiers } from '@/hooks/useDossiers';
+import { DossierTimeline } from './DossierTimeline';
+import { DossierAuditLog } from './DossierAuditLog';
+import { useExportDossierComplet } from '@/hooks/useExportDossierComplet';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
+import { ARTIReferenceBadge } from '@/components/shared/ARTIReferenceBadge';
+import { formatCurrency } from '@/lib/utils';
 
 interface DossierDetailsEnhancedProps {
   dossier: Dossier | null;
@@ -55,57 +56,57 @@ interface DossierDetailsEnhancedProps {
 }
 
 const ETAPE_LABELS: Record<string, string> = {
-  note_sef: "Note SEF",
-  note_aef: "Note AEF",
-  note: "Note",
-  expression_besoin: "Expression de besoin",
-  imputation: "Imputation",
-  marche: "Marché",
-  engagement: "Engagement",
-  liquidation: "Liquidation",
-  ordonnancement: "Ordonnancement",
-  reglement: "Règlement",
+  note_sef: 'Note SEF',
+  note_aef: 'Note AEF',
+  note: 'Note',
+  expression_besoin: 'Expression de besoin',
+  imputation: 'Imputation',
+  marche: 'Marché',
+  engagement: 'Engagement',
+  liquidation: 'Liquidation',
+  ordonnancement: 'Ordonnancement',
+  reglement: 'Règlement',
 };
 
 // Ordre des 8 étapes de la chaîne de dépense
 const ETAPES_CHAINE = [
-  { key: "note_sef", label: "Note SEF", icon: "📝" },
-  { key: "note_aef", label: "Note AEF", icon: "📄" },
-  { key: "imputation", label: "Imputation", icon: "🎯" },
-  { key: "marche", label: "Marché", icon: "📋" },
-  { key: "engagement", label: "Engagement", icon: "✍️" },
-  { key: "liquidation", label: "Liquidation", icon: "📊" },
-  { key: "ordonnancement", label: "Ordonnancement", icon: "📑" },
-  { key: "reglement", label: "Règlement", icon: "💰" },
+  { key: 'note_sef', label: 'Note SEF', icon: '📝' },
+  { key: 'note_aef', label: 'Note AEF', icon: '📄' },
+  { key: 'imputation', label: 'Imputation', icon: '🎯' },
+  { key: 'marche', label: 'Marché', icon: '📋' },
+  { key: 'engagement', label: 'Engagement', icon: '✍️' },
+  { key: 'liquidation', label: 'Liquidation', icon: '📊' },
+  { key: 'ordonnancement', label: 'Ordonnancement', icon: '📑' },
+  { key: 'reglement', label: 'Règlement', icon: '💰' },
 ];
 
 const STATUT_COLORS: Record<string, string> = {
-  en_cours: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  termine: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  annule: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  suspendu: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  bloque: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+  en_cours: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  termine: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  annule: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+  suspendu: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  bloque: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 };
 
 const CATEGORIE_LABELS: Record<string, string> = {
-  proforma: "Facture proforma",
-  bon_commande: "Bon de commande",
-  contrat: "Contrat",
-  pv_reception: "PV de réception",
-  facture: "Facture",
-  attestation: "Attestation",
-  autre: "Autre",
+  proforma: 'Facture proforma',
+  bon_commande: 'Bon de commande',
+  contrat: 'Contrat',
+  pv_reception: 'PV de réception',
+  facture: 'Facture',
+  attestation: 'Attestation',
+  autre: 'Autre',
 };
 
-export function DossierDetailsEnhanced({ 
-  dossier, 
-  open, 
+export function DossierDetailsEnhanced({
+  dossier,
+  open,
   onOpenChange,
   onCreateStep,
   onBlock,
-  onUnblock 
+  onUnblock,
 }: DossierDetailsEnhancedProps) {
-  const [activeTab, setActiveTab] = useState("resume");
+  const [activeTab, setActiveTab] = useState('resume');
   const [etapes, setEtapes] = useState<DossierEtape[]>([]);
   const [documents, setDocuments] = useState<DossierDocument[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -135,22 +136,14 @@ export function DossierDetailsEnhanced({
     }
   };
 
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "XOF",
-      minimumFractionDigits: 0,
-    }).format(montant);
-  };
-
   const getProgressPercent = () => {
     if (!dossier || !dossier.montant_estime || dossier.montant_estime === 0) return 0;
     return Math.min(100, (dossier.montant_ordonnance / dossier.montant_estime) * 100);
   };
 
   const getNextStep = () => {
-    const stepOrder = ["note", "engagement", "liquidation", "ordonnancement", "reglement"];
-    const currentIndex = stepOrder.indexOf(dossier?.etape_courante || "note");
+    const stepOrder = ['note', 'engagement', 'liquidation', 'ordonnancement', 'reglement'];
+    const currentIndex = stepOrder.indexOf(dossier?.etape_courante || 'note');
     if (currentIndex < stepOrder.length - 1) {
       return stepOrder[currentIndex + 1];
     }
@@ -173,7 +166,7 @@ export function DossierDetailsEnhanced({
 
   if (!dossier) return null;
 
-  const isBlocked = dossier.statut_global === "bloque";
+  const isBlocked = dossier.statut_global === 'bloque';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -183,32 +176,29 @@ export function DossierDetailsEnhanced({
             <div className="flex items-center gap-3 flex-wrap">
               {/* Référence ARTI pivot en premier si disponible */}
               {dossier.reference_pivot ? (
-                <ARTIReferenceBadge 
-                  reference={dossier.reference_pivot} 
-                  size="lg" 
-                  showIcon 
-                />
+                <ARTIReferenceBadge reference={dossier.reference_pivot} size="lg" showIcon />
               ) : (
                 <span className="font-mono text-xl text-primary font-bold">{dossier.numero}</span>
               )}
-              
+
               {/* Numéro dossier si différent de la référence */}
               {dossier.reference_pivot && (
-                <span className="text-sm text-muted-foreground font-mono">
-                  ({dossier.numero})
-                </span>
+                <span className="text-sm text-muted-foreground font-mono">({dossier.numero})</span>
               )}
-              
-              <Badge className={STATUT_COLORS[dossier.statut_global] || ""}>
+
+              <Badge className={STATUT_COLORS[dossier.statut_global] || ''}>
                 {isBlocked && <Lock className="h-3 w-3 mr-1" />}
-                {dossier.statut_global === "en_cours" ? "En cours" :
-                 dossier.statut_global === "termine" ? "Terminé" :
-                 dossier.statut_global === "annule" ? "Annulé" :
-                 dossier.statut_global === "bloque" ? "Bloqué" : "Suspendu"}
+                {dossier.statut_global === 'en_cours'
+                  ? 'En cours'
+                  : dossier.statut_global === 'termine'
+                    ? 'Terminé'
+                    : dossier.statut_global === 'annule'
+                      ? 'Annulé'
+                      : dossier.statut_global === 'bloque'
+                        ? 'Bloqué'
+                        : 'Suspendu'}
               </Badge>
-              {dossier.type_dossier && (
-                <Badge variant="outline">{dossier.type_dossier}</Badge>
-              )}
+              {dossier.type_dossier && <Badge variant="outline">{dossier.type_dossier}</Badge>}
             </div>
             <div className="flex gap-2">
               {/* Export dossier complet dropdown */}
@@ -224,11 +214,11 @@ export function DossierDetailsEnhanced({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => exportDossierComplet(dossier.id, "pdf")}>
+                  <DropdownMenuItem onClick={() => exportDossierComplet(dossier.id, 'pdf')}>
                     <FileText className="h-4 w-4 mr-2" />
                     Export PDF (Récapitulatif)
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => exportDossierComplet(dossier.id, "excel")}>
+                  <DropdownMenuItem onClick={() => exportDossierComplet(dossier.id, 'excel')}>
                     <FileSpreadsheet className="h-4 w-4 mr-2" />
                     Export Excel
                   </DropdownMenuItem>
@@ -282,25 +272,31 @@ export function DossierDetailsEnhanced({
                 <Card className="bg-muted/30">
                   <CardContent className="pt-4 text-center">
                     <p className="text-xs text-muted-foreground mb-1">Estimé</p>
-                    <p className="text-lg font-bold">{formatMontant(dossier.montant_estime)}</p>
+                    <p className="text-lg font-bold">{formatCurrency(dossier.montant_estime)}</p>
                   </CardContent>
                 </Card>
                 <Card className="bg-blue-50 dark:bg-blue-950/30">
                   <CardContent className="pt-4 text-center">
                     <p className="text-xs text-muted-foreground mb-1">Engagé</p>
-                    <p className="text-lg font-bold text-blue-600">{formatMontant(dossier.montant_engage)}</p>
+                    <p className="text-lg font-bold text-blue-600">
+                      {formatCurrency(dossier.montant_engage)}
+                    </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-orange-50 dark:bg-orange-950/30">
                   <CardContent className="pt-4 text-center">
                     <p className="text-xs text-muted-foreground mb-1">Liquidé</p>
-                    <p className="text-lg font-bold text-orange-600">{formatMontant(dossier.montant_liquide)}</p>
+                    <p className="text-lg font-bold text-orange-600">
+                      {formatCurrency(dossier.montant_liquide)}
+                    </p>
                   </CardContent>
                 </Card>
                 <Card className="bg-green-50 dark:bg-green-950/30">
                   <CardContent className="pt-4 text-center">
                     <p className="text-xs text-muted-foreground mb-1">Ordonnancé</p>
-                    <p className="text-lg font-bold text-green-600">{formatMontant(dossier.montant_ordonnance)}</p>
+                    <p className="text-lg font-bold text-green-600">
+                      {formatCurrency(dossier.montant_ordonnance)}
+                    </p>
                   </CardContent>
                 </Card>
               </div>
@@ -334,28 +330,34 @@ export function DossierDetailsEnhanced({
                     <Building2 className="h-4 w-4 text-muted-foreground mt-0.5" />
                     <div>
                       <p className="text-muted-foreground">Direction</p>
-                      <p className="font-medium">{dossier.direction?.sigle || dossier.direction?.label || "-"}</p>
+                      <p className="font-medium">
+                        {dossier.direction?.sigle || dossier.direction?.label || '-'}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <User className="h-4 w-4 text-muted-foreground mt-0.5" />
                     <div>
                       <p className="text-muted-foreground">Demandeur</p>
-                      <p className="font-medium">{dossier.demandeur?.full_name || "-"}</p>
+                      <p className="font-medium">{dossier.demandeur?.full_name || '-'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground mt-0.5" />
                     <div>
                       <p className="text-muted-foreground">Création</p>
-                      <p className="font-medium">{format(new Date(dossier.created_at), "dd/MM/yyyy", { locale: fr })}</p>
+                      <p className="font-medium">
+                        {format(new Date(dossier.created_at), 'dd/MM/yyyy', { locale: fr })}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
                     <div>
                       <p className="text-muted-foreground">Étape actuelle</p>
-                      <p className="font-medium">{ETAPE_LABELS[dossier.etape_courante] || dossier.etape_courante}</p>
+                      <p className="font-medium">
+                        {ETAPE_LABELS[dossier.etape_courante] || dossier.etape_courante}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -375,27 +377,38 @@ export function DossierDetailsEnhanced({
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
                     </div>
                   ) : etapes.length === 0 ? (
-                    <p className="text-muted-foreground text-sm text-center py-4">Aucune activité</p>
+                    <p className="text-muted-foreground text-sm text-center py-4">
+                      Aucune activité
+                    </p>
                   ) : (
                     <div className="space-y-3">
-                      {etapes.slice(-5).reverse().map((etape) => (
-                        <div key={etape.id} className="flex items-center gap-3 text-sm">
-                          <div className={`w-2 h-2 rounded-full ${
-                            etape.statut === 'valide' ? 'bg-green-500' :
-                            etape.statut === 'rejete' ? 'bg-red-500' :
-                            'bg-yellow-500'
-                          }`} />
-                          <Badge variant="outline" className="text-xs">
-                            {ETAPE_LABELS[etape.type_etape]}
-                          </Badge>
-                          <span className="text-muted-foreground">
-                            {format(new Date(etape.created_at), "dd/MM HH:mm", { locale: fr })}
-                          </span>
-                          {etape.montant > 0 && (
-                            <span className="font-medium ml-auto">{formatMontant(etape.montant)}</span>
-                          )}
-                        </div>
-                      ))}
+                      {etapes
+                        .slice(-5)
+                        .reverse()
+                        .map((etape) => (
+                          <div key={etape.id} className="flex items-center gap-3 text-sm">
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                etape.statut === 'valide'
+                                  ? 'bg-green-500'
+                                  : etape.statut === 'rejete'
+                                    ? 'bg-red-500'
+                                    : 'bg-yellow-500'
+                              }`}
+                            />
+                            <Badge variant="outline" className="text-xs">
+                              {ETAPE_LABELS[etape.type_etape]}
+                            </Badge>
+                            <span className="text-muted-foreground">
+                              {format(new Date(etape.created_at), 'dd/MM HH:mm', { locale: fr })}
+                            </span>
+                            {etape.montant > 0 && (
+                              <span className="font-medium ml-auto">
+                                {formatCurrency(etape.montant)}
+                              </span>
+                            )}
+                          </div>
+                        ))}
                     </div>
                   )}
                 </CardContent>
@@ -415,41 +428,59 @@ export function DossierDetailsEnhanced({
                 <CardContent>
                   <div className="flex items-center justify-between gap-1 overflow-x-auto pb-2">
                     {ETAPES_CHAINE.map((etapeConfig, index) => {
-                      const etapeDossier = etapes.find(e => e.type_etape === etapeConfig.key);
+                      const etapeDossier = etapes.find((e) => e.type_etape === etapeConfig.key);
                       const isCompleted = etapeDossier?.statut === 'valide';
                       const isCurrent = dossier.etape_courante === etapeConfig.key;
-                      const isPending = etapeDossier && etapeDossier.statut !== 'valide' && etapeDossier.statut !== 'rejete';
+                      const isPending =
+                        etapeDossier &&
+                        etapeDossier.statut !== 'valide' &&
+                        etapeDossier.statut !== 'rejete';
                       const isRejected = etapeDossier?.statut === 'rejete';
-                      
+
                       return (
-                        <div key={etapeConfig.key} className="flex items-center flex-1 min-w-[100px]">
+                        <div
+                          key={etapeConfig.key}
+                          className="flex items-center flex-1 min-w-[100px]"
+                        >
                           <div className="flex flex-col items-center w-full">
-                            <div className={`
+                            <div
+                              className={`
                               w-10 h-10 rounded-full flex items-center justify-center text-lg
                               transition-all duration-300
-                              ${isCompleted ? 'bg-green-500 text-white shadow-lg shadow-green-200' :
-                                isRejected ? 'bg-red-500 text-white' :
-                                isCurrent ? 'bg-primary text-primary-foreground ring-4 ring-primary/30' :
-                                isPending ? 'bg-yellow-500 text-white' :
-                                'bg-muted text-muted-foreground'}
-                            `}>
+                              ${
+                                isCompleted
+                                  ? 'bg-green-500 text-white shadow-lg shadow-green-200'
+                                  : isRejected
+                                    ? 'bg-red-500 text-white'
+                                    : isCurrent
+                                      ? 'bg-primary text-primary-foreground ring-4 ring-primary/30'
+                                      : isPending
+                                        ? 'bg-yellow-500 text-white'
+                                        : 'bg-muted text-muted-foreground'
+                              }
+                            `}
+                            >
                               {isCompleted ? <CheckCircle className="h-5 w-5" /> : etapeConfig.icon}
                             </div>
-                            <span className={`text-xs mt-1 text-center font-medium ${
-                              isCurrent ? 'text-primary' : 'text-muted-foreground'
-                            }`}>
+                            <span
+                              className={`text-xs mt-1 text-center font-medium ${
+                                isCurrent ? 'text-primary' : 'text-muted-foreground'
+                              }`}
+                            >
                               {etapeConfig.label}
                             </span>
                             {etapeDossier && (
                               <span className="text-[10px] text-muted-foreground">
-                                {format(new Date(etapeDossier.created_at), "dd/MM", { locale: fr })}
+                                {format(new Date(etapeDossier.created_at), 'dd/MM', { locale: fr })}
                               </span>
                             )}
                           </div>
                           {index < ETAPES_CHAINE.length - 1 && (
-                            <div className={`h-0.5 flex-1 mx-1 ${
-                              isCompleted ? 'bg-green-500' : 'bg-muted'
-                            }`} />
+                            <div
+                              className={`h-0.5 flex-1 mx-1 ${
+                                isCompleted ? 'bg-green-500' : 'bg-muted'
+                              }`}
+                            />
                           )}
                         </div>
                       );
@@ -467,19 +498,25 @@ export function DossierDetailsEnhanced({
                   <div className="grid grid-cols-4 gap-4 text-center text-sm mb-4 bg-muted/50 p-3 rounded-lg">
                     <div>
                       <p className="text-muted-foreground">Estimé</p>
-                      <p className="font-bold">{formatMontant(dossier.montant_estime)}</p>
+                      <p className="font-bold">{formatCurrency(dossier.montant_estime)}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Engagé</p>
-                      <p className="font-bold text-blue-600">{formatMontant(dossier.montant_engage)}</p>
+                      <p className="font-bold text-blue-600">
+                        {formatCurrency(dossier.montant_engage)}
+                      </p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Liquidé</p>
-                      <p className="font-bold text-orange-600">{formatMontant(dossier.montant_liquide)}</p>
+                      <p className="font-bold text-orange-600">
+                        {formatCurrency(dossier.montant_liquide)}
+                      </p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Payé</p>
-                      <p className="font-bold text-green-600">{formatMontant(dossier.montant_ordonnance)}</p>
+                      <p className="font-bold text-green-600">
+                        {formatCurrency(dossier.montant_ordonnance)}
+                      </p>
                     </div>
                   </div>
 
@@ -488,25 +525,49 @@ export function DossierDetailsEnhanced({
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
                     </div>
                   ) : etapes.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">Aucune étape enregistrée</p>
+                    <p className="text-muted-foreground text-center py-8">
+                      Aucune étape enregistrée
+                    </p>
                   ) : (
                     <div className="space-y-3">
                       {etapes.map((etape) => (
-                        <div key={etape.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
-                          <div className={`w-3 h-3 rounded-full ${
-                            etape.statut === 'valide' ? 'bg-green-500' :
-                            etape.statut === 'rejete' ? 'bg-red-500' :
-                            'bg-yellow-500'
-                          }`} />
-                          <Badge variant="outline">{ETAPE_LABELS[etape.type_etape] || etape.type_etape}</Badge>
+                        <div
+                          key={etape.id}
+                          className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div
+                            className={`w-3 h-3 rounded-full ${
+                              etape.statut === 'valide'
+                                ? 'bg-green-500'
+                                : etape.statut === 'rejete'
+                                  ? 'bg-red-500'
+                                  : 'bg-yellow-500'
+                            }`}
+                          />
+                          <Badge variant="outline">
+                            {ETAPE_LABELS[etape.type_etape] || etape.type_etape}
+                          </Badge>
                           <span className="text-sm text-muted-foreground">
-                            {format(new Date(etape.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
+                            {format(new Date(etape.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
                           </span>
-                          <Badge variant={etape.statut === 'valide' ? 'default' : etape.statut === 'rejete' ? 'destructive' : 'secondary'} className="ml-auto">
-                            {etape.statut === 'valide' ? 'Validé' : etape.statut === 'rejete' ? 'Rejeté' : 'En cours'}
+                          <Badge
+                            variant={
+                              etape.statut === 'valide'
+                                ? 'default'
+                                : etape.statut === 'rejete'
+                                  ? 'destructive'
+                                  : 'secondary'
+                            }
+                            className="ml-auto"
+                          >
+                            {etape.statut === 'valide'
+                              ? 'Validé'
+                              : etape.statut === 'rejete'
+                                ? 'Rejeté'
+                                : 'En cours'}
                           </Badge>
                           {etape.montant > 0 && (
-                            <span className="font-medium">{formatMontant(etape.montant)}</span>
+                            <span className="font-medium">{formatCurrency(etape.montant)}</span>
                           )}
                         </div>
                       ))}
@@ -546,7 +607,9 @@ export function DossierDetailsEnhanced({
                         </div>
                         <div>
                           <p className="text-muted-foreground">Consommé</p>
-                          <p className="font-medium text-lg text-orange-600">{formatMontant(dossier.montant_engage)}</p>
+                          <p className="font-medium text-lg text-orange-600">
+                            {formatCurrency(dossier.montant_engage)}
+                          </p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Disponible</p>
@@ -604,7 +667,9 @@ export function DossierDetailsEnhanced({
                               {CATEGORIE_LABELS[doc.categorie] || doc.categorie}
                             </Badge>
                             <span>•</span>
-                            <span>{format(new Date(doc.created_at), "dd/MM/yyyy", { locale: fr })}</span>
+                            <span>
+                              {format(new Date(doc.created_at), 'dd/MM/yyyy', { locale: fr })}
+                            </span>
                           </div>
                         </div>
                       </div>

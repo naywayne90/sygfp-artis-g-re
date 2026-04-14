@@ -9,17 +9,20 @@
 ## 1. Architecture Générale
 
 ### 1.1 Dashboard Principal
+
 - **4 KPIs principaux** avec montants et compteurs:
-  - Engagement: 139 dossiers / 389M CFA
-  - Liquidation: 125 dossiers / 383M CFA
-  - Ordonnancement: 91 dossiers / 326M CFA
-  - Règlement: 90 dossiers / 308M CFA
+  - Engagement: 139 dossiers / 389M FCFA
+  - Liquidation: 125 dossiers / 383M FCFA
+  - Ordonnancement: 91 dossiers / 326M FCFA
+  - Règlement: 90 dossiers / 308M FCFA
 - Graphiques: Pie chart + Bar chart pour visualisation
 
 ### 1.2 Menu avec Compteurs Dynamiques
+
 Les compteurs entre parenthèses indiquent le nombre de dossiers en attente par état.
 
 ### 1.3 Système Multi-Exercice
+
 - URLs séparées par année:
   - 2024: arti-ci.com:8002
   - 2025: arti-ci.com:8003
@@ -30,13 +33,16 @@ Les compteurs entre parenthèses indiquent le nombre de dossiers en attente par 
 ## 2. Modules Découverts
 
 ### 2.1 Scanning (Numérisation) - 31 dossiers
+
 Gestion de la numérisation des documents physiques:
+
 - **Engagement**: 6 documents à scanner
 - **Liquidation**: 25 documents à scanner
 
 **Logique**: Les dossiers physiques doivent être numérisés avant traitement digital.
 
 ### 2.2 Gestion des Tâches
+
 - Planification des tâches
 - Exécution des tâches
 - État d'exécution (reporting)
@@ -44,6 +50,7 @@ Gestion de la numérisation des documents physiques:
 ### 2.3 Exécution Budgétaire (Chaîne de Dépense)
 
 #### Workflow complet:
+
 ```
 Note DG (145) → Expression Besoin (139) → Engagement (139) → Liquidation (125) → Ordonnancement (91) → Règlement (90)
 ```
@@ -70,6 +77,7 @@ Note DG (145) → Expression Besoin (139) → Engagement (139) → Liquidation (
 | Liste rejetée | 1 | Rejetées |
 
 **Ordonnancement (91)**:
+
 - Liste à valider: 1
 - Liste validée: 90
 - Liste différée/satisfaite/rejetée: 0
@@ -86,6 +94,7 @@ Note DG (145) → Expression Besoin (139) → Engagement (139) → Liquidation (
 | Règl. Rejetés | 0 | Rejetés |
 
 ### 2.4 Comptabilité Matière
+
 - **Introduction au Patrimoine**: Gestion des immobilisations
   - Lié au règlement (Code Règlement dropdown)
   - Durée d'amortissement en années
@@ -96,14 +105,18 @@ Note DG (145) → Expression Besoin (139) → Engagement (139) → Liquidation (
 - **Affectation**: Affectation des biens aux services/personnes
 
 ### 2.5 Mission (Déplacements)
+
 Formulaire:
+
 - Type Mission: Représentation / Formation
 - Libellé, Description
 - Date Début, Date Fin
 - Ordre de Mission (upload PDF)
 
 ### 2.6 Contratualisation (Marchés Publics)
+
 Structure hiérarchique:
+
 - **Marchés**: Libellé, Référence, Nombre Lots, Montant, DAO
   - Lié à Action/Activité (structure programmatique)
   - Documents: DAO, TDR, Cahier des Charges
@@ -112,52 +125,58 @@ Structure hiérarchique:
 - **Contrats**: Contrats signés
 
 ### 2.7 Note DG (145 dossiers)
+
 Colonnes: N°, Objet, Référence, Exposé, Avis, Recommandation
 
 ### 2.8 Prestataires (422 fournisseurs)
-| Champ | Description |
-|-------|-------------|
-| Raison Sociale | Nom complet |
-| Code | Code interne (ex: 401xxx, 481xxx) |
-| Sigle | Abréviation |
-| CC | Compte Contribuable |
-| RCCM | Registre Commerce |
-| Régime Imposition | TEE, etc. |
-| Banque | Nom de la banque |
-| Compte | Numéro de compte |
-| Adresse | Adresse postale |
+
+| Champ             | Description                       |
+| ----------------- | --------------------------------- |
+| Raison Sociale    | Nom complet                       |
+| Code              | Code interne (ex: 401xxx, 481xxx) |
+| Sigle             | Abréviation                       |
+| CC                | Compte Contribuable               |
+| RCCM              | Registre Commerce                 |
+| Régime Imposition | TEE, etc.                         |
+| Banque            | Nom de la banque                  |
+| Compte            | Numéro de compte                  |
+| Adresse           | Adresse postale                   |
 
 **Fonctionnalité**: Historique des mouvements par prestataire
 
 ### 2.9 Utilisateurs (73 actifs)
-| Champ | Options |
-|-------|---------|
-| Matricule | Identifiant unique |
-| Nom, Prénom, Email | Infos personnelles |
-| Direction | 16 directions (DG, DAAF, DSI, DMGP, etc.) |
-| Fonction | 31 fonctions (DG, DAAF, SDMG, AGENT, etc.) |
-| EstResponsable | Oui/Non |
+
+| Champ              | Options                                    |
+| ------------------ | ------------------------------------------ |
+| Matricule          | Identifiant unique                         |
+| Nom, Prénom, Email | Infos personnelles                         |
+| Direction          | 16 directions (DG, DAAF, DSI, DMGP, etc.)  |
+| Fonction           | 31 fonctions (DG, DAAF, SDMG, AGENT, etc.) |
+| EstResponsable     | Oui/Non                                    |
 
 ### 2.10 Paramétrage
 
 #### Structure programmatique (204 imputations):
-| Niveau | Exemple |
-|--------|---------|
+
+| Niveau                    | Exemple                                    |
+| ------------------------- | ------------------------------------------ |
 | OS (Objectif Stratégique) | OS1: Construire la structure fonctionnelle |
-| Action | Améliorer les performances opérationnelles |
-| Activité | 101: Remboursement du prêt BHCI |
-| Sous-Activité | 002, 013, etc. |
-| Direction | Direction des Affaires Administratives |
-| Nature Dépense | 2 Biens et services |
-| Nature Économique (NBE) | 671700: Intérêts et frais financiers |
-| **Budget Actuel** | Montant alloué |
+| Action                    | Améliorer les performances opérationnelles |
+| Activité                  | 101: Remboursement du prêt BHCI            |
+| Sous-Activité             | 002, 013, etc.                             |
+| Direction                 | Direction des Affaires Administratives     |
+| Nature Dépense            | 2 Biens et services                        |
+| Nature Économique (NBE)   | 671700: Intérêts et frais financiers       |
+| **Budget Actuel**         | Montant alloué                             |
 
 #### Comptes Bancaires:
+
 - FISCALITE-CST-BDT
 - SUBVENTION-BDT
 - BANQUE DE L'HABITAT DE COTE D'IVOIRE (BHCI)
 
 #### Autres paramétrages:
+
 - Origine des Fonds
 - Notification Budgétaire
 - Approvisionnement
@@ -169,6 +188,7 @@ Colonnes: N°, Objet, Référence, Exposé, Avis, Recommandation
 ## 3. Structure des Données Détaillées
 
 ### 3.1 Formulaire d'Imputation Budgétaire (Expression de Besoin)
+
 ```
 === Note du DG ===
 Objet              : [Texte]
@@ -213,6 +233,7 @@ Piece 1, 2, 3      : [Upload PDF]
 ```
 
 ### 3.2 Engagement/Liquidation (Expandable Row)
+
 ```
 === Informations Budgétaires ===
 Montant Marché         : 225,400 FCFA
@@ -259,6 +280,7 @@ Action                 : CB → SDMG → DAAF → DG
 ```
 
 ### 3.3 Paiement Partiel avec Mouvements Bancaires
+
 ```
 === Dossier Règlement ===
 Fournisseur            : ASSURE PLUS
@@ -283,6 +305,7 @@ Date                   : [Date du paiement]
 ```
 
 ### 3.4 État d'Exécution Budgétaire (Rapport NBE)
+
 ```
 === Par Nature Économique ===
 Nature économique      : 601200 - Achats de carburants et lubrifiants
@@ -296,6 +319,7 @@ Taux d'exécution (G=E/D): 16,85%
 ```
 
 ### 3.5 Réaménagement Budgétaire
+
 ```
 === Source ===
 Imputation             : 110110102022671700
@@ -318,6 +342,7 @@ Budget après réaménagement: [Budget Dest + Montant]
 ## 4. Fonctionnalités UI Identifiées
 
 ### 4.1 DataTables
+
 - Tri par colonnes (ascending/descending)
 - Recherche globale (Search)
 - Pagination (10/25/50/100)
@@ -326,12 +351,14 @@ Budget après réaménagement: [Budget Dest + Montant]
 - Compteur d'entrées (Showing X to Y of Z entries)
 
 ### 4.2 Workflows de Validation
+
 - Multi-étapes (CB → SDMG → DAAF → DG)
 - États multiples (à valider, validé, différé, satisfait, rejeté)
 - Contrôle SDCT pour Liquidation uniquement
 - Boutons d'action contextuels
 
 ### 4.3 Gestion Documentaire
+
 - Upload de pièces jointes par type
 - Nomenclature: `ARTI[TYPE][ANNEE][NUMERO].pdf`
   - Engagement: Devis, Bon Commande, Fiche Contrat
@@ -340,6 +367,7 @@ Budget après réaménagement: [Budget Dest + Montant]
 - Prévisualisation via icône download
 
 ### 4.4 Formulaires Dynamiques
+
 - Auto-remplissage depuis sélections (Imputation → OS/Action/Activité)
 - Calculs en temps réel (Budget disponible)
 - Dropdowns avec recherche (Imputation avec filtre)
@@ -350,6 +378,7 @@ Budget après réaménagement: [Budget Dest + Montant]
 ## 5. Logiques Métier Clés à Implémenter
 
 ### 5.1 Nomenclature des Références
+
 ```typescript
 // Format Numéro de Dépense
 type TypeDossier = 0 | 1 | 2 | 3; // 0=Expression, 1=Engagement, 2=Liquidation, 3=Règlement
@@ -362,27 +391,29 @@ type TypeDossier = 0 | 1 | 2 | 3; // 0=Expression, 1=Engagement, 2=Liquidation, 
 ```
 
 ### 5.2 Code d'Imputation (18 chiffres)
+
 ```typescript
 interface CodeImputation {
-  os: string;           // 2 chiffres - Objectif Stratégique
-  action: string;       // 2 chiffres
-  activite: string;     // 3 chiffres
+  os: string; // 2 chiffres - Objectif Stratégique
+  action: string; // 2 chiffres
+  activite: string; // 3 chiffres
   sousActivite: string; // 3 chiffres
-  direction: string;    // 2 chiffres
-  natureNBE: string;    // 6 chiffres - Nature Économique
+  direction: string; // 2 chiffres
+  natureNBE: string; // 6 chiffres - Nature Économique
 }
 // Exemple: 110240202052612900
 // 11-02-402-020-52-612900
 ```
 
 ### 5.3 Système de Paiement Partiel
+
 ```typescript
 interface Reglement {
   id: string;
-  numeroDepense: string;  // ARTI3xxxxx
+  numeroDepense: string; // ARTI3xxxxx
   montantTotal: number;
   montantRegle: number;
-  resteAPayer: number;    // Calculé: montantTotal - sum(mouvements)
+  resteAPayer: number; // Calculé: montantTotal - sum(mouvements)
   statut: 'non_effectue' | 'partiel' | 'total';
   mouvements: MouvementBancaire[];
 }
@@ -392,7 +423,7 @@ interface MouvementBancaire {
   reglementId: string;
   compteBancaire: 'FISCALITE-CST-BDT' | 'SUBVENTION-BDT' | 'BHCI';
   montant: number;
-  reference: string;      // Numéro de référence bancaire
+  reference: string; // Numéro de référence bancaire
   objet: string;
   pieceJustificative: string; // URL du PDF
   dateReglement: Date;
@@ -400,6 +431,7 @@ interface MouvementBancaire {
 ```
 
 ### 5.4 Workflow de Validation Multi-Niveaux
+
 ```typescript
 type ValidationStep = 'CB' | 'SDMG' | 'DAAF' | 'DG' | 'SDCT';
 type ValidationStatus = 'en_attente' | 'valide' | 'differe' | 'satisfait' | 'rejete';
@@ -420,14 +452,15 @@ interface WorkflowValidation {
 ```
 
 ### 5.5 Contrôle Budgétaire
+
 ```typescript
 interface ControleBudgetaire {
   imputation: string;
-  dotationBudgetaire: number;        // (A)
-  engagementsAnterieurs: number;     // (B)
-  engagementActuel: number;          // (C) - Montant saisi
-  cumulEngagements: number;          // (D) = B + C
-  disponibleBudgetaire: number;      // (E) = A - D
+  dotationBudgetaire: number; // (A)
+  engagementsAnterieurs: number; // (B)
+  engagementActuel: number; // (C) - Montant saisi
+  cumulEngagements: number; // (D) = B + C
+  disponibleBudgetaire: number; // (E) = A - D
 
   // Validation: Montant saisi <= Disponible
   estValide: boolean;
@@ -435,6 +468,7 @@ interface ControleBudgetaire {
 ```
 
 ### 5.6 Réaménagement Budgétaire
+
 ```typescript
 interface ReamenagementBudgetaire {
   id: string;
@@ -444,12 +478,12 @@ interface ReamenagementBudgetaire {
   imputationSource: string;
   budgetSourceAvant: number;
   montantTransfere: number;
-  budgetSourceApres: number;  // = budgetSourceAvant - montantTransfere
+  budgetSourceApres: number; // = budgetSourceAvant - montantTransfere
 
   // Destination
   imputationDestination: string;
   budgetDestAvant: number;
-  budgetDestApres: number;    // = budgetDestAvant + montantTransfere
+  budgetDestApres: number; // = budgetDestAvant + montantTransfere
 
   motif: string;
   validePar: string;
@@ -457,6 +491,7 @@ interface ReamenagementBudgetaire {
 ```
 
 ### 5.7 Nature SYSCO (200+ codes SYSCOHADA)
+
 ```typescript
 // Exemples de codes SYSCOHADA
 const NATURE_SYSCO = {
@@ -483,17 +518,19 @@ const NATURE_SYSCO = {
 ## 6. État d'Exécution (Rapports)
 
 ### 6.1 Rapport par NBE (Nature Économique)
-| Indicateur | Formule | Description |
-|------------|---------|-------------|
-| Budget initial (A) | - | Allocation initiale |
-| Budget reporté (B) | - | Report exercice précédent |
-| Total réaménagement (C) | - | Transferts (+/-) |
-| Budget actuel (D) | A + B + C | Budget disponible total |
-| Cumul Engagement (E) | Sum(engagements) | Total engagé |
-| Disponible (F) | D - E | Reste à engager |
-| Taux d'exécution (G) | E / D * 100 | Pourcentage consommé |
+
+| Indicateur              | Formule          | Description               |
+| ----------------------- | ---------------- | ------------------------- |
+| Budget initial (A)      | -                | Allocation initiale       |
+| Budget reporté (B)      | -                | Report exercice précédent |
+| Total réaménagement (C) | -                | Transferts (+/-)          |
+| Budget actuel (D)       | A + B + C        | Budget disponible total   |
+| Cumul Engagement (E)    | Sum(engagements) | Total engagé              |
+| Disponible (F)          | D - E            | Reste à engager           |
+| Taux d'exécution (G)    | E / D \* 100     | Pourcentage consommé      |
 
 ### 6.2 Rapports disponibles
+
 - État d'exécution (NBE) - Expression de besoin
 - État d'exécution (NBE) - Engagement
 - État d'exécution (NBE) - Liquidation
@@ -504,31 +541,32 @@ const NATURE_SYSCO = {
 
 ## 7. Mapping avec la Nouvelle Structure
 
-| Ancien Module | Nouveau Module | Statut |
-|---------------|----------------|--------|
-| Note DG | notes_sef | Implémenté |
-| Expression Besoin | expressions_besoin | Implémenté |
-| Engagement | engagements | Implémenté |
-| Liquidation | liquidations | Implémenté |
-| Ordonnancement | ordonnancements | Implémenté |
-| Règlement | reglements | Partiellement |
-| Prestataires | fournisseurs | Implémenté |
-| Paramétrage Budget | objectifs_strategiques, missions, actions, activites | Implémenté |
-| Utilisateurs | profiles + auth.users | Implémenté |
-| **Paiement Partiel** | mouvements_bancaires | **À implémenter** |
-| **Réaménagement** | reamenagements_budgetaires | **À implémenter** |
-| **Scanning** | pieces_jointes + workflow | **À améliorer** |
-| **Comptabilité Matière** | immobilisations, amortissements | **À créer** |
-| **Missions** | missions_deplacement | **À créer** |
-| **Contratualisation** | marches, lots, soumissions, contrats | **À créer** |
-| **Contrôle SDCT** | workflow_liquidation | **À implémenter** |
-| **États d'exécution** | rapports_execution | **À créer** |
+| Ancien Module            | Nouveau Module                                       | Statut            |
+| ------------------------ | ---------------------------------------------------- | ----------------- |
+| Note DG                  | notes_sef                                            | Implémenté        |
+| Expression Besoin        | expressions_besoin                                   | Implémenté        |
+| Engagement               | engagements                                          | Implémenté        |
+| Liquidation              | liquidations                                         | Implémenté        |
+| Ordonnancement           | ordonnancements                                      | Implémenté        |
+| Règlement                | reglements                                           | Partiellement     |
+| Prestataires             | fournisseurs                                         | Implémenté        |
+| Paramétrage Budget       | objectifs_strategiques, missions, actions, activites | Implémenté        |
+| Utilisateurs             | profiles + auth.users                                | Implémenté        |
+| **Paiement Partiel**     | mouvements_bancaires                                 | **À implémenter** |
+| **Réaménagement**        | reamenagements_budgetaires                           | **À implémenter** |
+| **Scanning**             | pieces_jointes + workflow                            | **À améliorer**   |
+| **Comptabilité Matière** | immobilisations, amortissements                      | **À créer**       |
+| **Missions**             | missions_deplacement                                 | **À créer**       |
+| **Contratualisation**    | marches, lots, soumissions, contrats                 | **À créer**       |
+| **Contrôle SDCT**        | workflow_liquidation                                 | **À implémenter** |
+| **États d'exécution**    | rapports_execution                                   | **À créer**       |
 
 ---
 
 ## 8. Recommandations pour la Nouvelle Version
 
 ### 8.1 Fonctionnalités Prioritaires (P1)
+
 1. **Paiements partiels**: Table mouvements_bancaires + UI
 2. **Réaménagement budgétaire**: Interface de transfert entre imputations
 3. **Contrôle SDCT**: Étape validation supplémentaire pour Liquidation
@@ -536,6 +574,7 @@ const NATURE_SYSCO = {
 5. **Compteurs dynamiques**: Dans le menu latéral
 
 ### 8.2 Fonctionnalités Importantes (P2)
+
 1. **Comptabilité Matière**: Immobilisations et amortissements
 2. **Module Mission**: Gestion des déplacements
 3. **Contratualisation**: Marchés publics complets
@@ -543,6 +582,7 @@ const NATURE_SYSCO = {
 5. **Export multi-format**: Copy, CSV, Excel, PDF, Print
 
 ### 8.3 Améliorations UX (P3)
+
 1. **DataTables avancées**: Tri, recherche, pagination, export
 2. **Lignes expandables**: Détails sans navigation
 3. **Auto-calcul budget**: Disponible en temps réel
@@ -550,6 +590,7 @@ const NATURE_SYSCO = {
 5. **Mobile responsive**: L'ancien n'est pas adapté mobile
 
 ### 8.4 Sécurité et Audit
+
 1. **Audit trail complet**: Historique des modifications
 2. **RLS renforcé**: Par direction/fonction
 3. **Validation workflow**: Traçabilité des approbations
@@ -560,6 +601,7 @@ const NATURE_SYSCO = {
 ## 9. Prochaines Étapes Prioritaires
 
 ### Phase 1 - Paiements Partiels
+
 ```sql
 -- Table mouvements_bancaires
 CREATE TABLE mouvements_bancaires (
@@ -591,6 +633,7 @@ GROUP BY r.id;
 ```
 
 ### Phase 2 - Réaménagement Budgétaire
+
 ```sql
 CREATE TABLE reamenagements_budgetaires (
   id UUID PRIMARY KEY,
@@ -609,6 +652,7 @@ CREATE TABLE reamenagements_budgetaires (
 ```
 
 ### Phase 3 - Comptabilité Matière
+
 ```sql
 CREATE TABLE immobilisations (
   id UUID PRIMARY KEY,
@@ -642,12 +686,14 @@ CREATE TABLE amortissements (
 ## 10. Conclusion
 
 L'ancienne application SYGFP est fonctionnelle mais présente des limitations:
+
 - Interface datée (Bootstrap 3)
 - Pas de responsive mobile
 - Manque de notifications temps réel
 - Audit trail basique
 
 La nouvelle version doit:
+
 1. **Conserver** toute la logique métier existante (workflow, calculs, nomenclatures)
 2. **Moderniser** l'interface (React + Tailwind + shadcn/ui)
 3. **Ajouter** les fonctionnalités manquantes (paiements partiels, réaménagement)
@@ -655,6 +701,7 @@ La nouvelle version doit:
 5. **Renforcer** la sécurité (RLS, audit trail complet)
 
 **Estimation**:
+
 - P1 (Paiements + Réaménagement): À implémenter en priorité
 - P2 (Comptabilité Matière + Missions + Marchés): Phase suivante
 - P3 (UX + Rapports avancés): Améliorations continues

@@ -65,7 +65,7 @@ export function NSEFParentSelector({
 
     try {
       // Exécuter la requête avec filtres conditionnels
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const query = supabase
         .from('notes_sef')
         .select('id, numero, reference_pivot, objet, statut') as any;

@@ -26,12 +26,7 @@ import { fr } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import { useBudgetAlerts, BudgetAlert } from '@/hooks/useBudgetAlerts';
 import { useExercice } from '@/contexts/ExerciceContext';
-import { cn } from '@/lib/utils';
-
-const formatMontant = (montant: number | null) => {
-  if (montant === null) return 'N/A';
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-};
+import { cn, formatCurrency } from '@/lib/utils';
 
 const getNiveauIcon = (niveau: string) => {
   switch (niveau) {
@@ -102,11 +97,11 @@ const AlertCard = ({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 text-sm">
               <div className="bg-muted/50 p-2 rounded">
                 <span className="text-muted-foreground text-xs">Dotation</span>
-                <p className="font-medium">{formatMontant(alert.montant_dotation)}</p>
+                <p className="font-medium">{formatCurrency(alert.montant_dotation)}</p>
               </div>
               <div className="bg-muted/50 p-2 rounded">
                 <span className="text-muted-foreground text-xs">Engagé</span>
-                <p className="font-medium text-primary">{formatMontant(alert.montant_engage)}</p>
+                <p className="font-medium text-primary">{formatCurrency(alert.montant_engage)}</p>
               </div>
               <div className="bg-muted/50 p-2 rounded">
                 <span className="text-muted-foreground text-xs">Taux</span>
@@ -125,7 +120,7 @@ const AlertCard = ({
                     (alert.montant_disponible || 0) <= 0 ? 'text-red-600' : 'text-green-600'
                   )}
                 >
-                  {formatMontant(alert.montant_disponible)}
+                  {formatCurrency(alert.montant_disponible)}
                 </p>
               </div>
             </div>

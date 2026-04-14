@@ -29,7 +29,17 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { cn, formatCurrency } from '@/lib/utils';
 import {
   useReglements,
   MODES_PAIEMENT,
@@ -60,10 +70,6 @@ interface ReglementFormProps {
   preselectedOrdonnancementId?: string | null;
 }
 
-const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-};
-
 export function ReglementForm({
   onSuccess,
   onCancel,
@@ -89,6 +95,8 @@ export function ReglementForm({
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [preuvePaiementUploaded, setPreuvePaiementUploaded] = useState(false);
   const [imputationJustification, setImputationJustification] = useState('');
+  const [showConfirmNoPreuve, setShowConfirmNoPreuve] = useState(false);
+  const [pendingValues, setPendingValues] = useState<FormValues | null>(null);
 
   // Utiliser les vrais comptes bancaires ou le fallback
   const comptesDisponibles: Array<{
@@ -173,20 +181,7 @@ export function ReglementForm({
     }
   };
 
-  const onSubmit = async (values: FormValues) => {
-    // Vérifier la justification si imputation non trouvée
-    if (needsJustification && !justificationValid) {
-      return; // Ne pas soumettre sans justification
-    }
-
-    // Vérifier que la preuve de paiement est fournie (recommandée)
-    if (!preuvePaiementUploaded) {
-      const confirm = window.confirm(
-        "Aucune preuve de paiement n'a été jointe. Voulez-vous continuer ?"
-      );
-      if (!confirm) return;
-    }
-
+  const doSubmit = async (values: FormValues) => {
     const compte = comptesDisponibles.find((c) => c.value === values.compte_bancaire_arti);
 
     const data: ReglementFormData = {
@@ -212,6 +207,22 @@ export function ReglementForm({
 
     setImputationJustification('');
     onSuccess?.();
+  };
+
+  const onSubmit = async (values: FormValues) => {
+    // Vérifier la justification si imputation non trouvée
+    if (needsJustification && !justificationValid) {
+      return; // Ne pas soumettre sans justification
+    }
+
+    // Vérifier que la preuve de paiement est fournie (recommandée)
+    if (!preuvePaiementUploaded) {
+      setPendingValues(values);
+      setShowConfirmNoPreuve(true);
+      return;
+    }
+
+    await doSubmit(values);
   };
 
   const isFormValid =
@@ -254,7 +265,7 @@ export function ReglementForm({
                           <div className="flex flex-col">
                             <span className="font-medium">{ord.numero}</span>
                             <span className="text-xs text-muted-foreground">
-                              {ord.beneficiaire} - {formatMontant(ord.montant)}
+                              {ord.beneficiaire} - {formatCurrency(ord.montant)}
                             </span>
                           </div>
                         </SelectItem>
@@ -347,18 +358,18 @@ export function ReglementForm({
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">(A) Montant ordonnancé</p>
                   <p className="text-lg font-bold">
-                    {formatMontant(availability.montantOrdonnance)}
+                    {formatCurrency(availability.montantOrdonnance)}
                   </p>
                 </div>
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">(B) Règlements antérieurs</p>
                   <p className="text-lg font-bold text-orange-600">
-                    {formatMontant(availability.reglementsAnterieurs)}
+                    {formatCurrency(availability.reglementsAnterieurs)}
                   </p>
                 </div>
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">(C) Ce règlement</p>
-                  <p className="text-lg font-bold text-primary">{formatMontant(watchedMontant)}</p>
+                  <p className="text-lg font-bold text-primary">{formatCurrency(watchedMontant)}</p>
                 </div>
                 <div
                   className={cn(
@@ -377,7 +388,7 @@ export function ReglementForm({
                         : 'text-destructive'
                     )}
                   >
-                    {formatMontant(availability.restantAPayer - watchedMontant)}
+                    {formatCurrency(availability.restantAPayer - watchedMontant)}
                   </p>
                 </div>
               </div>
@@ -388,7 +399,7 @@ export function ReglementForm({
                   <AlertTitle>Montant invalide</AlertTitle>
                   <AlertDescription>
                     Le montant du règlement ne peut pas dépasser le restant à payer (
-                    {formatMontant(availability.restantAPayer)})
+                    {formatCurrency(availability.restantAPayer)})
                   </AlertDescription>
                 </Alert>
               )}
@@ -512,7 +523,7 @@ export function ReglementForm({
                               <span>{compte.label}</span>
                               {compte.solde !== undefined && (
                                 <span className="text-xs text-muted-foreground">
-                                  Solde: {formatMontant(compte.solde || 0)}
+                                  Solde: {formatCurrency(compte.solde || 0)}
                                 </span>
                               )}
                             </div>
@@ -545,7 +556,7 @@ export function ReglementForm({
                   </FormControl>
                   {availability && (
                     <FormDescription>
-                      Maximum: {formatMontant(availability.restantAPayer)}
+                      Maximum: {formatCurrency(availability.restantAPayer)}
                     </FormDescription>
                   )}
                   <FormMessage />
@@ -652,6 +663,30 @@ export function ReglementForm({
           </Button>
         </div>
       </form>
+
+      <AlertDialog open={showConfirmNoPreuve} onOpenChange={setShowConfirmNoPreuve}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Aucune preuve de paiement</AlertDialogTitle>
+            <AlertDialogDescription>
+              Aucune preuve de paiement n'a été jointe. Voulez-vous continuer ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingValues(null)}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (pendingValues) {
+                  await doSubmit(pendingValues);
+                  setPendingValues(null);
+                }
+              }}
+            >
+              Continuer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Form>
   );
 }

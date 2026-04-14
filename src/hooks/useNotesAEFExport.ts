@@ -568,7 +568,7 @@ export function useNotesAEFExport() {
           lines.push(Object.values(row).map(escapeCSV).join(';'));
         }
 
-        const csvContent = '\uFEFF' + lines.join('\n'); // BOM for Excel compatibility
+        const csvContent = '﻿' + lines.join('\n'); // BOM for Excel compatibility
         downloadBlob(new Blob([csvContent], { type: 'text/csv;charset=utf-8' }), fileName);
 
         toast.success(`${notes.length} note(s) exportée(s) en CSV`);

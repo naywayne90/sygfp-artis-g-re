@@ -578,7 +578,7 @@ export function useNotesAEF() {
 
       if (fetchError) throw new Error('Note introuvable');
 
-      const oldStatut = note.statut || NoteAEFStatut.DRAFT;
+      const oldStatut = note.statut || NoteAEFStatut.SUBMITTED;
       const newStatut = NoteAEFStatut.SUBMITTED;
 
       // ═══════════════════════════════════════════════════════════════════════

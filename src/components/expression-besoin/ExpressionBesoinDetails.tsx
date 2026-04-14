@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -129,6 +130,8 @@ export function ExpressionBesoinDetails({
   onSaveArticles,
 }: ExpressionBesoinDetailsProps) {
   const navigate = useNavigate();
+  const { hasRole } = usePermissions();
+  const isDG = hasRole('DG');
 
   // Lazy-loading: fetch detail only when dialog is open
   const { data: detailData, isLoading: isLoadingDetail } = useExpressionBesoinDetail(
@@ -258,9 +261,6 @@ export function ExpressionBesoinDetails({
       toast.error('Erreur lors de la génération du PDF');
     }
   };
-
-  const formatMontant = (montant: number | null | undefined) =>
-    montant ? formatCurrency(montant) : '-';
 
   /** Compute completedSteps for ChaineDepenseCompact based on EB statut */
   const getCompletedStepsEB = (statut: string | null): number[] => {
@@ -394,8 +394,8 @@ export function ExpressionBesoinDetails({
                     </>
                   )}
 
-                  {/* Validé — créer passation/marché */}
-                  {expression.statut === 'valide' && (
+                  {/* Validé — créer passation/marché (masqué pour DG) */}
+                  {expression.statut === 'valide' && !isDG && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -635,7 +635,7 @@ export function ExpressionBesoinDetails({
                     >
                       <CreditCard className="h-3 w-3" />
                       {expression.imputation.reference || 'Imputation'} —{' '}
-                      {formatMontant(expression.imputation.montant)}
+                      {formatCurrency(expression.imputation.montant)}
                       <ExternalLink className="h-3 w-3" />
                     </button>
                   </div>
@@ -897,11 +897,11 @@ export function ExpressionBesoinDetails({
                                 {' | '}
                                 <span className="font-mono text-xs">
                                   {details.articles_total_before != null
-                                    ? formatMontant(details.articles_total_before as number)
+                                    ? formatCurrency(details.articles_total_before as number)
                                     : '?'}{' '}
                                   →{' '}
                                   {details.articles_total_after != null
-                                    ? formatMontant(details.articles_total_after as number)
+                                    ? formatCurrency(details.articles_total_after as number)
                                     : '?'}
                                 </span>
                               </div>
@@ -940,7 +940,7 @@ export function ExpressionBesoinDetails({
                     <div>
                       <span className="text-sm text-muted-foreground">Montant imputé</span>
                       <p className="font-bold text-primary text-lg">
-                        {formatMontant(expression.imputation.montant)}
+                        {formatCurrency(expression.imputation.montant)}
                       </p>
                     </div>
                     <div className="col-span-2">
@@ -964,7 +964,7 @@ export function ExpressionBesoinDetails({
                 <div className="grid grid-cols-3 gap-4">
                   <div className="p-3 bg-muted/50 rounded-lg text-center">
                     <p className="text-xs text-muted-foreground">Montant imputé</p>
-                    <p className="font-bold text-lg">{formatMontant(montantImpute || null)}</p>
+                    <p className="font-bold text-lg">{formatCurrency(montantImpute || null)}</p>
                   </div>
                   <div className="p-3 bg-muted/50 rounded-lg text-center">
                     <p className="text-xs text-muted-foreground">Total articles</p>
@@ -974,7 +974,7 @@ export function ExpressionBesoinDetails({
                         budgetDepasse ? 'text-destructive' : 'text-success'
                       )}
                     >
-                      {formatMontant(totalArticles || null)}
+                      {formatCurrency(totalArticles || null)}
                     </p>
                   </div>
                   <div className="p-3 bg-muted/50 rounded-lg text-center">
@@ -988,7 +988,7 @@ export function ExpressionBesoinDetails({
                       )}
                     >
                       {montantImpute > 0
-                        ? formatMontant(Math.abs(montantImpute - totalArticles))
+                        ? formatCurrency(Math.abs(montantImpute - totalArticles))
                         : '-'}
                     </p>
                   </div>
@@ -1015,7 +1015,7 @@ export function ExpressionBesoinDetails({
                     <span className="text-sm text-muted-foreground">
                       Montant estimé (formulaire)
                     </span>
-                    <p className="font-medium">{formatMontant(expression.montant_estime)}</p>
+                    <p className="font-medium">{formatCurrency(expression.montant_estime)}</p>
                   </div>
                   <div>
                     <span className="text-sm text-muted-foreground">Direction</span>

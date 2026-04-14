@@ -54,7 +54,7 @@ export default function NotesDirectionGenerale() {
     validateNote,
     rejectNote,
     diffuseNote,
-    revertToDraft,
+    revertToSoumis,
     deleteNote,
   } = useNotesDirectionGenerale();
 
@@ -150,8 +150,8 @@ export default function NotesDirectionGenerale() {
     refetch();
   };
 
-  const handleRevertToDraft = async (noteId: string) => {
-    await revertToDraft(noteId);
+  const handleRevertToSoumis = async (noteId: string) => {
+    await revertToSoumis(noteId);
     refetch();
   };
 
@@ -313,7 +313,7 @@ export default function NotesDirectionGenerale() {
             onValidate={canValidate ? handleValidate : undefined}
             onReject={canValidate ? setRejectingNote : undefined}
             onDiffuse={handleDiffuse}
-            onRevertToDraft={handleRevertToDraft}
+            onRevertToSoumis={handleRevertToSoumis}
             onDelete={handleDelete}
             onCreate={() => setFormOpen(true)}
             onRetry={refetch}
@@ -372,7 +372,7 @@ export default function NotesDirectionGenerale() {
             description="À corriger et resoumettre"
             onView={setViewingNote}
             onEdit={handleEdit}
-            onRevertToDraft={handleRevertToDraft}
+            onRevertToSoumis={handleRevertToSoumis}
             onRetry={refetch}
             isLoading={isLoading}
             emptyMessage="Aucune note rejetée"

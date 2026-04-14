@@ -7,24 +7,19 @@
  * Utilise le feature flag WORKFLOW_V2 pour activer les règles strictes.
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   CheckCircle2,
   Clock,
@@ -44,12 +39,12 @@ import {
   Lock,
   Unlock,
   SkipForward,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
-import { useFeatureFlag } from "@/lib/feature-flags/flags";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn, formatCurrency } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { useFeatureFlag } from '@/lib/feature-flags/flags';
 import {
   SpendingCase,
   SpendingStage,
@@ -58,8 +53,8 @@ import {
   STAGE_CONFIG,
   StepStatus,
   getSpendingProgress,
-} from "@/types/spending-case";
-import { useSpendingCase, useStagePermission } from "@/hooks/useSpendingCase";
+} from '@/types/spending-case';
+import { useSpendingCase, useStagePermission } from '@/hooks/useSpendingCase';
 
 // Configuration visuelle des étapes
 const STAGE_VISUAL_CONFIG: Record<
@@ -73,51 +68,51 @@ const STAGE_VISUAL_CONFIG: Record<
 > = {
   note_sef: {
     icon: FileText,
-    color: "text-blue-600",
-    bgColor: "bg-blue-500",
-    route: "/notes-sef",
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-500',
+    route: '/notes-sef',
   },
   note_aef: {
     icon: FileEdit,
-    color: "text-indigo-600",
-    bgColor: "bg-indigo-500",
-    route: "/notes-aef",
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-500',
+    route: '/notes-aef',
   },
   imputation: {
     icon: Target,
-    color: "text-purple-600",
-    bgColor: "bg-purple-500",
-    route: "/execution/imputation",
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-500',
+    route: '/execution/imputation',
   },
   passation_marche: {
     icon: ScrollText,
-    color: "text-pink-600",
-    bgColor: "bg-pink-500",
-    route: "/execution/passation-marche",
+    color: 'text-pink-600',
+    bgColor: 'bg-pink-500',
+    route: '/execution/passation-marche',
   },
   engagement: {
     icon: Signature,
-    color: "text-orange-600",
-    bgColor: "bg-orange-500",
-    route: "/engagements",
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-500',
+    route: '/engagements',
   },
   liquidation: {
     icon: Receipt,
-    color: "text-amber-600",
-    bgColor: "bg-amber-500",
-    route: "/liquidations",
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-500',
+    route: '/liquidations',
   },
   ordonnancement: {
     icon: FileOutput,
-    color: "text-lime-600",
-    bgColor: "bg-lime-500",
-    route: "/ordonnancements",
+    color: 'text-lime-600',
+    bgColor: 'bg-lime-500',
+    route: '/ordonnancements',
   },
   reglement: {
     icon: Banknote,
-    color: "text-green-600",
-    bgColor: "bg-green-500",
-    route: "/reglements",
+    color: 'text-green-600',
+    bgColor: 'bg-green-500',
+    route: '/reglements',
   },
 };
 
@@ -154,8 +149,8 @@ export function SpendingCaseTimeline({
   className,
 }: SpendingCaseTimelineProps) {
   const navigate = useNavigate();
-  const workflowV2Enabled = useFeatureFlag("WORKFLOW_V2");
-  const timelineAdvanced = useFeatureFlag("TIMELINE_ADVANCED");
+  const workflowV2Enabled = useFeatureFlag('WORKFLOW_V2');
+  const timelineAdvanced = useFeatureFlag('TIMELINE_ADVANCED');
 
   const [selectedStage, setSelectedStage] = useState<SpendingStage | null>(null);
 
@@ -180,15 +175,15 @@ export function SpendingCaseTimeline({
 
   const getStatusIcon = (status?: StepStatus) => {
     switch (status) {
-      case "completed":
+      case 'completed':
         return <CheckCircle2 className="h-4 w-4 text-white" />;
-      case "rejected":
+      case 'rejected':
         return <XCircle className="h-4 w-4 text-white" />;
-      case "deferred":
+      case 'deferred':
         return <Clock className="h-4 w-4 text-white" />;
-      case "in_progress":
+      case 'in_progress':
         return <AlertCircle className="h-4 w-4 text-white animate-pulse" />;
-      case "skipped":
+      case 'skipped':
         return <SkipForward className="h-4 w-4 text-white" />;
       default:
         return null;
@@ -197,45 +192,36 @@ export function SpendingCaseTimeline({
 
   const getStatusColor = (status?: StepStatus, defaultColor?: string) => {
     switch (status) {
-      case "completed":
-        return "bg-green-500";
-      case "rejected":
-        return "bg-red-500";
-      case "deferred":
-        return "bg-yellow-500";
-      case "in_progress":
-        return defaultColor || "bg-primary";
-      case "skipped":
-        return "bg-gray-400";
+      case 'completed':
+        return 'bg-green-500';
+      case 'rejected':
+        return 'bg-red-500';
+      case 'deferred':
+        return 'bg-yellow-500';
+      case 'in_progress':
+        return defaultColor || 'bg-primary';
+      case 'skipped':
+        return 'bg-gray-400';
       default:
-        return "bg-muted";
+        return 'bg-muted';
     }
   };
 
   const getStatusLabel = (status?: StepStatus) => {
     switch (status) {
-      case "completed":
-        return "Validé";
-      case "rejected":
-        return "Rejeté";
-      case "deferred":
-        return "Différé";
-      case "in_progress":
-        return "En cours";
-      case "skipped":
-        return "Ignoré";
+      case 'completed':
+        return 'Validé';
+      case 'rejected':
+        return 'Rejeté';
+      case 'deferred':
+        return 'Différé';
+      case 'in_progress':
+        return 'En cours';
+      case 'skipped':
+        return 'Ignoré';
       default:
-        return "En attente";
+        return 'En attente';
     }
-  };
-
-  const formatMontant = (montant: number) => {
-    return (
-      new Intl.NumberFormat("fr-FR", {
-        notation: "compact",
-        maximumFractionDigits: 1,
-      }).format(montant) + " F"
-    );
   };
 
   const handleStepClick = (stage: SpendingStage) => {
@@ -260,9 +246,7 @@ export function SpendingCaseTimeline({
             {SPENDING_STAGES.map((_, i) => (
               <div key={i} className="flex items-center flex-1">
                 <div className="h-10 w-10 rounded-full bg-muted" />
-                {i < SPENDING_STAGES.length - 1 && (
-                  <div className="h-1 flex-1 mx-1 bg-muted" />
-                )}
+                {i < SPENDING_STAGES.length - 1 && <div className="h-1 flex-1 mx-1 bg-muted" />}
               </div>
             ))}
           </div>
@@ -304,7 +288,7 @@ export function SpendingCaseTimeline({
             </div>
           </CardHeader>
         )}
-        <CardContent className={compact ? "py-3" : "pt-0"}>
+        <CardContent className={compact ? 'py-3' : 'pt-0'}>
           <div className="flex items-center justify-between gap-1 overflow-x-auto pb-2">
             {SPENDING_STAGES.map((stage, index) => {
               const stepData = getStepData(stage);
@@ -315,57 +299,52 @@ export function SpendingCaseTimeline({
               const canTransition = availableTransitions.includes(stage);
 
               return (
-                <div
-                  key={stage}
-                  className="flex items-center flex-1 min-w-[60px]"
-                >
+                <div key={stage} className="flex items-center flex-1 min-w-[60px]">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => handleStepClick(stage)}
                         className={cn(
-                          "flex flex-col items-center w-full transition-all duration-300",
-                          "cursor-pointer hover:opacity-80",
-                          highlightCurrent && isCurrent && "scale-110"
+                          'flex flex-col items-center w-full transition-all duration-300',
+                          'cursor-pointer hover:opacity-80',
+                          highlightCurrent && isCurrent && 'scale-110'
                         )}
                       >
                         <div
                           className={cn(
-                            "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 relative",
+                            'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 relative',
                             getStatusColor(stepData?.status, visual.bgColor),
-                            isCurrent && "ring-4 ring-primary/30",
-                            stepData?.status === "completed" &&
-                              "shadow-lg shadow-green-200",
-                            canTransition &&
-                              "ring-2 ring-amber-400 ring-offset-2"
+                            isCurrent && 'ring-4 ring-primary/30',
+                            stepData?.status === 'completed' && 'shadow-lg shadow-green-200',
+                            canTransition && 'ring-2 ring-amber-400 ring-offset-2'
                           )}
                         >
                           {getStatusIcon(stepData?.status) || (
                             <Icon className="h-5 w-5 text-white opacity-70" />
                           )}
-                          {workflowV2Enabled && stepData?.status === "pending" && (
+                          {workflowV2Enabled && stepData?.status === 'pending' && (
                             <Lock className="absolute -bottom-1 -right-1 h-3 w-3 text-muted-foreground" />
                           )}
                         </div>
                         <span
                           className={cn(
-                            "text-xs mt-1 text-center font-medium",
-                            isCurrent && "text-primary",
-                            stepData?.status === "completed" && "text-green-600",
-                            stepData?.status === "rejected" && "text-red-600",
-                            !stepData?.status && "text-muted-foreground"
+                            'text-xs mt-1 text-center font-medium',
+                            isCurrent && 'text-primary',
+                            stepData?.status === 'completed' && 'text-green-600',
+                            stepData?.status === 'rejected' && 'text-red-600',
+                            !stepData?.status && 'text-muted-foreground'
                           )}
                         >
                           {compact ? config.shortLabel : config.label}
                         </span>
                         {showAmounts && stepData?.montant && !compact && (
                           <span className="text-[10px] text-muted-foreground">
-                            {formatMontant(stepData.montant)}
+                            {formatCurrency(stepData.montant)}
                           </span>
                         )}
                         {stepData?.date && !compact && (
                           <span className="text-[10px] text-muted-foreground">
-                            {format(new Date(stepData.date), "dd/MM", {
+                            {format(new Date(stepData.date), 'dd/MM', {
                               locale: fr,
                             })}
                           </span>
@@ -375,19 +354,15 @@ export function SpendingCaseTimeline({
                     <TooltipContent side="bottom" className="max-w-xs">
                       <div className="space-y-1">
                         <p className="font-medium">{config.label}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {config.description}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{config.description}</p>
                         <p className="text-xs">
-                          Statut:{" "}
+                          Statut:{' '}
                           <Badge
                             variant="outline"
                             className={cn(
-                              "text-xs",
-                              stepData?.status === "completed" &&
-                                "bg-green-100 text-green-700",
-                              stepData?.status === "rejected" &&
-                                "bg-red-100 text-red-700"
+                              'text-xs',
+                              stepData?.status === 'completed' && 'bg-green-100 text-green-700',
+                              stepData?.status === 'rejected' && 'bg-red-100 text-red-700'
                             )}
                           >
                             {getStatusLabel(stepData?.status)}
@@ -397,22 +372,12 @@ export function SpendingCaseTimeline({
                           <p className="text-xs">Réf: {stepData.reference}</p>
                         )}
                         {stepData?.montant && (
-                          <p className="text-xs">
-                            Montant:{" "}
-                            {new Intl.NumberFormat("fr-FR").format(
-                              stepData.montant
-                            )}{" "}
-                            FCFA
-                          </p>
+                          <p className="text-xs">Montant: {formatCurrency(stepData.montant)}</p>
                         )}
                         {stepData?.date && (
                           <p className="text-xs">
-                            Date:{" "}
-                            {format(
-                              new Date(stepData.date),
-                              "dd/MM/yyyy HH:mm",
-                              { locale: fr }
-                            )}
+                            Date:{' '}
+                            {format(new Date(stepData.date), 'dd/MM/yyyy HH:mm', { locale: fr })}
                           </p>
                         )}
                         <p className="text-xs text-muted-foreground">
@@ -438,13 +403,11 @@ export function SpendingCaseTimeline({
                   {index < SPENDING_STAGES.length - 1 && (
                     <div
                       className={cn(
-                        "h-0.5 flex-1 mx-1 transition-colors duration-300 relative",
-                        stepData?.status === "completed"
-                          ? "bg-green-500"
-                          : "bg-muted"
+                        'h-0.5 flex-1 mx-1 transition-colors duration-300 relative',
+                        stepData?.status === 'completed' ? 'bg-green-500' : 'bg-muted'
                       )}
                     >
-                      {stepData?.status === "completed" && (
+                      {stepData?.status === 'completed' && (
                         <ChevronRight className="absolute -right-1 top-1/2 -translate-y-1/2 h-3 w-3 text-green-500" />
                       )}
                     </div>
@@ -509,7 +472,11 @@ function StageDetailDialog({
   onNavigate,
 }: StageDetailDialogProps) {
   // Hooks must be called unconditionally before any early return
-  const { canValidate, userRole: _userRole, requiredRole } = useStagePermission(stage ?? "note_sef");
+  const {
+    canValidate,
+    userRole: _userRole,
+    requiredRole,
+  } = useStagePermission(stage ?? 'note_sef');
 
   if (!stage) return null;
 
@@ -523,7 +490,7 @@ function StageDetailDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className={cn("p-2 rounded-full", visual.bgColor)}>
+            <div className={cn('p-2 rounded-full', visual.bgColor)}>
               <Icon className="h-5 w-5 text-white" />
             </div>
             {config.label}
@@ -537,20 +504,20 @@ function StageDetailDialog({
             <span className="text-sm font-medium">Statut</span>
             <Badge
               variant={
-                stepData?.status === "completed"
-                  ? "default"
-                  : stepData?.status === "rejected"
-                  ? "destructive"
-                  : "secondary"
+                stepData?.status === 'completed'
+                  ? 'default'
+                  : stepData?.status === 'rejected'
+                    ? 'destructive'
+                    : 'secondary'
               }
             >
-              {stepData?.status === "completed"
-                ? "Validé"
-                : stepData?.status === "rejected"
-                ? "Rejeté"
-                : stepData?.status === "in_progress"
-                ? "En cours"
-                : "En attente"}
+              {stepData?.status === 'completed'
+                ? 'Validé'
+                : stepData?.status === 'rejected'
+                  ? 'Rejeté'
+                  : stepData?.status === 'in_progress'
+                    ? 'En cours'
+                    : 'En attente'}
             </Badge>
           </div>
 
@@ -566,9 +533,7 @@ function StageDetailDialog({
           {stepData?.montant && (
             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
               <span className="text-sm font-medium">Montant</span>
-              <span className="font-medium">
-                {new Intl.NumberFormat("fr-FR").format(stepData.montant)} FCFA
-              </span>
+              <span className="font-medium">{formatCurrency(stepData.montant)}</span>
             </div>
           )}
 
@@ -577,7 +542,7 @@ function StageDetailDialog({
             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
               <span className="text-sm font-medium">Date</span>
               <span>
-                {format(new Date(stepData.date), "dd/MM/yyyy HH:mm", {
+                {format(new Date(stepData.date), 'dd/MM/yyyy HH:mm', {
                   locale: fr,
                 })}
               </span>
@@ -610,11 +575,7 @@ function StageDetailDialog({
               </Button>
             )}
             {!stepData?.entityId && canValidate && (
-              <Button
-                variant="outline"
-                onClick={() => onNavigate(visual.route)}
-                className="flex-1"
-              >
+              <Button variant="outline" onClick={() => onNavigate(visual.route)} className="flex-1">
                 Créer
               </Button>
             )}

@@ -6,16 +6,16 @@ import { useAuditLog } from '@/hooks/useAuditLog';
 
 // Étapes de validation workflow
 export const VALIDATION_STEPS = [
-  { order: 1, role: 'DAAF', label: 'Sous-Directeur DAAF' },
-  { order: 2, role: 'CB', label: 'Contrôleur Budgétaire' },
-  { order: 3, role: 'DAF', label: 'Directeur Administratif et Financier' },
-  { order: 4, role: 'DG', label: 'Directeur Général' },
+  { order: 1, role: 'DAAF', label: 'Sous-Directeur DAAF', shortLabel: 'Sous-Dir DAAF' },
+  { order: 2, role: 'CB', label: 'Contrôleur Budgétaire', shortLabel: 'CB' },
+  { order: 3, role: 'DAF', label: 'Directeur Administratif et Financier', shortLabel: 'Dir DAAF' },
+  { order: 4, role: 'DG', label: 'Directeur Général', shortLabel: 'DG' },
 ];
 
 // Étapes de signature (aligné avec le schéma DB ordonnancement_signatures: colonnes role, required)
 export const SIGNATURE_STEPS = [
-  { order: 1, role: 'DAAF', label: 'Directeur Administratif et Financier' },
-  { order: 2, role: 'DG', label: 'Directeur Général (Ordonnateur)' },
+  { order: 1, role: 'DAAF', label: 'Directeur Administratif et Financier', shortLabel: 'Dir DAAF' },
+  { order: 2, role: 'DG', label: 'Directeur Général (Ordonnateur)', shortLabel: 'DG' },
 ];
 
 export const MODES_PAIEMENT = [
@@ -137,7 +137,7 @@ export function useOrdonnancements() {
           )
         `
         )
-        .eq('statut', 'valide')
+        .eq('statut', 'validé_dg')
         .eq('exercice', exercice)
         // Exclut les liquidations migrées à montant=0 qui pollueraient le select
         // et permettraient de créer un ordonnancement bancal (audit 2026-04-07)
@@ -201,18 +201,9 @@ export function useOrdonnancements() {
         );
       }
 
-      // Generate atomic sequence number
-      const { data: seqData, error: seqError } = await supabase.rpc('get_next_sequence', {
-        p_doc_type: 'ORD',
-        p_exercice: exercice || new Date().getFullYear(),
-        p_direction_code: null,
-        p_scope: 'global',
-      });
-
-      if (seqError) throw seqError;
-      if (!seqData || seqData.length === 0) throw new Error('Échec génération numéro');
-
-      const numero = seqData[0].full_code;
+      // Numéro auto-généré par trigger DB (format ARTI07MMYYNNNN)
+      // Le trigger trg_ordonnancement_arti_ref appelle generate_arti_reference(7)
+      const numero = ''; // Sera remplacé par le trigger BEFORE INSERT
 
       const { data: ordonnancement, error } = await supabase
         .from('ordonnancements')
@@ -264,6 +255,9 @@ export function useOrdonnancements() {
   // Soumettre un ordonnancement
   const submitOrdonnancement = useMutation({
     mutationFn: async (id: string) => {
+      // Supprimer les étapes existantes (idempotence en cas de double-clic)
+      await supabase.from('ordonnancement_validations').delete().eq('ordonnancement_id', id);
+
       // Créer les étapes de validation
       const validationSteps = VALIDATION_STEPS.map((step) => ({
         ordonnancement_id: id,
@@ -319,6 +313,11 @@ export function useOrdonnancements() {
       stepOrder: number;
       comments?: string;
     }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Utilisateur non authentifié');
+
       const currentStep = VALIDATION_STEPS.find((s) => s.order === stepOrder);
 
       // Mettre à jour l'étape de validation
@@ -327,6 +326,7 @@ export function useOrdonnancements() {
         .update({
           status: 'validated',
           validated_at: new Date().toISOString(),
+          validated_by: user.id,
           comments,
         })
         .eq('ordonnancement_id', ordonnancementId)
@@ -345,6 +345,7 @@ export function useOrdonnancements() {
             statut: 'valide',
             workflow_status: 'valide',
             validated_at: new Date().toISOString(),
+            validated_by: user.id,
           })
           .eq('id', ordonnancementId);
 

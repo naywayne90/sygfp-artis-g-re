@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * MajFeuillesRoutePage - Mise à jour des feuilles de routes
  *
@@ -6,22 +5,22 @@
  * comme dans l'ancien système (synchroUpdateActivite.aspx)
  */
 
-import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -29,7 +28,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -37,9 +36,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   FileEdit,
   Search,
@@ -48,11 +47,12 @@ import {
   Save,
   Edit,
   Loader2,
-  AlertCircle
-} from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+  AlertCircle,
+} from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { formatCurrency } from '@/lib/utils';
 
 interface FeuilleRoute {
   id: string;
@@ -78,42 +78,47 @@ interface FeuilleRoute {
 export default function MajFeuillesRoutePage() {
   const { exerciceId, exercice, isReadOnly } = useExercice();
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDirection, setSelectedDirection] = useState<string>("all");
-  const [selectedMission, setSelectedMission] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDirection, setSelectedDirection] = useState<string>('all');
+  const [selectedMission, setSelectedMission] = useState<string>('all');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FeuilleRoute | null>(null);
   const [editForm, setEditForm] = useState({
-    libelle: "",
+    libelle: '',
     poids: 0,
-    budget_prevu: 0
+    budget_prevu: 0,
   });
 
   // Charger les filtres
   const { data: filterData } = useQuery({
-    queryKey: ["feuilles-route-filters", exerciceId],
+    queryKey: ['feuilles-route-filters', exerciceId],
     queryFn: async () => {
       const [directionsRes, missionsRes] = await Promise.all([
-        supabase.from("directions").select("id, code, label").order("code"),
-        supabase.from("missions").select("id, code, libelle").order("code")
+        supabase.from('directions').select('id, code, label').order('code'),
+        supabase.from('missions').select('id, code, libelle').order('code'),
       ]);
 
       return {
         directions: directionsRes.data || [],
-        missions: missionsRes.data || []
+        missions: missionsRes.data || [],
       };
     },
-    enabled: !!exerciceId
+    enabled: !!exerciceId,
   });
 
   // Charger les feuilles de route (activités)
-  const { data: feuilles, isLoading, refetch } = useQuery({
-    queryKey: ["feuilles-route-maj", exerciceId, selectedDirection, selectedMission],
+  const {
+    data: feuilles,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['feuilles-route-maj', exerciceId, selectedDirection, selectedMission],
     queryFn: async () => {
       const query = supabase
-        .from("activites")
-        .select(`
+        .from('activites')
+        .select(
+          `
           id,
           code,
           libelle,
@@ -140,10 +145,11 @@ export default function MajFeuillesRoutePage() {
               )
             )
           )
-        `)
-        .eq("exercice_id", exerciceId);
+        `
+        )
+        .eq('exercice_id', exerciceId);
 
-      const { data, error } = await query.order("code");
+      const { data, error } = await query.order('code');
 
       if (error) throw error;
 
@@ -151,60 +157,65 @@ export default function MajFeuillesRoutePage() {
         id: item.id,
         code: item.code,
         libelle: item.libelle,
-        direction_id: item.action?.mission?.os?.direction?.id || "",
-        direction_code: item.action?.mission?.os?.direction?.code || "-",
-        direction_label: item.action?.mission?.os?.direction?.label || "-",
-        mission_id: item.action?.mission?.id || "",
-        mission_code: item.action?.mission?.code || "-",
-        mission_libelle: item.action?.mission?.libelle || "-",
-        os_id: item.action?.mission?.os?.id || "",
-        os_code: item.action?.mission?.os?.code || "-",
-        os_libelle: item.action?.mission?.os?.libelle || "-",
-        action_id: item.action?.id || "",
-        action_code: item.action?.code || "-",
-        action_libelle: item.action?.libelle || "-",
+        direction_id: item.action?.mission?.os?.direction?.id || '',
+        direction_code: item.action?.mission?.os?.direction?.code || '-',
+        direction_label: item.action?.mission?.os?.direction?.label || '-',
+        mission_id: item.action?.mission?.id || '',
+        mission_code: item.action?.mission?.code || '-',
+        mission_libelle: item.action?.mission?.libelle || '-',
+        os_id: item.action?.mission?.os?.id || '',
+        os_code: item.action?.mission?.os?.code || '-',
+        os_libelle: item.action?.mission?.os?.libelle || '-',
+        action_id: item.action?.id || '',
+        action_code: item.action?.code || '-',
+        action_libelle: item.action?.libelle || '-',
         poids: item.poids || 0,
         budget_prevu: item.budget_prevu || 0,
-        status: item.status || "actif"
+        status: item.status || 'actif',
       })) as FeuilleRoute[];
 
       // Filtrer par direction et mission
-      if (selectedDirection !== "all") {
-        result = result.filter(f => f.direction_id === selectedDirection);
+      if (selectedDirection !== 'all') {
+        result = result.filter((f) => f.direction_id === selectedDirection);
       }
-      if (selectedMission !== "all") {
-        result = result.filter(f => f.mission_id === selectedMission);
+      if (selectedMission !== 'all') {
+        result = result.filter((f) => f.mission_id === selectedMission);
       }
 
       return result;
     },
-    enabled: !!exerciceId
+    enabled: !!exerciceId,
   });
 
   // Mutation pour mise à jour
   const updateMutation = useMutation({
-    mutationFn: async (data: { id: string; libelle: string; poids: number; budget_prevu: number }) => {
+    mutationFn: async (data: {
+      id: string;
+      libelle: string;
+      poids: number;
+      budget_prevu: number;
+    }) => {
       const { error } = await supabase
-        .from("activites")
+        .from('activites')
         .update({
           libelle: data.libelle,
           poids: data.poids,
-          budget_prevu: data.budget_prevu
+          budget_prevu: data.budget_prevu,
         })
-        .eq("id", data.id);
+        .eq('id', data.id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Feuille de route mise à jour");
-      queryClient.invalidateQueries({ queryKey: ["feuilles-route-maj"] });
+      toast.success('Feuille de route mise à jour');
+      queryClient.invalidateQueries({ queryKey: ['feuilles-route-maj'] });
       setEditDialogOpen(false);
       setEditingItem(null);
     },
     onError: (error) => {
-      console.error("Update error:", error);
-      toast.error("Erreur lors de la mise à jour");
-    }
+      console.error('Update error:', error);
+      toast.error('Erreur lors de la mise à jour');
+    },
   });
 
   // Filtrer par recherche
@@ -213,11 +224,12 @@ export default function MajFeuillesRoutePage() {
     if (!searchQuery) return feuilles;
 
     const query = searchQuery.toLowerCase();
-    return feuilles.filter(f =>
-      f.libelle.toLowerCase().includes(query) ||
-      f.code.toLowerCase().includes(query) ||
-      f.direction_label.toLowerCase().includes(query) ||
-      f.mission_libelle.toLowerCase().includes(query)
+    return feuilles.filter(
+      (f) =>
+        f.libelle.toLowerCase().includes(query) ||
+        f.code.toLowerCase().includes(query) ||
+        f.direction_label.toLowerCase().includes(query) ||
+        f.mission_libelle.toLowerCase().includes(query)
     );
   }, [feuilles, searchQuery]);
 
@@ -226,7 +238,7 @@ export default function MajFeuillesRoutePage() {
     setEditForm({
       libelle: item.libelle,
       poids: item.poids,
-      budget_prevu: item.budget_prevu
+      budget_prevu: item.budget_prevu,
     });
     setEditDialogOpen(true);
   };
@@ -236,7 +248,7 @@ export default function MajFeuillesRoutePage() {
 
     updateMutation.mutate({
       id: editingItem.id,
-      ...editForm
+      ...editForm,
     });
   };
 
@@ -244,24 +256,12 @@ export default function MajFeuillesRoutePage() {
     if (selectedItems.length === filteredFeuilles.length) {
       setSelectedItems([]);
     } else {
-      setSelectedItems(filteredFeuilles.map(f => f.id));
+      setSelectedItems(filteredFeuilles.map((f) => f.id));
     }
   };
 
   const toggleSelectItem = (id: string) => {
-    setSelectedItems(prev =>
-      prev.includes(id)
-        ? prev.filter(i => i !== id)
-        : [...prev, id]
-    );
-  };
-
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "decimal",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(montant);
+    setSelectedItems((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
   return (
@@ -274,7 +274,7 @@ export default function MajFeuillesRoutePage() {
             Mise à jour des feuilles de routes
           </h1>
           <p className="text-muted-foreground">
-            Exercice {exercice?.annee || "-"} - Réaménagement et modification
+            Exercice {exercice?.annee || '-'} - Réaménagement et modification
           </p>
         </div>
 
@@ -291,7 +291,8 @@ export default function MajFeuillesRoutePage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            L'exercice {exercice?.annee} est en mode lecture seule. Les modifications ne sont pas autorisées.
+            L'exercice {exercice?.annee} est en mode lecture seule. Les modifications ne sont pas
+            autorisées.
           </AlertDescription>
         </Alert>
       )}
@@ -379,7 +380,10 @@ export default function MajFeuillesRoutePage() {
                   <TableRow>
                     <TableHead className="w-10">
                       <Checkbox
-                        checked={selectedItems.length === filteredFeuilles.length && filteredFeuilles.length > 0}
+                        checked={
+                          selectedItems.length === filteredFeuilles.length &&
+                          filteredFeuilles.length > 0
+                        }
                         onCheckedChange={toggleSelectAll}
                       />
                     </TableHead>
@@ -396,7 +400,10 @@ export default function MajFeuillesRoutePage() {
                 </TableHeader>
                 <TableBody>
                   {filteredFeuilles.map((feuille, index) => (
-                    <TableRow key={feuille.id} className={selectedItems.includes(feuille.id) ? "bg-muted/50" : ""}>
+                    <TableRow
+                      key={feuille.id}
+                      className={selectedItems.includes(feuille.id) ? 'bg-muted/50' : ''}
+                    >
                       <TableCell>
                         <Checkbox
                           checked={selectedItems.includes(feuille.id)}
@@ -416,18 +423,19 @@ export default function MajFeuillesRoutePage() {
                         <span className="text-sm">{feuille.direction_code}</span>
                       </TableCell>
                       <TableCell className="hidden lg:table-cell">
-                        <span className="text-sm truncate max-w-[150px] block" title={feuille.mission_libelle}>
+                        <span
+                          className="text-sm truncate max-w-[150px] block"
+                          title={feuille.mission_libelle}
+                        >
                           {feuille.mission_code}
                         </span>
                       </TableCell>
                       <TableCell className="hidden xl:table-cell">
                         <span className="text-sm">{feuille.os_code}</span>
                       </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {feuille.poids}%
-                      </TableCell>
+                      <TableCell className="text-right font-medium">{feuille.poids}%</TableCell>
                       <TableCell className="text-right hidden md:table-cell">
-                        {formatMontant(feuille.budget_prevu)} FCFA
+                        {formatCurrency(feuille.budget_prevu)}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -458,9 +466,7 @@ export default function MajFeuillesRoutePage() {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Modifier la feuille de route</DialogTitle>
-            <DialogDescription>
-              {editingItem && `Code: ${editingItem.code}`}
-            </DialogDescription>
+            <DialogDescription>{editingItem && `Code: ${editingItem.code}`}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -469,7 +475,7 @@ export default function MajFeuillesRoutePage() {
               <Textarea
                 id="libelle"
                 value={editForm.libelle}
-                onChange={(e) => setEditForm(prev => ({ ...prev, libelle: e.target.value }))}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, libelle: e.target.value }))}
                 rows={3}
               />
             </div>
@@ -483,7 +489,9 @@ export default function MajFeuillesRoutePage() {
                   min={0}
                   max={100}
                   value={editForm.poids}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, poids: parseFloat(e.target.value) || 0 }))}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({ ...prev, poids: parseFloat(e.target.value) || 0 }))
+                  }
                 />
               </div>
 
@@ -494,17 +502,32 @@ export default function MajFeuillesRoutePage() {
                   type="number"
                   min={0}
                   value={editForm.budget_prevu}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, budget_prevu: parseFloat(e.target.value) || 0 }))}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      budget_prevu: parseFloat(e.target.value) || 0,
+                    }))
+                  }
                 />
               </div>
             </div>
 
             {editingItem && (
               <div className="text-sm text-muted-foreground space-y-1 pt-2 border-t">
-                <p><strong>Direction:</strong> {editingItem.direction_code} - {editingItem.direction_label}</p>
-                <p><strong>Mission:</strong> {editingItem.mission_code} - {editingItem.mission_libelle}</p>
-                <p><strong>OS:</strong> {editingItem.os_code} - {editingItem.os_libelle}</p>
-                <p><strong>Action:</strong> {editingItem.action_code} - {editingItem.action_libelle}</p>
+                <p>
+                  <strong>Direction:</strong> {editingItem.direction_code} -{' '}
+                  {editingItem.direction_label}
+                </p>
+                <p>
+                  <strong>Mission:</strong> {editingItem.mission_code} -{' '}
+                  {editingItem.mission_libelle}
+                </p>
+                <p>
+                  <strong>OS:</strong> {editingItem.os_code} - {editingItem.os_libelle}
+                </p>
+                <p>
+                  <strong>Action:</strong> {editingItem.action_code} - {editingItem.action_libelle}
+                </p>
               </div>
             )}
           </div>

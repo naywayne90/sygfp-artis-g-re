@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,6 +15,7 @@ import { useNotesAEFExport } from '@/hooks/useNotesAEFExport';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
+import { useRBAC } from '@/contexts/RBACContext';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
@@ -39,10 +40,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function NotesAEF() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
+  const { isDG } = useRBAC();
 
   // Hook pour les exports (Excel, PDF, CSV)
   const { exportNotesAEF, exportNotesAEFPDF, exportNotesAEFCSV, isExporting, exportProgress } =
@@ -82,6 +85,11 @@ export default function NotesAEF() {
   const [prefillNoteSEFId, setPrefillNoteSEFId] = useState<string | null>(null);
 
   const canValidate = hasAnyRole(['ADMIN', 'DG', 'DAAF']);
+
+  // DG : ouvrir directement sur l'onglet "À valider"
+  useEffect(() => {
+    if (isDG) setActiveTab('a_valider');
+  }, [isDG, setActiveTab]);
 
   // Filters communs pour les exports (respectent les filtres actifs)
   const exportFilters = {
@@ -198,7 +206,7 @@ export default function NotesAEF() {
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  onClick={() => (window.location.href = '/notes-aef/validation')}
+                  onClick={() => navigate('/notes-aef/validation')}
                   className="gap-2"
                 >
                   <CheckCircle className="h-4 w-4" />
@@ -287,23 +295,26 @@ export default function NotesAEF() {
             </Tooltip>
           </TooltipProvider>
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button onClick={() => setFormOpen(true)} className="gap-2" disabled={!canWrite}>
-                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  Nouvelle note AEF
-                </Button>
-              </span>
-            </TooltipTrigger>
-            {!canWrite && (
-              <TooltipContent>
-                <p>{getDisabledMessage()}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+        {/* DG ne crée pas de notes — il valide */}
+        {!isDG && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button onClick={() => setFormOpen(true)} className="gap-2" disabled={!canWrite}>
+                    {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    Nouvelle note AEF
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!canWrite && (
+                <TooltipContent>
+                  <p>{getDisabledMessage()}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </PageHeader>
 
       {/* KPIs */}

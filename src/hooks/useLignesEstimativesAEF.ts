@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Hook pour gérer les lignes estimatives des Notes AEF
  *
@@ -8,25 +7,25 @@
  * - Quantité, Prix unitaire, Montant total
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export const CATEGORIES_LIGNE = [
-  { value: "fournitures", label: "Fournitures" },
-  { value: "equipement", label: "Équipement" },
-  { value: "services", label: "Services" },
-  { value: "travaux", label: "Travaux" },
-  { value: "honoraires", label: "Honoraires" },
-  { value: "transport", label: "Transport" },
-  { value: "hebergement", label: "Hébergement" },
-  { value: "restauration", label: "Restauration" },
-  { value: "communication", label: "Communication" },
-  { value: "formation", label: "Formation" },
-  { value: "autre", label: "Autre" },
+  { value: 'fournitures', label: 'Fournitures' },
+  { value: 'equipement', label: 'Équipement' },
+  { value: 'services', label: 'Services' },
+  { value: 'travaux', label: 'Travaux' },
+  { value: 'honoraires', label: 'Honoraires' },
+  { value: 'transport', label: 'Transport' },
+  { value: 'hebergement', label: 'Hébergement' },
+  { value: 'restauration', label: 'Restauration' },
+  { value: 'communication', label: 'Communication' },
+  { value: 'formation', label: 'Formation' },
+  { value: 'autre', label: 'Autre' },
 ] as const;
 
-export type CategorieTypeLigne = typeof CATEGORIES_LIGNE[number]["value"];
+export type CategorieTypeLigne = (typeof CATEGORIES_LIGNE)[number]['value'];
 
 export interface LigneEstimativeAEF {
   id: string;
@@ -63,17 +62,21 @@ export function useLignesEstimativesAEF(noteAefId: string | undefined) {
   const queryClient = useQueryClient();
 
   // Récupérer les lignes d'une note AEF
-  const { data: lignes, isLoading, error } = useQuery({
-    queryKey: ["lignes-estimatives-aef", noteAefId],
+  const {
+    data: lignes,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['lignes-estimatives-aef', noteAefId],
     queryFn: async () => {
       if (!noteAefId) return [];
 
       const { data, error } = await supabase
-        .from("lignes_estimatives_aef")
-        .select("*")
-        .eq("note_aef_id", noteAefId)
-        .order("ordre", { ascending: true })
-        .order("created_at", { ascending: true });
+        .from('lignes_estimatives_aef')
+        .select('*')
+        .eq('note_aef_id', noteAefId)
+        .order('ordre', { ascending: true })
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
       return data as LigneEstimativeAEF[];
@@ -88,7 +91,7 @@ export function useLignesEstimativesAEF(noteAefId: string | undefined) {
   const createMutation = useMutation({
     mutationFn: async (input: CreateLigneInput) => {
       const { data, error } = await supabase
-        .from("lignes_estimatives_aef")
+        .from('lignes_estimatives_aef')
         .insert({
           note_aef_id: input.note_aef_id,
           categorie: input.categorie,
@@ -104,12 +107,12 @@ export function useLignesEstimativesAEF(noteAefId: string | undefined) {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["lignes-estimatives-aef", noteAefId] });
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast.success("Ligne ajoutée");
+      queryClient.invalidateQueries({ queryKey: ['lignes-estimatives-aef', noteAefId] });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      toast.success('Ligne ajoutée');
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -118,9 +121,9 @@ export function useLignesEstimativesAEF(noteAefId: string | undefined) {
     mutationFn: async (input: UpdateLigneInput) => {
       const { id, ...updateData } = input;
       const { data, error } = await supabase
-        .from("lignes_estimatives_aef")
+        .from('lignes_estimatives_aef')
         .update(updateData)
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
 
@@ -128,31 +131,28 @@ export function useLignesEstimativesAEF(noteAefId: string | undefined) {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["lignes-estimatives-aef", noteAefId] });
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
+      queryClient.invalidateQueries({ queryKey: ['lignes-estimatives-aef', noteAefId] });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
   // Supprimer une ligne
   const deleteMutation = useMutation({
     mutationFn: async (ligneId: string) => {
-      const { error } = await supabase
-        .from("lignes_estimatives_aef")
-        .delete()
-        .eq("id", ligneId);
+      const { error } = await supabase.from('lignes_estimatives_aef').delete().eq('id', ligneId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["lignes-estimatives-aef", noteAefId] });
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast.success("Ligne supprimée");
+      queryClient.invalidateQueries({ queryKey: ['lignes-estimatives-aef', noteAefId] });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      toast.success('Ligne supprimée');
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -166,18 +166,18 @@ export function useLignesEstimativesAEF(noteAefId: string | undefined) {
 
       for (const update of updates) {
         const { error } = await supabase
-          .from("lignes_estimatives_aef")
+          .from('lignes_estimatives_aef')
           .update({ ordre: update.ordre })
-          .eq("id", update.id);
+          .eq('id', update.id);
 
         if (error) throw error;
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["lignes-estimatives-aef", noteAefId] });
+      queryClient.invalidateQueries({ queryKey: ['lignes-estimatives-aef', noteAefId] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur de réorganisation: " + error.message);
+      toast.error('Erreur de réorganisation: ' + error.message);
     },
   });
 
@@ -185,14 +185,14 @@ export function useLignesEstimativesAEF(noteAefId: string | undefined) {
   const duplicateMutation = useMutation({
     mutationFn: async (ligneId: string) => {
       const ligne = lignes?.find((l) => l.id === ligneId);
-      if (!ligne) throw new Error("Ligne non trouvée");
+      if (!ligne) throw new Error('Ligne non trouvée');
 
       const { data, error } = await supabase
-        .from("lignes_estimatives_aef")
+        .from('lignes_estimatives_aef')
         .insert({
           note_aef_id: ligne.note_aef_id,
           categorie: ligne.categorie,
-          description: ligne.description + " (copie)",
+          description: ligne.description + ' (copie)',
           quantite: ligne.quantite,
           prix_unitaire: ligne.prix_unitaire,
           ordre: (ligne.ordre || 0) + 1,
@@ -204,12 +204,12 @@ export function useLignesEstimativesAEF(noteAefId: string | undefined) {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["lignes-estimatives-aef", noteAefId] });
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast.success("Ligne dupliquée");
+      queryClient.invalidateQueries({ queryKey: ['lignes-estimatives-aef', noteAefId] });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      toast.success('Ligne dupliquée');
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -238,7 +238,7 @@ export function useBulkCreateLignes() {
   return useMutation({
     mutationFn: async (inputs: CreateLigneInput[]) => {
       const { data, error } = await supabase
-        .from("lignes_estimatives_aef")
+        .from('lignes_estimatives_aef')
         .insert(
           inputs.map((input, index) => ({
             note_aef_id: input.note_aef_id,
@@ -257,14 +257,14 @@ export function useBulkCreateLignes() {
     onSuccess: (_, variables) => {
       if (variables.length > 0) {
         queryClient.invalidateQueries({
-          queryKey: ["lignes-estimatives-aef", variables[0].note_aef_id]
+          queryKey: ['lignes-estimatives-aef', variables[0].note_aef_id],
         });
-        queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
+        queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
       }
       toast.success(`${variables.length} ligne(s) ajoutée(s)`);
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 }

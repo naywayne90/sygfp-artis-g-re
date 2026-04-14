@@ -36,11 +36,7 @@ import {
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useDossiers, type Dossier } from '@/hooks/useDossiers';
 import { ETAPE_LABELS } from '@/hooks/useDossierDetails';
-
-const formatMontant = (montant: number | null | undefined) => {
-  if (montant == null) return '0 FCFA';
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-};
+import { formatCurrency } from '@/lib/utils';
 
 const formatDate = (date: string | null | undefined) => {
   if (!date) return '-';
@@ -179,25 +175,25 @@ export default function SuiviDossiers() {
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Montant total estime</p>
-            <p className="text-lg font-bold text-primary">{formatMontant(stats.montant_total)}</p>
+            <p className="text-lg font-bold text-primary">{formatCurrency(stats.montant_total)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Montant engage</p>
-            <p className="text-lg font-bold">{formatMontant(stats.montant_engage)}</p>
+            <p className="text-lg font-bold">{formatCurrency(stats.montant_engage)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Montant liquide</p>
-            <p className="text-lg font-bold">{formatMontant(stats.montant_liquide)}</p>
+            <p className="text-lg font-bold">{formatCurrency(stats.montant_liquide)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Montant paye</p>
-            <p className="text-lg font-bold">{formatMontant(stats.montant_paye)}</p>
+            <p className="text-lg font-bold">{formatCurrency(stats.montant_paye)}</p>
           </CardContent>
         </Card>
       </div>
@@ -301,7 +297,7 @@ export default function SuiviDossiers() {
                         <Badge variant="outline">{getEtapeLabel(dossier.etape_courante)}</Badge>
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {formatMontant(dossier.montant_estime)}
+                        {formatCurrency(dossier.montant_estime)}
                       </TableCell>
                       <TableCell>{getStatutBadge(dossier.statut_global)}</TableCell>
                       <TableCell>{formatDate(dossier.created_at)}</TableCell>

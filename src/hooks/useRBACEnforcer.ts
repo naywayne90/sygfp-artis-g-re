@@ -355,8 +355,9 @@ export function useEntityAccess(
     return entity.created_by === rbac.user.userId;
   }, [entity, rbac.user.userId]);
 
-  const isDraft = useMemo(() => {
-    return entity?.statut === 'soumis' || entity?.statut === 'draft';
+  // brouillon supprime — le statut initial est soumis
+  const isSoumis = useMemo(() => {
+    return entity?.statut === 'soumis';
   }, [entity]);
 
   return {
@@ -365,8 +366,8 @@ export function useEntityAccess(
     canValidate: canValidateEntity,
     canDelete: canDeleteEntity,
     isOwner,
-    isDraft,
-    canEditIfOwnerAndDraft: isOwner && isDraft,
+    isSoumis,
+    canEditIfOwnerAndSoumis: isOwner && isSoumis,
   };
 }
 

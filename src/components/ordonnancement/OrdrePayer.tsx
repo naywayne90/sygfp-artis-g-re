@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { MODES_PAIEMENT } from '@/hooks/useOrdonnancements';
 import { numberToWords } from '@/lib/utils/numberToWords';
+import { formatCurrency } from '@/lib/utils';
 
 interface OrdrePayerProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,8 +21,6 @@ interface OrdrePayerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const formatMontant = (montant: number) => new Intl.NumberFormat('fr-FR').format(montant);
 
 export function OrdrePayer({ ordonnancement, open, onOpenChange }: OrdrePayerProps) {
   const printRef = useRef<HTMLDivElement>(null);
@@ -132,7 +131,7 @@ export function OrdrePayer({ ordonnancement, open, onOpenChange }: OrdrePayerPro
             <p className="font-bold text-lg">RÉPUBLIQUE DE CÔTE D'IVOIRE</p>
             <p className="text-sm">Union - Discipline - Travail</p>
             <p className="text-sm mt-2">————————</p>
-            <p className="font-bold mt-2">[NOM DE L'INSTITUTION]</p>
+            <p className="font-bold mt-2">AUTORITÉ DE RÉGULATION DU TRANSPORT INTÉRIEUR (ARTI)</p>
 
             <div className="mt-6 inline-block border-2 border-black px-8 py-2">
               <p className="font-bold text-xl">ORDRE DE PAYER</p>
@@ -201,12 +200,9 @@ export function OrdrePayer({ ordonnancement, open, onOpenChange }: OrdrePayerPro
             {/* Montant */}
             <div className="border-2 border-black p-6 text-center">
               <p className="text-sm mb-2">MONTANT À PAYER</p>
-              <p className="text-3xl font-bold">
-                {formatMontant(ordonnancement?.montant || 0)} FCFA
-              </p>
+              <p className="text-3xl font-bold">{formatCurrency(ordonnancement?.montant || 0)}</p>
               <p className="text-sm italic mt-2">
-                Arrêté à la somme de: {numberToWords(Math.floor(ordonnancement?.montant || 0))}{' '}
-                francs CFA
+                Arrêté à la somme de: {numberToWords(Math.floor(ordonnancement?.montant || 0))} FCFA
               </p>
             </div>
 

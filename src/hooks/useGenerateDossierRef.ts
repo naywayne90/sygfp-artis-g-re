@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Hook pour générer des références dossier uniques (dossier_ref)
  * Format: ARTI + MM(2) + YY(2) + NNNNNN(6) = 14 chars
@@ -8,9 +7,9 @@
  * zéro collision même en création simultanée.
  */
 
-import { useState, useCallback } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useCallback } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 // ============================================
 // TYPES
@@ -39,7 +38,7 @@ interface ParsedDossierRef {
  * @param ref Référence au format ARTI + MM + YY + NNNNNN
  */
 export function parseDossierRef(ref: string | null | undefined): ParsedDossierRef {
-  if (!ref || ref.length !== 14 || !ref.startsWith("ARTI")) {
+  if (!ref || ref.length !== 14 || !ref.startsWith('ARTI')) {
     return { mois: 0, annee: 0, numero: 0, isValid: false };
   }
 
@@ -71,14 +70,15 @@ export function isValidDossierRef(ref: string | null | undefined): boolean {
  * Ex: ARTI0126000001 → ARTI 01-26 000001
  */
 export function formatDossierRefDisplay(ref: string | null | undefined): string {
-  if (!ref || !isValidDossierRef(ref)) return ref || "-";
+  if (!ref || !isValidDossierRef(ref)) return ref || '-';
 
   const parsed = parseDossierRef(ref);
   if (!parsed.isValid) return ref;
 
-  return `ARTI ${String(parsed.mois).padStart(2, "0")}-${String(
-    parsed.annee % 100
-  ).padStart(2, "0")} ${String(parsed.numero).padStart(6, "0")}`;
+  return `ARTI ${String(parsed.mois).padStart(2, '0')}-${String(parsed.annee % 100).padStart(
+    2,
+    '0'
+  )} ${String(parsed.numero).padStart(6, '0')}`;
 }
 
 // ============================================
@@ -95,14 +95,14 @@ export function useGenerateDossierRef() {
    */
   const generateMutation = useMutation({
     mutationFn: async (): Promise<GenerateDossierRefResult> => {
-      const { data, error } = await supabase.rpc("get_next_dossier_ref");
+      const { data, error } = await supabase.rpc('get_next_dossier_ref');
 
       if (error) {
         throw new Error(`Erreur génération dossier_ref: ${error.message}`);
       }
 
-      if (!data || typeof data !== "string") {
-        throw new Error("Référence dossier invalide retournée par le serveur");
+      if (!data || typeof data !== 'string') {
+        throw new Error('Référence dossier invalide retournée par le serveur');
       }
 
       const parsed = parseDossierRef(data);
@@ -121,7 +121,7 @@ export function useGenerateDossierRef() {
     },
     onSuccess: () => {
       // Invalider les requêtes qui pourraient dépendre du compteur
-      queryClient.invalidateQueries({ queryKey: ["dossier-ref-counters"] });
+      queryClient.invalidateQueries({ queryKey: ['dossier-ref-counters'] });
     },
   });
 

@@ -7,16 +7,8 @@ import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-import {
-  COLUMN_WIDTHS,
-  ROW_HEIGHTS,
-} from './excelStyles';
-import {
-  formatMontant,
-  formatDate,
-  getStatusLabel,
-  generateFilename,
-} from './excelFormats';
+import { COLUMN_WIDTHS, ROW_HEIGHTS } from './excelStyles';
+import { formatMontant, formatDate, getStatusLabel, generateFilename } from './excelFormats';
 
 import type { NoteSEFEntity } from '@/lib/notes-sef/types';
 
@@ -76,7 +68,9 @@ const COLUMNS: ColumnConfig[] = [
 /**
  * Obtient le nom complet d'un profil
  */
-function getFullName(profile: { first_name?: string | null; last_name?: string | null } | null): string {
+function getFullName(
+  profile: { first_name?: string | null; last_name?: string | null } | null
+): string {
   if (!profile) return '-';
   const parts = [profile.first_name, profile.last_name].filter(Boolean);
   return parts.length > 0 ? parts.join(' ') : '-';
@@ -175,7 +169,9 @@ function createDataSheet(
 
   // Ligne 2 : Filtres (si applicable)
   const filtersDesc = getFiltersDescription(filters);
-  rows.push([filtersDesc || `Généré le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`]);
+  rows.push([
+    filtersDesc || `Généré le ${format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}`,
+  ]);
 
   // Ligne 3 : Vide
   rows.push([]);
@@ -324,7 +320,7 @@ function createResumeSheet(data: NoteSEFEntity[]): XLSX.WorkSheet {
   rows.push(['INFORMATIONS GÉNÉRALES']);
   rows.push(['Métrique', 'Valeur']);
   rows.push(['Nombre total de notes', data.length]);
-  rows.push(['Date d\'export', format(new Date(), 'dd/MM/yyyy HH:mm', { locale: fr })]);
+  rows.push(["Date d'export", format(new Date(), 'dd/MM/yyyy HH:mm', { locale: fr })]);
 
   // Dates extrêmes
   const dates = data
@@ -377,9 +373,7 @@ export function generateExcel(options: ExportExcelOptions): void {
   }
 
   // Générer le nom du fichier
-  const finalFilename = filename
-    ? `${filename}.xlsx`
-    : generateFilename('SYGFP_Notes_SEF');
+  const finalFilename = filename ? `${filename}.xlsx` : generateFilename('SYGFP_Notes_SEF');
 
   // Écrire et télécharger le fichier
   XLSX.writeFile(wb, finalFilename, {
@@ -392,12 +386,7 @@ export function generateExcel(options: ExportExcelOptions): void {
  * Génère un fichier Excel en mémoire (Blob)
  */
 export function generateExcelBlob(options: ExportExcelOptions): Blob {
-  const {
-    data,
-    filters,
-    includeResume = true,
-    title = 'SYGFP - Export Notes SEF',
-  } = options;
+  const { data, filters, includeResume = true, title = 'SYGFP - Export Notes SEF' } = options;
 
   // Créer le workbook
   const wb = XLSX.utils.book_new();
@@ -447,7 +436,7 @@ export function generateCSV(data: NoteSEFEntity[], filename?: string): void {
   const csv = XLSX.utils.sheet_to_csv(ws, { FS: ';' }); // Séparateur point-virgule pour Excel français
 
   // Télécharger avec BOM pour UTF-8
-  const bom = '\uFEFF';
+  const bom = '﻿';
   const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
 

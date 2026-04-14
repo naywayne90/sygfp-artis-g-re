@@ -118,8 +118,6 @@ export function SoumissionnairesSection({
         p.code?.toLowerCase().includes(searchPrestataire.toLowerCase()))
   );
 
-  const formatMontant = (montant: number | null) => (montant ? formatCurrency(montant) : '-');
-
   const handleSelectPrestataire = (p: Prestataire) => {
     setNewSoum((prev) => ({
       ...prev,
@@ -314,7 +312,7 @@ export function SoumissionnairesSection({
                     )}
                   </TableCell>
                   <TableCell className="text-right font-mono">
-                    {formatMontant(s.offre_financiere)}
+                    {formatCurrency(s.offre_financiere)}
                     {s.note_financiere !== null && (
                       <p className="text-xs text-muted-foreground mt-0.5">
                         Note: {s.note_financiere}/100

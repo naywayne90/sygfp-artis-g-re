@@ -16,6 +16,7 @@ import { BudgetLineWithRelations } from '@/hooks/useBudgetLines';
 import { useBudgetLineELOP } from '@/hooks/useBudgetLineELOP';
 import { useBudgetLineAudit } from '@/hooks/useBudgetLineAudit';
 import { Loader2 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface BudgetLineDetailSheetProps {
   open: boolean;
@@ -23,13 +24,6 @@ interface BudgetLineDetailSheetProps {
   budgetLine: BudgetLineWithRelations | null;
   defaultTab?: string;
 }
-
-const formatMontant = (amount: number) =>
-  new Intl.NumberFormat('fr-FR', {
-    style: 'decimal',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount) + ' FCFA';
 
 const formatDate = (dateStr: string | null) => {
   if (!dateStr) return '-';
@@ -77,7 +71,7 @@ function MontantCard({ label, value, color }: { label: string; value: number; co
     <Card>
       <CardContent className="pt-3 pb-3">
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className={`text-lg font-bold ${color}`}>{formatMontant(value)}</p>
+        <p className={`text-lg font-bold ${color}`}>{formatCurrency(value)}</p>
       </CardContent>
     </Card>
   );
@@ -215,7 +209,7 @@ function TabInformations({ line }: { line: BudgetLineWithRelations }) {
                 <span
                   className={`text-lg font-bold ${disponible < 0 ? 'text-red-600' : 'text-emerald-600'}`}
                 >
-                  {formatMontant(disponible)}
+                  {formatCurrency(disponible)}
                 </span>
               </div>
             </div>
@@ -348,7 +342,7 @@ function ELOPTable({
                 <TableCell className="text-xs font-mono">{r.numero || '-'}</TableCell>
                 <TableCell className="text-xs">{r.objet || r.reference || '-'}</TableCell>
                 <TableCell className="text-xs text-right font-mono">
-                  {formatMontant(r.montant)}
+                  {formatCurrency(r.montant)}
                 </TableCell>
                 <TableCell className="text-xs">
                   {r.statut ? (

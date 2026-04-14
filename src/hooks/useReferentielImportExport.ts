@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 type ImportResult = {
   success: number;
@@ -12,23 +12,23 @@ export function useReferentielImportExport(
   tableName: string,
   queryKey: string,
   requiredFields: string[],
-  uniqueField: string = "code"
+  uniqueField: string = 'code'
 ) {
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
 
   const parseCSV = (content: string): Record<string, string>[] => {
-    const lines = content.trim().split("\n");
+    const lines = content.trim().split('\n');
     if (lines.length < 2) return [];
 
-    const headers = lines[0].split(/[;,]/).map((h) => h.trim().toLowerCase().replace(/"/g, ""));
+    const headers = lines[0].split(/[;,]/).map((h) => h.trim().toLowerCase().replace(/"/g, ''));
     const data: Record<string, string>[] = [];
 
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(/[;,]/).map((v) => v.trim().replace(/"/g, ""));
+      const values = lines[i].split(/[;,]/).map((v) => v.trim().replace(/"/g, ''));
       const row: Record<string, string> = {};
       headers.forEach((header, index) => {
-        row[header] = values[index] || "";
+        row[header] = values[index] || '';
       });
       data.push(row);
     }
@@ -38,7 +38,7 @@ export function useReferentielImportExport(
 
   const validateRow = (row: Record<string, string>, index: number): string | null => {
     for (const field of requiredFields) {
-      if (!row[field] || row[field].trim() === "") {
+      if (!row[field] || row[field].trim() === '') {
         return `Ligne ${index + 2}: Champ obligatoire "${field}" manquant`;
       }
     }
@@ -54,7 +54,7 @@ export function useReferentielImportExport(
       const data = parseCSV(content);
 
       if (data.length === 0) {
-        throw new Error("Fichier vide ou format invalide");
+        throw new Error('Fichier vide ou format invalide');
       }
 
       // Validate all rows first
@@ -73,7 +73,7 @@ export function useReferentielImportExport(
         // Check for duplicates
         const { data: existing } = await (supabase as any)
           .from(tableName)
-          .select("id")
+          .select('id')
           .eq(uniqueField, row[uniqueField])
           .maybeSingle();
 
@@ -117,30 +117,32 @@ export function useReferentielImportExport(
 
   const exportToCSV = (data: Record<string, any>[], filename: string) => {
     if (!data || data.length === 0) {
-      toast.error("Aucune donnée à exporter");
+      toast.error('Aucune donnée à exporter');
       return;
     }
 
     // Get headers from first item, excluding internal fields
-    const excludedFields = ["id", "created_at", "updated_at"];
+    const excludedFields = ['id', 'created_at', 'updated_at'];
     const headers = Object.keys(data[0]).filter((h) => !excludedFields.includes(h));
 
     // Build CSV content
     const csvContent = [
-      headers.join(";"),
+      headers.join(';'),
       ...data.map((row) =>
-        headers.map((h) => {
-          const value = row[h];
-          if (value === null || value === undefined) return "";
-          if (typeof value === "boolean") return value ? "true" : "false";
-          return String(value).replace(/"/g, '""');
-        }).join(";")
+        headers
+          .map((h) => {
+            const value = row[h];
+            if (value === null || value === undefined) return '';
+            if (typeof value === 'boolean') return value ? 'true' : 'false';
+            return String(value).replace(/"/g, '""');
+          })
+          .join(';')
       ),
-    ].join("\n");
+    ].join('\n');
 
     // Download file
-    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `${filename}_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
@@ -150,18 +152,18 @@ export function useReferentielImportExport(
   };
 
   const downloadTemplate = (fields: { name: string; example: string }[], filename: string) => {
-    const headers = fields.map((f) => f.name).join(";");
-    const example = fields.map((f) => f.example).join(";");
+    const headers = fields.map((f) => f.name).join(';');
+    const example = fields.map((f) => f.example).join(';');
     const csvContent = `${headers}\n${example}`;
 
-    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `modele_${filename}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
 
-    toast.success("Modèle téléchargé");
+    toast.success('Modèle téléchargé');
   };
 
   return {

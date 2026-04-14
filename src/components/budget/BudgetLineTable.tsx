@@ -70,7 +70,7 @@ const getStatusBadge = (status: string | null) => {
     case 'rejete':
       return <Badge variant="destructive">Rejeté</Badge>;
     default:
-      return <Badge variant="secondary">Brouillon</Badge>;
+      return <Badge variant="secondary">Soumis</Badge>;
   }
 };
 

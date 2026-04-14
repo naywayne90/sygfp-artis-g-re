@@ -131,7 +131,7 @@ const LIQUIDATION_RECAP_COLUMNS: ExportColumn[] = [
   { key: 'net_a_payer', label: 'Net à Payer', type: 'currency', width: 18 },
   { key: 'nb_valide', label: 'Validées', type: 'number', width: 10 },
   { key: 'nb_soumis', label: 'Soumises', type: 'number', width: 10 },
-  { key: 'nb_brouillon', label: 'Brouillons', type: 'number', width: 10 },
+  { key: 'nb_soumis_initial', label: 'Soumis', type: 'number', width: 10 },
   { key: 'nb_rejete', label: 'Rejetées', type: 'number', width: 10 },
   { key: 'nb_urgent', label: 'Urgentes', type: 'number', width: 10 },
 ];
@@ -598,7 +598,7 @@ export function useExportBudgetChain() {
               net_a_payer: number;
               nb_valide: number;
               nb_soumis: number;
-              nb_brouillon: number;
+              nb_soumis_initial: number;
               nb_rejete: number;
               nb_urgent: number;
             }
@@ -615,7 +615,7 @@ export function useExportBudgetChain() {
                 net_a_payer: 0,
                 nb_valide: 0,
                 nb_soumis: 0,
-                nb_brouillon: 0,
+                nb_soumis_initial: 0,
                 nb_rejete: 0,
                 nb_urgent: 0,
               });

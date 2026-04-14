@@ -82,7 +82,7 @@ export function NoteSEFForm({
   const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [submitAfterSave, setSubmitAfterSave] = useState(false);
+  const submitAfterSaveRef = useRef(false);
 
   const [formData, setFormData] = useState({
     objet: '',
@@ -498,7 +498,7 @@ export function NoteSEFForm({
           }
 
           // Si l'utilisateur veut soumettre directement
-          if (submitAfterSave) {
+          if (submitAfterSaveRef.current) {
             try {
               await submitNote(result.id);
               toast.success(`Note ${result.reference_pivot || result.numero} créée et soumise`, {
@@ -523,13 +523,13 @@ export function NoteSEFForm({
       console.error('Error saving note:', error);
       toast.error("Erreur lors de l'enregistrement de la note");
     } finally {
-      setSubmitAfterSave(false);
+      submitAfterSaveRef.current = false;
     }
   };
 
   // Soumettre directement (créer + soumettre)
   const handleSaveAndSubmit = () => {
-    setSubmitAfterSave(true);
+    submitAfterSaveRef.current = true;
   };
 
   const isLoading = isCreating || isUpdating || isUploading || isSubmitting;

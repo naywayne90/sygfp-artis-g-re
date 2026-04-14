@@ -483,7 +483,7 @@ export function useNotesSEF() {
           etape_courante: 'note_sef',
           exercice: year,
           created_by: user.id,
-          montant_estime: 0,
+          montant_estime: oldNote?.montant_estime || data.montant_estime || 0,
           montant_engage: 0,
           montant_liquide: 0,
           montant_ordonnance: 0,

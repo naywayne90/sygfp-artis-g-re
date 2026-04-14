@@ -8,13 +8,13 @@
  * - Actions de validation/rejet
  */
 
-import { useState } from "react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -30,13 +30,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   ArrowRight,
   Check,
@@ -47,39 +42,37 @@ import {
   Eye,
   Loader2,
   AlertTriangle,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   useReamenagementBudgetaire,
   type ReamenagementBudgetaire,
-} from "@/hooks/useReamenagementBudgetaire";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useRBAC } from "@/hooks/useRBAC";
+} from '@/hooks/useReamenagementBudgetaire';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useRBAC } from '@/hooks/useRBAC';
+import { formatCurrency } from '@/lib/utils';
 
 interface ReamenementsListProps {
-  filterStatut?: "en_attente" | "valide" | "rejete" | "tous";
+  filterStatut?: 'en_attente' | 'valide' | 'rejete' | 'tous';
   showActions?: boolean;
 }
 
-const formatMontant = (montant: number) =>
-  new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
-
 const getStatutBadge = (statut: string) => {
   switch (statut) {
-    case "en_attente":
+    case 'en_attente':
       return (
         <Badge variant="secondary" className="gap-1">
           <Clock className="h-3 w-3" />
           En attente
         </Badge>
       );
-    case "valide":
+    case 'valide':
       return (
         <Badge className="bg-success gap-1">
           <CheckCircle className="h-3 w-3" />
           Validé
         </Badge>
       );
-    case "rejete":
+    case 'rejete':
       return (
         <Badge variant="destructive" className="gap-1">
           <XCircle className="h-3 w-3" />
@@ -92,45 +85,40 @@ const getStatutBadge = (statut: string) => {
 };
 
 export function ReamenagementsList({
-  filterStatut = "tous",
+  filterStatut = 'tous',
   showActions = true,
 }: ReamenementsListProps) {
   const { exerciceId } = useExercice();
   const { isAdmin, hasProfil } = useRBAC();
-  const canValidate = isAdmin || hasProfil("Validateur") || hasProfil("Controleur");
+  const canValidate = isAdmin || hasProfil('Validateur') || hasProfil('Controleur');
 
   // State
   const [selectedReamenagement, setSelectedReamenagement] =
     useState<ReamenagementBudgetaire | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
-  const [rejectMotif, setRejectMotif] = useState("");
+  const [rejectMotif, setRejectMotif] = useState('');
 
   // Query
-  const {
-    reamenagements,
-    isLoading,
-    validate,
-    reject,
-    isValidating,
-  } = useReamenagementBudgetaire(exerciceId);
+  const { reamenagements, isLoading, validate, reject, isValidating } =
+    useReamenagementBudgetaire(exerciceId);
 
   // Filter reamenagements
   const filteredReamenagements =
-    filterStatut === "tous"
+    filterStatut === 'tous'
       ? reamenagements
       : reamenagements.filter((r) => r.statut === filterStatut);
 
   // Handle validation
   const handleValidate = async (id: string) => {
-    if (!confirm("Confirmer la validation de ce réaménagement ?")) return;
+    if (!confirm('Confirmer la validation de ce réaménagement ?')) return;
     validate(id);
   };
 
   // Handle rejection
   const handleOpenRejectDialog = (reamenagement: ReamenagementBudgetaire) => {
     setSelectedReamenagement(reamenagement);
-    setRejectMotif("");
+    setRejectMotif('');
     setShowRejectDialog(true);
   };
 
@@ -139,7 +127,7 @@ export function ReamenagementsList({
     reject(selectedReamenagement.id, rejectMotif.trim());
     setShowRejectDialog(false);
     setSelectedReamenagement(null);
-    setRejectMotif("");
+    setRejectMotif('');
   };
 
   // Handle view details
@@ -160,9 +148,7 @@ export function ReamenagementsList({
     return (
       <div className="text-center py-8 text-muted-foreground">
         <p>Aucun réaménagement budgétaire trouvé</p>
-        {filterStatut !== "tous" && (
-          <p className="text-sm">pour le filtre "{filterStatut}"</p>
-        )}
+        {filterStatut !== 'tous' && <p className="text-sm">pour le filtre "{filterStatut}"</p>}
       </div>
     );
   }
@@ -175,7 +161,7 @@ export function ReamenagementsList({
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Source</TableHead>
-              <TableHead></TableHead>
+              <TableHead />
               <TableHead>Destination</TableHead>
               <TableHead className="text-right">Montant</TableHead>
               <TableHead>Statut</TableHead>
@@ -186,7 +172,7 @@ export function ReamenagementsList({
             {filteredReamenagements.map((reamenagement) => (
               <TableRow key={reamenagement.id}>
                 <TableCell className="whitespace-nowrap">
-                  {format(new Date(reamenagement.created_at), "dd/MM/yyyy", {
+                  {format(new Date(reamenagement.created_at), 'dd/MM/yyyy', {
                     locale: fr,
                   })}
                 </TableCell>
@@ -199,7 +185,7 @@ export function ReamenagementsList({
                             {reamenagement.imputation_source}
                           </p>
                           <p className="text-xs text-muted-foreground truncate max-w-[150px]">
-                            {reamenagement.libelle_source || "-"}
+                            {reamenagement.libelle_source || '-'}
                           </p>
                         </div>
                       </TooltipTrigger>
@@ -210,8 +196,8 @@ export function ReamenagementsList({
                           NBE: {reamenagement.nature_nbe_source}
                         </p>
                         <p className="text-xs">
-                          Budget: {formatMontant(reamenagement.budget_source_avant)} →{" "}
-                          {formatMontant(reamenagement.budget_source_apres)}
+                          Budget: {formatCurrency(reamenagement.budget_source_avant)} →{' '}
+                          {formatCurrency(reamenagement.budget_source_apres)}
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -229,28 +215,26 @@ export function ReamenagementsList({
                             {reamenagement.imputation_destination}
                           </p>
                           <p className="text-xs text-muted-foreground truncate max-w-[150px]">
-                            {reamenagement.libelle_destination || "-"}
+                            {reamenagement.libelle_destination || '-'}
                           </p>
                         </div>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p className="font-mono">
-                          {reamenagement.imputation_destination}
-                        </p>
+                        <p className="font-mono">{reamenagement.imputation_destination}</p>
                         <p className="text-sm">{reamenagement.libelle_destination}</p>
                         <p className="text-xs text-muted-foreground">
                           NBE: {reamenagement.nature_nbe_destination}
                         </p>
                         <p className="text-xs">
-                          Budget: {formatMontant(reamenagement.budget_destination_avant)}{" "}
-                          → {formatMontant(reamenagement.budget_destination_apres)}
+                          Budget: {formatCurrency(reamenagement.budget_destination_avant)} →{' '}
+                          {formatCurrency(reamenagement.budget_destination_apres)}
                         </p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </TableCell>
                 <TableCell className="text-right font-mono font-medium">
-                  {formatMontant(reamenagement.montant)}
+                  {formatCurrency(reamenagement.montant)}
                 </TableCell>
                 <TableCell>{getStatutBadge(reamenagement.statut)}</TableCell>
                 {showActions && (
@@ -264,7 +248,7 @@ export function ReamenagementsList({
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      {canValidate && reamenagement.statut === "en_attente" && (
+                      {canValidate && reamenagement.statut === 'en_attente' && (
                         <>
                           <Button
                             variant="ghost"
@@ -301,9 +285,9 @@ export function ReamenagementsList({
           <DialogHeader>
             <DialogTitle>Détails du réaménagement</DialogTitle>
             <DialogDescription>
-              Demande du{" "}
+              Demande du{' '}
               {selectedReamenagement &&
-                format(new Date(selectedReamenagement.created_at), "dd MMMM yyyy", {
+                format(new Date(selectedReamenagement.created_at), 'dd MMMM yyyy', {
                   locale: fr,
                 })}
             </DialogDescription>
@@ -325,18 +309,14 @@ export function ReamenagementsList({
               <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center">
                 <div className="bg-red-50 dark:bg-red-950/30 rounded-lg p-3">
                   <p className="text-xs text-muted-foreground mb-1">Source (débit)</p>
-                  <p className="font-mono text-sm">
-                    {selectedReamenagement.imputation_source}
-                  </p>
+                  <p className="font-mono text-sm">{selectedReamenagement.imputation_source}</p>
                   <p className="text-xs text-muted-foreground">
                     {selectedReamenagement.libelle_source}
                   </p>
                   <div className="mt-2 text-xs">
-                    <p>
-                      Avant: {formatMontant(selectedReamenagement.budget_source_avant)}
-                    </p>
+                    <p>Avant: {formatCurrency(selectedReamenagement.budget_source_avant)}</p>
                     <p className="font-medium text-red-600">
-                      Après: {formatMontant(selectedReamenagement.budget_source_apres)}
+                      Après: {formatCurrency(selectedReamenagement.budget_source_apres)}
                     </p>
                   </div>
                 </div>
@@ -344,9 +324,7 @@ export function ReamenagementsList({
                 <ArrowRight className="h-6 w-6 text-muted-foreground" />
 
                 <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-3">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Destination (crédit)
-                  </p>
+                  <p className="text-xs text-muted-foreground mb-1">Destination (crédit)</p>
                   <p className="font-mono text-sm">
                     {selectedReamenagement.imputation_destination}
                   </p>
@@ -354,13 +332,9 @@ export function ReamenagementsList({
                     {selectedReamenagement.libelle_destination}
                   </p>
                   <div className="mt-2 text-xs">
-                    <p>
-                      Avant:{" "}
-                      {formatMontant(selectedReamenagement.budget_destination_avant)}
-                    </p>
+                    <p>Avant: {formatCurrency(selectedReamenagement.budget_destination_avant)}</p>
                     <p className="font-medium text-green-600">
-                      Après:{" "}
-                      {formatMontant(selectedReamenagement.budget_destination_apres)}
+                      Après: {formatCurrency(selectedReamenagement.budget_destination_apres)}
                     </p>
                   </div>
                 </div>
@@ -370,7 +344,7 @@ export function ReamenagementsList({
               <div className="bg-muted/50 rounded-lg p-4 text-center">
                 <p className="text-sm text-muted-foreground">Montant transféré</p>
                 <p className="text-2xl font-bold">
-                  {formatMontant(selectedReamenagement.montant)}
+                  {formatCurrency(selectedReamenagement.montant)}
                 </p>
               </div>
 
@@ -384,25 +358,19 @@ export function ReamenagementsList({
               {selectedReamenagement.reference_note && (
                 <div>
                   <Label className="text-muted-foreground">Référence de la note</Label>
-                  <p className="mt-1 font-mono">
-                    {selectedReamenagement.reference_note}
-                  </p>
+                  <p className="mt-1 font-mono">{selectedReamenagement.reference_note}</p>
                 </div>
               )}
 
               {/* Validation info */}
-              {selectedReamenagement.statut !== "en_attente" && (
+              {selectedReamenagement.statut !== 'en_attente' && (
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        {selectedReamenagement.statut === "valide"
-                          ? "Validé par"
-                          : "Rejeté par"}
+                        {selectedReamenagement.statut === 'valide' ? 'Validé par' : 'Rejeté par'}
                       </p>
-                      <p className="font-medium">
-                        {selectedReamenagement.valide_par_nom || "-"}
-                      </p>
+                      <p className="font-medium">{selectedReamenagement.valide_par_nom || '-'}</p>
                     </div>
                     {selectedReamenagement.date_validation && (
                       <div className="text-right">
@@ -410,7 +378,7 @@ export function ReamenagementsList({
                         <p>
                           {format(
                             new Date(selectedReamenagement.date_validation),
-                            "dd/MM/yyyy HH:mm",
+                            'dd/MM/yyyy HH:mm',
                             { locale: fr }
                           )}
                         </p>
@@ -419,9 +387,7 @@ export function ReamenagementsList({
                   </div>
                   {selectedReamenagement.motif_rejet && (
                     <div className="mt-3 p-3 bg-destructive/10 rounded-lg">
-                      <p className="text-sm font-medium text-destructive">
-                        Motif de rejet:
-                      </p>
+                      <p className="text-sm font-medium text-destructive">Motif de rejet:</p>
                       <p className="text-sm">{selectedReamenagement.motif_rejet}</p>
                     </div>
                   )}
@@ -479,7 +445,7 @@ export function ReamenagementsList({
                   En cours...
                 </>
               ) : (
-                "Confirmer le rejet"
+                'Confirmer le rejet'
               )}
             </Button>
           </DialogFooter>

@@ -1,6 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { ExportButtons } from "./ExportButtons";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { ExportButtons } from './ExportButtons';
+import { formatCurrency } from '@/lib/utils';
 
 interface GenericData {
   item: { id: string; code: string; libelle: string };
@@ -18,10 +19,6 @@ interface EtatGeneriqueProps {
   filename: string;
 }
 
-const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat("fr-FR").format(montant);
-};
-
 export function EtatGenerique({ data, title, itemLabel, filename }: EtatGeneriqueProps) {
   const totals = data.reduce(
     (acc, row) => ({
@@ -35,15 +32,15 @@ export function EtatGenerique({ data, title, itemLabel, filename }: EtatGeneriqu
   );
 
   const exportColumns = [
-    { key: "item.code", label: "Code" },
-    { key: "item.libelle", label: itemLabel },
-    { key: "dotation", label: "Dotation" },
-    { key: "engage", label: "Engagé" },
-    { key: "liquide", label: "Liquidé" },
-    { key: "ordonnance", label: "Ordonnancé" },
-    { key: "paye", label: "Payé" },
-    { key: "disponible", label: "Disponible" },
-    { key: "taux", label: "Taux (%)" },
+    { key: 'item.code', label: 'Code' },
+    { key: 'item.libelle', label: itemLabel },
+    { key: 'dotation', label: 'Dotation' },
+    { key: 'engage', label: 'Engagé' },
+    { key: 'liquide', label: 'Liquidé' },
+    { key: 'ordonnance', label: 'Ordonnancé' },
+    { key: 'paye', label: 'Payé' },
+    { key: 'disponible', label: 'Disponible' },
+    { key: 'taux', label: 'Taux (%)' },
   ];
 
   const exportData = data.map((row) => ({
@@ -86,23 +83,25 @@ export function EtatGenerique({ data, title, itemLabel, filename }: EtatGeneriqu
                   <tr key={row.item.id || index} className="border-b hover:bg-muted/30">
                     <td className="py-3 px-4 font-mono">{row.item.code}</td>
                     <td className="py-3 px-4">{row.item.libelle}</td>
-                    <td className="py-3 px-4 text-right font-mono">{formatMontant(row.dotation)}</td>
+                    <td className="py-3 px-4 text-right font-mono">
+                      {formatCurrency(row.dotation)}
+                    </td>
                     <td className="py-3 px-4 text-right font-mono text-secondary">
-                      {formatMontant(row.engage)}
+                      {formatCurrency(row.engage)}
                     </td>
                     <td className="py-3 px-4 text-right font-mono text-amber-600">
-                      {formatMontant(row.liquide)}
+                      {formatCurrency(row.liquide)}
                     </td>
                     <td className="py-3 px-4 text-right font-mono text-success">
-                      {formatMontant(row.paye)}
+                      {formatCurrency(row.paye)}
                     </td>
-                    <td className="py-3 px-4 text-right font-mono">
-                      {formatMontant(disponible)}
-                    </td>
+                    <td className="py-3 px-4 text-right font-mono">{formatCurrency(disponible)}</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <Progress value={Math.min(taux, 100)} className="h-2 flex-1" />
-                        <span className="text-xs font-medium w-12 text-right">{taux.toFixed(1)}%</span>
+                        <span className="text-xs font-medium w-12 text-right">
+                          {taux.toFixed(1)}%
+                        </span>
                       </div>
                     </td>
                   </tr>
@@ -111,25 +110,26 @@ export function EtatGenerique({ data, title, itemLabel, filename }: EtatGeneriqu
             </tbody>
             <tfoot>
               <tr className="bg-muted/70 font-bold">
-                <td className="py-3 px-4" colSpan={2}>TOTAL</td>
-                <td className="py-3 px-4 text-right font-mono">{formatMontant(totals.dotation)}</td>
-                <td className="py-3 px-4 text-right font-mono text-secondary">
-                  {formatMontant(totals.engage)}
-                </td>
-                <td className="py-3 px-4 text-right font-mono text-amber-600">
-                  {formatMontant(totals.liquide)}
-                </td>
-                <td className="py-3 px-4 text-right font-mono text-success">
-                  {formatMontant(totals.paye)}
+                <td className="py-3 px-4" colSpan={2}>
+                  TOTAL
                 </td>
                 <td className="py-3 px-4 text-right font-mono">
-                  {formatMontant(totals.dotation - totals.engage)}
+                  {formatCurrency(totals.dotation)}
+                </td>
+                <td className="py-3 px-4 text-right font-mono text-secondary">
+                  {formatCurrency(totals.engage)}
+                </td>
+                <td className="py-3 px-4 text-right font-mono text-amber-600">
+                  {formatCurrency(totals.liquide)}
+                </td>
+                <td className="py-3 px-4 text-right font-mono text-success">
+                  {formatCurrency(totals.paye)}
+                </td>
+                <td className="py-3 px-4 text-right font-mono">
+                  {formatCurrency(totals.dotation - totals.engage)}
                 </td>
                 <td className="py-3 px-4 text-center">
-                  {totals.dotation > 0
-                    ? ((totals.engage / totals.dotation) * 100).toFixed(1)
-                    : 0}
-                  %
+                  {totals.dotation > 0 ? ((totals.engage / totals.dotation) * 100).toFixed(1) : 0}%
                 </td>
               </tr>
             </tfoot>

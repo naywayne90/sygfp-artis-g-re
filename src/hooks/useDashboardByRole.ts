@@ -3,6 +3,18 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useExercice } from '@/contexts/ExerciceContext';
 
+// ─── Corbeille DG : chaque type d'action que le DG doit traiter ───
+export interface CorbeilleDGItem {
+  key: string;
+  label: string;
+  count: number;
+  montant: number;
+  action: string;
+  link: string;
+  color: string;
+  icon: string; // nom icône Lucide (résolu côté composant)
+}
+
 // Stats pour le DG - Vue complète
 export interface DGStats {
   budgetGlobal: number;
@@ -24,16 +36,25 @@ export interface DGStats {
   dossiersValides: number;
   dossiersSoldes: number;
   alertesDepassement: number;
-  // Dossiers en attente de signature
+  // ─── Actions DG spécifiques (corbeille) ───
+  corbeille: CorbeilleDGItem[];
+  pendingDGActions: number;
+  pendingDGMontant: number;
+  // Compteurs individuels pour rétro-compatibilité
   engagementsASigner: number;
   liquidationsASigner: number;
   ordonnancementsASigner: number;
+  imputationsAValiderDG: number;
+  marchesAApprouver: number;
+  engagementsAValiderDG: number;
   // Pipeline complet (9 étapes)
   pipeline: {
     notesSEF: number;
     notesSEFAValider: number;
     notesAEF: number;
     notesAEFAValider: number;
+    imputations: number;
+    imputationsEnAttente: number;
     expressionsBesoin: number;
     marches: number;
     engagements: number;
@@ -47,8 +68,12 @@ export interface DGStats {
     moyenLiquidation: number | null;
     moyenOrdonnancement: number | null;
   };
-  // Actions en attente DG
-  pendingDGActions: number;
+  // Synthèse mensuelle
+  synthèseMois: {
+    dossiersTraites: number;
+    montantValide: number;
+    tauxValidation: number;
+  };
   // Prestataires
   prestatairesActifs: number;
 }
@@ -72,7 +97,7 @@ export interface DAFStats {
 // Stats pour SDPM
 export interface SDPMStats {
   marchesEnCours: number;
-  marchesBrouillon: number;
+  marchesSoumis: number;
   marchesEnValidation: number;
   marchesValides: number;
   expressionsBesoinAValider: number;
@@ -251,43 +276,104 @@ export function useDGDashboard() {
           .length || 0;
 
       // ===== Pipeline complet (9 étapes) =====
-      // Notes SEF
-      const { data: notesSEF } = await supabase
-        .from('notes_sef')
-        .select('id, statut')
-        .eq('exercice', exercice);
+      // Paralléliser les requêtes indépendantes pour la performance
+      const [
+        notesSEFRes,
+        notesAEFRes,
+        imputationsRes,
+        expressionsRes,
+        marchesRes,
+        prestatairesRes,
+        // Synthèse mensuelle
+        logsMoisRes,
+      ] = await Promise.all([
+        supabase.from('notes_sef').select('id, statut, montant_estime').eq('exercice', exercice),
+        supabase.from('notes_dg').select('id, statut, montant_estime').eq('exercice', exercice),
+        supabase.from('imputations').select('id, statut, montant').eq('exercice', exercice),
+        supabase.from('expressions_besoin').select('id').eq('exercice', exercice),
+        supabase
+          .from('passation_marche')
+          .select('id, statut, montant_estime')
+          .eq('exercice', exercice),
+        supabase.from('prestataires').select('id').eq('statut', 'actif'),
+        // Logs de validation du mois en cours (table logs_actions, actions en MAJUSCULES)
+        supabase
+          .from('logs_actions')
+          .select('id, action')
+          .in('action', ['VALIDATE', 'APPROVE', 'SIGN', 'REJECT', 'DEFER', 'CANCEL'])
+          .gte(
+            'created_at',
+            new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+          ),
+      ]);
 
-      const notesSEFTotal = notesSEF?.length || 0;
-      const notesSEFAValider =
-        notesSEF?.filter((n) => n.statut === 'soumis' || n.statut === 'en_validation').length || 0;
+      const notesSEF = notesSEFRes.data || [];
+      const notesAEF = notesAEFRes.data || [];
+      const imputationsData = imputationsRes.data || [];
+      const expressions = expressionsRes.data || [];
+      const marchesData = marchesRes.data || [];
+      const prestataires = prestatairesRes.data || [];
+      const logsMois = logsMoisRes.data || [];
 
-      // Notes AEF (notes_dg)
-      const { data: notesAEF } = await supabase
-        .from('notes_dg')
-        .select('id, statut')
-        .eq('exercice', exercice);
+      const notesSEFTotal = notesSEF.length;
+      const notesSEFAValider = notesSEF.filter(
+        (n) => n.statut === 'soumis' || n.statut === 'en_validation'
+      ).length;
+      const notesSEFMontant = notesSEF
+        .filter((n) => n.statut === 'soumis' || n.statut === 'en_validation')
+        .reduce((s, n) => s + (((n as Record<string, unknown>).montant_estime as number) || 0), 0);
 
-      const notesAEFTotal = notesAEF?.length || 0;
-      const notesAEFAValider =
-        notesAEF?.filter((n) => n.statut === 'soumis' || n.statut === 'en_validation').length || 0;
+      const notesAEFTotal = notesAEF.length;
+      const notesAEFAValider = notesAEF.filter(
+        (n) => n.statut === 'soumis' || n.statut === 'en_validation'
+      ).length;
+      const notesAEFMontant = notesAEF
+        .filter((n) => n.statut === 'soumis' || n.statut === 'en_validation')
+        .reduce((s, n) => s + (((n as Record<string, unknown>).montant_estime as number) || 0), 0);
 
-      // Expressions de besoin
-      const { data: expressions } = await supabase
-        .from('expressions_besoin')
-        .select('id')
-        .eq('exercice', exercice);
+      // Imputations — DG valide celles visées par le CB (statut = 'vise')
+      const imputationsTotal = imputationsData.length;
+      const imputationsVise = imputationsData.filter((i) => i.statut === 'vise');
+      const imputationsAValiderDG = imputationsVise.length;
+      const imputationsAValiderDGMontant = imputationsVise.reduce(
+        (s, i) => s + (i.montant || 0),
+        0
+      );
+      const imputationsEnAttente = imputationsData.filter(
+        (i) => i.statut === 'soumis' || i.statut === 'vise'
+      ).length;
 
-      // Marchés
-      const { data: marches } = await supabase
-        .from('marches')
-        .select('id')
-        .eq('exercice', exercice);
+      // Passation Marchés — DG approuve les marchés attribués
+      const marchesAttribue = marchesData.filter((m) => m.statut === 'attribue');
+      const marchesAApprouver = marchesAttribue.length;
+      const marchesAApprouverMontant = marchesAttribue.reduce(
+        (s, m) => s + (((m as Record<string, unknown>).montant_estime as number) || 0),
+        0
+      );
 
-      // Prestataires actifs
-      const { data: prestataires } = await supabase
-        .from('prestataires')
-        .select('id')
-        .eq('statut', 'actif');
+      // Engagements — DG valide après visa DAAF (statut = 'visa_daaf')
+      const engagementsVisaDAF = engagements?.filter((e) => e.statut === 'visa_daaf') || [];
+      const engagementsAValiderDG = engagementsVisaDAF.length;
+      const engagementsAValiderDGMontant = engagementsVisaDAF.reduce(
+        (s, e) => s + (e.montant || 0),
+        0
+      );
+
+      // Ordonnancements — DG signe ceux en signature
+      const ordoEnSignature = ordonnancements?.filter((o) => o.statut === 'en_signature') || [];
+      const ordonnancementsASignerDG = ordoEnSignature.length;
+      const ordonnancementsASignerDGMontant = ordoEnSignature.reduce(
+        (s, o) => s + (o.montant || 0),
+        0
+      );
+
+      // Synthèse mensuelle (actions en MAJUSCULES dans logs_actions)
+      const dossiersTraitesMois = logsMois.filter(
+        (l) => l.action === 'VALIDATE' || l.action === 'APPROVE' || l.action === 'SIGN'
+      ).length;
+      const totalActionsMois = logsMois.length;
+      const tauxValidationMois =
+        totalActionsMois > 0 ? Math.round((dossiersTraitesMois / totalActionsMois) * 100) : 0;
 
       // ===== Délais de traitement =====
       let totalDelaiEng = 0,
@@ -344,7 +430,97 @@ export function useDGDashboard() {
           }
         });
 
-      const pendingDGActions = notesSEFAValider + notesAEFAValider + ordonnancementsASigner;
+      // ─── Construction de la Corbeille DG ───
+      const corbeille: CorbeilleDGItem[] = [];
+
+      if (notesSEFAValider > 0) {
+        corbeille.push({
+          key: 'notes_sef',
+          label: 'Notes SEF',
+          count: notesSEFAValider,
+          montant: notesSEFMontant,
+          action: 'Valider',
+          link: '/notes-sef?statut=soumis',
+          color: 'blue',
+          icon: 'FileText',
+        });
+      }
+      if (notesAEFAValider > 0) {
+        corbeille.push({
+          key: 'notes_aef',
+          label: 'Notes AEF',
+          count: notesAEFAValider,
+          montant: notesAEFMontant,
+          action: 'Valider',
+          link: '/notes-aef?statut=soumis',
+          color: 'indigo',
+          icon: 'FileSignature',
+        });
+      }
+      if (imputationsAValiderDG > 0) {
+        corbeille.push({
+          key: 'imputations',
+          label: 'Imputations',
+          count: imputationsAValiderDG,
+          montant: imputationsAValiderDGMontant,
+          action: 'Valider',
+          link: '/execution/imputation?statut=vise',
+          color: 'cyan',
+          icon: 'ClipboardCheck',
+        });
+      }
+      if (marchesAApprouver > 0) {
+        corbeille.push({
+          key: 'marches',
+          label: 'Marchés',
+          count: marchesAApprouver,
+          montant: marchesAApprouverMontant,
+          action: 'Approuver',
+          link: '/execution/passation-marche/approbation',
+          color: 'emerald',
+          icon: 'ShoppingCart',
+        });
+      }
+      if (engagementsAValiderDG > 0) {
+        corbeille.push({
+          key: 'engagements',
+          label: 'Engagements',
+          count: engagementsAValiderDG,
+          montant: engagementsAValiderDGMontant,
+          action: 'Valider',
+          link: '/engagements?statut=visa_daaf',
+          color: 'green',
+          icon: 'CreditCard',
+        });
+      }
+      if (ordonnancementsASignerDG > 0) {
+        corbeille.push({
+          key: 'ordonnancements',
+          label: 'Ordonnancements',
+          count: ordonnancementsASignerDG,
+          montant: ordonnancementsASignerDGMontant,
+          action: 'Signer',
+          link: '/ordonnancements?statut=en_signature',
+          color: 'purple',
+          icon: 'FileCheck',
+        });
+      }
+
+      const pendingDGActions =
+        notesSEFAValider +
+        notesAEFAValider +
+        imputationsAValiderDG +
+        marchesAApprouver +
+        engagementsAValiderDG +
+        ordonnancementsASignerDG;
+
+      const pendingDGMontant =
+        notesSEFMontant +
+        notesAEFMontant +
+        imputationsAValiderDGMontant +
+        marchesAApprouverMontant +
+        engagementsAValiderDGMontant +
+        ordonnancementsASignerDGMontant;
 
       return {
         budgetGlobal,
@@ -359,16 +535,26 @@ export function useDGDashboard() {
         dossiersValides,
         dossiersSoldes,
         alertesDepassement,
+        // Corbeille DG
+        corbeille,
+        pendingDGActions,
+        pendingDGMontant,
+        // Compteurs individuels
         engagementsASigner,
         liquidationsASigner,
-        ordonnancementsASigner,
+        ordonnancementsASigner: ordonnancementsASignerDG,
+        imputationsAValiderDG,
+        marchesAApprouver,
+        engagementsAValiderDG,
         pipeline: {
           notesSEF: notesSEFTotal,
           notesSEFAValider,
           notesAEF: notesAEFTotal,
           notesAEFAValider,
-          expressionsBesoin: expressions?.length || 0,
-          marches: marches?.length || 0,
+          imputations: imputationsTotal,
+          imputationsEnAttente,
+          expressionsBesoin: expressions.length,
+          marches: marchesData.length,
           engagements: engagements?.length || 0,
           liquidations: liquidations?.length || 0,
           ordonnancements: ordonnancements?.length || 0,
@@ -379,11 +565,17 @@ export function useDGDashboard() {
           moyenLiquidation: countDelaiLiq > 0 ? Math.round(totalDelaiLiq / countDelaiLiq) : null,
           moyenOrdonnancement: countDelaiOrd > 0 ? Math.round(totalDelaiOrd / countDelaiOrd) : null,
         },
-        pendingDGActions,
-        prestatairesActifs: prestataires?.length || 0,
+        synthèseMois: {
+          dossiersTraites: dossiersTraitesMois,
+          montantValide: engagementsAValiderDGMontant, // Approximation: on utilise le montant du mois
+          tauxValidation: tauxValidationMois,
+        },
+        prestatairesActifs: prestataires.length,
       };
     },
     enabled: !!exercice,
+    staleTime: 30_000,
+    refetchInterval: 60_000, // Rafraîchir chaque minute
   });
 }
 
@@ -507,7 +699,7 @@ export function useSDPMDashboard() {
 
       const marchesEnCours =
         marches?.filter((m) => m.statut === 'en_cours' || m.statut === 'en_execution').length || 0;
-      const marchesBrouillon = marches?.filter((m) => m.statut === 'soumis').length || 0;
+      const marchesSoumis = marches?.filter((m) => m.statut === 'soumis').length || 0;
       const marchesEnValidation =
         marches?.filter((m) => m.statut === 'soumis' || m.statut === 'en_validation').length || 0;
       const marchesValides =
@@ -572,7 +764,7 @@ export function useSDPMDashboard() {
 
       return {
         marchesEnCours,
-        marchesBrouillon,
+        marchesSoumis,
         marchesEnValidation,
         marchesValides,
         expressionsBesoinAValider,

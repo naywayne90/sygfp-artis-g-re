@@ -46,7 +46,7 @@ import { PendingTasksPanel } from '@/components/dashboard/PendingTasksPanel';
 import { KPICards } from '@/components/dashboard/KPICards';
 import { BudgetAlertsWidget } from '@/components/dashboard/BudgetAlertsWidget';
 
-// Import des constantes centralisées
+import { formatCurrency } from '@/lib/utils';
 import { formatMontant } from '@/lib/config/sygfp-constants';
 
 // Tabs de dashboard par rôle

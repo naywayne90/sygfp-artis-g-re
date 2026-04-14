@@ -28,6 +28,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -54,11 +55,12 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { BudgetChainExportButton } from '@/components/export/BudgetChainExportButton';
 import { useReglements, MODES_PAIEMENT, type ReglementWithRelations } from '@/hooks/useReglements';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
+import { useRBAC } from '@/contexts/RBACContext';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ReglementForm } from '@/components/reglement/ReglementForm';
@@ -68,20 +70,17 @@ import { BordereauReglement } from '@/components/reglement/BordereauReglement';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
 
-const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-};
-
 export default function Reglements() {
   const { exercice } = useExercice();
   const [searchParams, setSearchParams] = useSearchParams();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
-  const { reglements, stats, ordonnancementsValides } = useReglements();
+  const { isDG } = useRBAC();
+  const { reglements, stats, ordonnancementsValides, isLoading } = useReglements();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedReglement, setSelectedReglement] = useState<ReglementWithRelations | null>(null);
   const [showDetails, setShowDetails] = useState(false);
-  const [activeTab, setActiveTab] = useState('a_traiter');
+  const [activeTab, setActiveTab] = useState(isDG ? 'tous' : 'a_traiter');
   const [preselectedOrdId, setPreselectedOrdId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -104,6 +103,11 @@ export default function Reglements() {
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
+
+  // DG : ouvre sur l'onglet "Tous" (lecture seule, pas de création)
+  useEffect(() => {
+    if (isDG) setActiveTab('tous');
+  }, [isDG]);
 
   // Extract unique beneficiaires for filter
   const uniqueBeneficiaires = useMemo(() => {
@@ -253,6 +257,20 @@ export default function Reglements() {
     setShowCreateDialog(false);
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <Skeleton className="h-10 w-full" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className="h-20" />
+          ))}
+        </div>
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Indicateur de workflow */}
@@ -271,27 +289,29 @@ export default function Reglements() {
       >
         <BordereauReglement reglements={reglements} exercice={String(exercice ?? '')} />
         <BudgetChainExportButton step="reglement" />
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button
-                  className="gap-2"
-                  onClick={() => setShowCreateDialog(true)}
-                  disabled={!canWrite || ordonnancementsValides.length === 0}
-                >
-                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  Enregistrer un règlement
-                </Button>
-              </span>
-            </TooltipTrigger>
-            {!canWrite && (
-              <TooltipContent>
-                <p>{getDisabledMessage()}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+        {!isDG && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button
+                    className="gap-2"
+                    onClick={() => setShowCreateDialog(true)}
+                    disabled={!canWrite || ordonnancementsValides.length === 0}
+                  >
+                    {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    Enregistrer un règlement
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!canWrite && (
+                <TooltipContent>
+                  <p>{getDisabledMessage()}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </PageHeader>
 
       {/* Filters */}
@@ -489,7 +509,7 @@ export default function Reglements() {
               <div>
                 <p className="text-sm text-muted-foreground">Montant total paye</p>
                 <p className="text-2xl font-bold text-success">
-                  {formatMontant(stats.totalMontant)}
+                  {formatCurrency(stats.totalMontant)}
                 </p>
               </div>
               <TrendingUp className="h-8 w-8 text-success/50" />
@@ -538,7 +558,7 @@ export default function Reglements() {
                     <p className="text-xs text-muted-foreground">{item.count} reglement(s)</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold">{formatMontant(item.total)}</p>
+                    <p className="text-sm font-bold">{formatCurrency(item.total)}</p>
                     <p className="text-xs text-muted-foreground">{item.percentage.toFixed(0)}%</p>
                   </div>
                 </div>
@@ -614,22 +634,24 @@ export default function Reglements() {
                             <Badge variant="outline">{ord.mode_paiement || '-'}</Badge>
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            {formatMontant(ord.montant || 0)}
+                            {formatCurrency(ord.montant || 0)}
                           </TableCell>
                           <TableCell className="text-right text-warning font-medium">
-                            {formatMontant(restant)}
+                            {formatCurrency(restant)}
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              size="sm"
-                              onClick={() => {
-                                setPreselectedOrdId(ord.id);
-                                setShowCreateDialog(true);
-                              }}
-                            >
-                              <Wallet className="mr-2 h-4 w-4" />
-                              Payer
-                            </Button>
+                            {!isDG && (
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setPreselectedOrdId(ord.id);
+                                  setShowCreateDialog(true);
+                                }}
+                              >
+                                <Wallet className="mr-2 h-4 w-4" />
+                                Payer
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       );

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * useMouvementsTresorerie - Hook pour gérer les mouvements de trésorerie
  *
@@ -10,18 +9,19 @@
  * - Mise à jour automatique des soldes
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useCallback, useMemo } from "react";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useCallback, useMemo } from 'react';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { formatCurrency } from '@/lib/utils';
 
 // ============================================
 // TYPES
 // ============================================
 
-export type MouvementType = "BANK" | "CASH";
-export type MouvementSens = "ENTREE" | "SORTIE";
+export type MouvementType = 'BANK' | 'CASH';
+export type MouvementSens = 'ENTREE' | 'SORTIE';
 
 export interface MouvementTresorerie {
   id: string;
@@ -47,7 +47,7 @@ export interface MouvementTresorerie {
   pj_url: string | null;
   pj_filename: string | null;
   exercice: number;
-  statut: "brouillon" | "valide" | "annule";
+  statut: 'soumis' | 'valide' | 'annule';
   rapproche: boolean;
   date_rapprochement: string | null;
   created_at: string;
@@ -81,7 +81,7 @@ export interface MouvementFilters {
   compte_bancaire_id?: string;
   caisse_id?: string;
   origine_fonds_id?: string;
-  statut?: "brouillon" | "valide" | "annule" | "all";
+  statut?: 'soumis' | 'valide' | 'annule' | 'all';
   rapproche?: boolean;
   date_debut?: string;
   date_fin?: string;
@@ -104,7 +104,7 @@ export interface CreateMouvementData {
   reference_externe?: string;
   pj_url?: string;
   pj_filename?: string;
-  statut?: "brouillon" | "valide";
+  statut?: 'soumis' | 'valide';
 }
 
 // ============================================
@@ -126,62 +126,64 @@ export function useMouvementsTresorerie(filters?: MouvementFilters) {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["mouvements-tresorerie", filters, exerciceAnnee],
+    queryKey: ['mouvements-tresorerie', filters, exerciceAnnee],
     queryFn: async () => {
       let query = supabase
-        .from("mouvements_tresorerie")
-        .select(`
+        .from('mouvements_tresorerie')
+        .select(
+          `
           *,
           compte_bancaire:comptes_bancaires(id, code, libelle, banque),
           caisse:caisses(id, code, libelle),
           origine_fonds:funding_sources(id, code, libelle),
           createur:profiles!mouvements_tresorerie_created_by_fkey(id, full_name)
-        `)
-        .eq("exercice", exerciceAnnee)
-        .order("date_operation", { ascending: false })
-        .order("created_at", { ascending: false });
+        `
+        )
+        .eq('exercice', exerciceAnnee)
+        .order('date_operation', { ascending: false })
+        .order('created_at', { ascending: false });
 
       // Filtrer par type
       if (filters?.type) {
-        query = query.eq("type", filters.type);
+        query = query.eq('type', filters.type);
       }
 
       // Filtrer par sens
       if (filters?.sens) {
-        query = query.eq("sens", filters.sens);
+        query = query.eq('sens', filters.sens);
       }
 
       // Filtrer par compte bancaire
       if (filters?.compte_bancaire_id) {
-        query = query.eq("compte_bancaire_id", filters.compte_bancaire_id);
+        query = query.eq('compte_bancaire_id', filters.compte_bancaire_id);
       }
 
       // Filtrer par caisse
       if (filters?.caisse_id) {
-        query = query.eq("caisse_id", filters.caisse_id);
+        query = query.eq('caisse_id', filters.caisse_id);
       }
 
       // Filtrer par origine des fonds
       if (filters?.origine_fonds_id) {
-        query = query.eq("origine_fonds_id", filters.origine_fonds_id);
+        query = query.eq('origine_fonds_id', filters.origine_fonds_id);
       }
 
       // Filtrer par statut
-      if (filters?.statut && filters.statut !== "all") {
-        query = query.eq("statut", filters.statut);
+      if (filters?.statut && filters.statut !== 'all') {
+        query = query.eq('statut', filters.statut);
       }
 
       // Filtrer par rapprochement
       if (filters?.rapproche !== undefined) {
-        query = query.eq("rapproche", filters.rapproche);
+        query = query.eq('rapproche', filters.rapproche);
       }
 
       // Filtrer par période
       if (filters?.date_debut) {
-        query = query.gte("date_operation", filters.date_debut);
+        query = query.gte('date_operation', filters.date_debut);
       }
       if (filters?.date_fin) {
-        query = query.lte("date_operation", filters.date_fin);
+        query = query.lte('date_operation', filters.date_fin);
       }
 
       const { data, error } = await query;
@@ -220,8 +222,8 @@ export function useMouvementsTresorerie(filters?: MouvementFilters) {
       };
     }
 
-    const entrees = mouvements.filter((m) => m.sens === "ENTREE");
-    const sorties = mouvements.filter((m) => m.sens === "SORTIE");
+    const entrees = mouvements.filter((m) => m.sens === 'ENTREE');
+    const sorties = mouvements.filter((m) => m.sens === 'SORTIE');
     const montantEntrees = entrees.reduce((sum, m) => sum + m.montant, 0);
     const montantSorties = sorties.reduce((sum, m) => sum + m.montant, 0);
 
@@ -245,27 +247,27 @@ export function useMouvementsTresorerie(filters?: MouvementFilters) {
       const userId = (await supabase.auth.getUser()).data.user?.id;
 
       // Validation
-      if (data.type === "BANK" && !data.compte_bancaire_id) {
-        throw new Error("Veuillez sélectionner un compte bancaire");
+      if (data.type === 'BANK' && !data.compte_bancaire_id) {
+        throw new Error('Veuillez sélectionner un compte bancaire');
       }
-      if (data.type === "CASH" && !data.caisse_id) {
-        throw new Error("Veuillez sélectionner une caisse");
+      if (data.type === 'CASH' && !data.caisse_id) {
+        throw new Error('Veuillez sélectionner une caisse');
       }
       if (data.montant <= 0) {
-        throw new Error("Le montant doit être supérieur à 0");
+        throw new Error('Le montant doit être supérieur à 0');
       }
       if (!data.libelle?.trim()) {
-        throw new Error("Le libellé est obligatoire");
+        throw new Error('Le libellé est obligatoire');
       }
 
       const { data: result, error } = await supabase
-        .from("mouvements_tresorerie")
+        .from('mouvements_tresorerie')
         .insert([
           {
             type: data.type,
             sens: data.sens,
-            compte_bancaire_id: data.type === "BANK" ? data.compte_bancaire_id : null,
-            caisse_id: data.type === "CASH" ? data.caisse_id : null,
+            compte_bancaire_id: data.type === 'BANK' ? data.compte_bancaire_id : null,
+            caisse_id: data.type === 'CASH' ? data.caisse_id : null,
             montant: data.montant,
             date_operation: data.date_operation,
             date_valeur: data.date_valeur || null,
@@ -278,16 +280,18 @@ export function useMouvementsTresorerie(filters?: MouvementFilters) {
             pj_url: data.pj_url || null,
             pj_filename: data.pj_filename || null,
             exercice: exerciceAnnee,
-            statut: data.statut || "valide",
+            statut: data.statut || 'valide',
             created_by: userId,
           },
         ])
-        .select(`
+        .select(
+          `
           *,
           compte_bancaire:comptes_bancaires(id, code, libelle, banque),
           caisse:caisses(id, code, libelle),
           origine_fonds:funding_sources(id, code, libelle)
-        `)
+        `
+        )
         .single();
 
       if (error) throw error;
@@ -295,9 +299,9 @@ export function useMouvementsTresorerie(filters?: MouvementFilters) {
     },
     onSuccess: (data) => {
       toast.success(`Mouvement ${data.numero} créé`);
-      queryClient.invalidateQueries({ queryKey: ["mouvements-tresorerie"] });
-      queryClient.invalidateQueries({ queryKey: ["comptes-bancaires"] });
-      queryClient.invalidateQueries({ queryKey: ["caisses"] });
+      queryClient.invalidateQueries({ queryKey: ['mouvements-tresorerie'] });
+      queryClient.invalidateQueries({ queryKey: ['comptes-bancaires'] });
+      queryClient.invalidateQueries({ queryKey: ['caisses'] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -308,9 +312,9 @@ export function useMouvementsTresorerie(filters?: MouvementFilters) {
   const annulerMouvement = useMutation({
     mutationFn: async (id: string) => {
       const { data, error } = await supabase
-        .from("mouvements_tresorerie")
-        .update({ statut: "annule" })
-        .eq("id", id)
+        .from('mouvements_tresorerie')
+        .update({ statut: 'annule' })
+        .eq('id', id)
         .select()
         .single();
 
@@ -318,8 +322,8 @@ export function useMouvementsTresorerie(filters?: MouvementFilters) {
       return data;
     },
     onSuccess: () => {
-      toast.success("Mouvement annulé");
-      queryClient.invalidateQueries({ queryKey: ["mouvements-tresorerie"] });
+      toast.success('Mouvement annulé');
+      queryClient.invalidateQueries({ queryKey: ['mouvements-tresorerie'] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -330,12 +334,12 @@ export function useMouvementsTresorerie(filters?: MouvementFilters) {
   const marquerRapproche = useMutation({
     mutationFn: async ({ id, rapproche }: { id: string; rapproche: boolean }) => {
       const { data, error } = await supabase
-        .from("mouvements_tresorerie")
+        .from('mouvements_tresorerie')
         .update({
           rapproche,
-          date_rapprochement: rapproche ? new Date().toISOString().split("T")[0] : null,
+          date_rapprochement: rapproche ? new Date().toISOString().split('T')[0] : null,
         })
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
 
@@ -343,8 +347,8 @@ export function useMouvementsTresorerie(filters?: MouvementFilters) {
       return data;
     },
     onSuccess: (_, variables) => {
-      toast.success(variables.rapproche ? "Mouvement rapproché" : "Rapprochement annulé");
-      queryClient.invalidateQueries({ queryKey: ["mouvements-tresorerie"] });
+      toast.success(variables.rapproche ? 'Mouvement rapproché' : 'Rapprochement annulé');
+      queryClient.invalidateQueries({ queryKey: ['mouvements-tresorerie'] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -358,87 +362,77 @@ export function useMouvementsTresorerie(filters?: MouvementFilters) {
   // Export Excel/CSV
   const exportToExcel = useCallback(() => {
     if (!mouvements || mouvements.length === 0) {
-      toast.error("Aucune donnée à exporter");
+      toast.error('Aucune donnée à exporter');
       return;
     }
 
     const headers = [
-      "Numéro",
-      "Type",
-      "Sens",
-      "Date Opération",
-      "Date Valeur",
-      "Compte/Caisse",
-      "Libellé",
-      "Origine Fonds",
-      "Montant",
-      "Solde Avant",
-      "Solde Après",
-      "Référence Pièce",
-      "Statut",
-      "Rapproché",
-      "Créé par",
-      "Date création",
-    ].join(";");
+      'Numéro',
+      'Type',
+      'Sens',
+      'Date Opération',
+      'Date Valeur',
+      'Compte/Caisse',
+      'Libellé',
+      'Origine Fonds',
+      'Montant',
+      'Solde Avant',
+      'Solde Après',
+      'Référence Pièce',
+      'Statut',
+      'Rapproché',
+      'Créé par',
+      'Date création',
+    ].join(';');
 
     const rows = mouvements.map((m) =>
       [
         m.numero,
-        m.type === "BANK" ? "Banque" : "Caisse",
-        m.sens === "ENTREE" ? "Entrée" : "Sortie",
-        new Date(m.date_operation).toLocaleDateString("fr-FR"),
-        m.date_valeur ? new Date(m.date_valeur).toLocaleDateString("fr-FR") : "",
-        m.type === "BANK"
+        m.type === 'BANK' ? 'Banque' : 'Caisse',
+        m.sens === 'ENTREE' ? 'Entrée' : 'Sortie',
+        new Date(m.date_operation).toLocaleDateString('fr-FR'),
+        m.date_valeur ? new Date(m.date_valeur).toLocaleDateString('fr-FR') : '',
+        m.type === 'BANK'
           ? `${m.compte_bancaire?.code} - ${m.compte_bancaire?.libelle}`
           : `${m.caisse?.code} - ${m.caisse?.libelle}`,
         m.libelle,
-        m.origine_fonds?.libelle || m.origine_fonds_code || "",
-        m.sens === "ENTREE" ? m.montant : -m.montant,
-        m.solde_avant ?? "",
-        m.solde_apres ?? "",
-        m.reference_piece || "",
+        m.origine_fonds?.libelle || m.origine_fonds_code || '',
+        m.sens === 'ENTREE' ? m.montant : -m.montant,
+        m.solde_avant ?? '',
+        m.solde_apres ?? '',
+        m.reference_piece || '',
         m.statut,
-        m.rapproche ? "Oui" : "Non",
-        m.createur?.full_name || "",
-        new Date(m.created_at).toLocaleDateString("fr-FR"),
+        m.rapproche ? 'Oui' : 'Non',
+        m.createur?.full_name || '',
+        new Date(m.created_at).toLocaleDateString('fr-FR'),
       ]
         .map((c) => `"${c}"`)
-        .join(";")
+        .join(';')
     );
 
-    const content = [headers, ...rows].join("\n");
-    const blob = new Blob(["\ufeff" + content], {
-      type: "text/csv;charset=utf-8;",
+    const content = [headers, ...rows].join('\n');
+    const blob = new Blob(['﻿' + content], {
+      type: 'text/csv;charset=utf-8;',
     });
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `mouvements_tresorerie_${exerciceAnnee}_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `mouvements_tresorerie_${exerciceAnnee}_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
     toast.success(`Export de ${mouvements.length} mouvement(s) réussi`);
   }, [mouvements, exerciceAnnee]);
 
-  // Formater montant
-  const formatMontant = useCallback((montant: number, devise?: string) => {
-    return (
-      new Intl.NumberFormat("fr-FR", {
-        style: "decimal",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(montant) + ` ${devise || "FCFA"}`
-    );
-  }, []);
+  // Formater montant (délègue à formatCurrency)
+  const formatMontant = formatCurrency;
 
   // Couleur selon sens
   const getSensColor = useCallback((sens: MouvementSens) => {
-    return sens === "ENTREE"
-      ? "text-green-600 bg-green-50"
-      : "text-red-600 bg-red-50";
+    return sens === 'ENTREE' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
   }, []);
 
   // Label sens
   const getSensLabel = useCallback((sens: MouvementSens) => {
-    return sens === "ENTREE" ? "Entrée" : "Sortie";
+    return sens === 'ENTREE' ? 'Entrée' : 'Sortie';
   }, []);
 
   // ============================================

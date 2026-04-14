@@ -13,6 +13,19 @@ La table Supabase sous-jacente est `notes_dg`.
 
 **Chaine** : Note SEF > **Note AEF** > Imputation > Expression Besoin > Passation Marche > Engagement > Liquidation > Ordonnancement > Reglement
 
+## Codification ARTI
+
+| Propriété            | Valeur                                                |
+| -------------------- | ----------------------------------------------------- |
+| **Code étape**       | 1 (01 en format 14 chars)                             |
+| **Sigle**            | AEF                                                   |
+| **Format référence** | `ARTI01MMYYNNNN` (14 chars)                           |
+| **Exemple**          | `ARTI0102260001` = AEF n°1, février 2026              |
+| **Colonne DB**       | `notes_dg.numero` et `notes_dg.reference_pivot`       |
+| **Génération**       | Trigger `trg_notes_dg_arti_reference` (BEFORE INSERT) |
+| **Compteur**         | `arti_reference_counters` (étape=1, par mois)         |
+| **Héritage**         | Peut hériter `reference_pivot` de la Note SEF parent  |
+
 ## 2. Routes et acces
 
 | Route                        | Page                                         | Roles           |

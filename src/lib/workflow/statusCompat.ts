@@ -65,7 +65,7 @@ export function mapAncienVersNouveau(ancienStatut: string): MappingResult {
   const normalized = ancienStatut.toLowerCase().trim();
 
   switch (normalized) {
-    // --- Soumis (inclut les anciens brouillons) ---
+    // --- Soumis (brouillon supprime — compat: anciens brouillons mappes vers soumis) ---
     case 'brouillon':
     case 'draft':
     case 'soumis':
@@ -168,7 +168,7 @@ export function mapAncienVersNouveau(ancienStatut: string): MappingResult {
       ) {
         return { statut: STATUTS_UNIFIES.EN_VALIDATION };
       }
-      // Par defaut, soumis (plus de brouillon)
+      // Par defaut, soumis (brouillon supprime — creation = soumis)
       return { statut: STATUTS_UNIFIES.SOUMIS };
   }
 }

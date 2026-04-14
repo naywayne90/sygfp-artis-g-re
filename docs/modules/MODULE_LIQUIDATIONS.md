@@ -8,6 +8,19 @@ Le module **Liquidation** constate le service fait et determine le montant exact
 
 **Chaine** : Note SEF > Note AEF > Imputation > Expression Besoin > Passation Marche > Engagement > **Liquidation** > Ordonnancement > Reglement
 
+## Codification ARTI
+
+| Propriété                  | Valeur                                              |
+| -------------------------- | --------------------------------------------------- |
+| **Code étape**             | 6 (06 en format 14 chars)                           |
+| **Sigle**                  | LIQ                                                 |
+| **Format référence cible** | `ARTI06MMYYNNNN` (14 chars)                         |
+| **Exemple**                | `ARTI0602260001` = Liquidation n°1, février 2026    |
+| **Format actuel**          | `LIQ-2026-NNNN` (via `get_next_sequence('LIQ')`)    |
+| **Colonne DB**             | `budget_liquidations.numero`                        |
+| **Migration**              | Alignement vers format ARTI planifié                |
+| **Données migrées**        | 3,443 liquidations avec flag `legacy_import = true` |
+
 ## 2. Routes et acces
 
 | Route                                 | Page                                         | Roles |

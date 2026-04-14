@@ -42,13 +42,7 @@ import {
 import { Link, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useGenerateReport } from '@/hooks/useGenerateReport';
-
-const formatMontant = (montant: number): string => {
-  if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(2)} Mds`;
-  if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
-  if (montant >= 1_000) return `${(montant / 1_000).toFixed(0)} K`;
-  return new Intl.NumberFormat('fr-FR').format(montant);
-};
+import { formatCurrency } from '@/lib/utils';
 
 function KPICard({
   title,
@@ -429,7 +423,7 @@ function OSTable({ objectifs }: { objectifs: OSStats[] }) {
                 <Progress value={os.taux_realisation} className="h-2" />
                 {os.montant_prevu > 0 && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Budget prévu: {formatMontant(os.montant_prevu)} FCFA
+                    Budget prévu: {formatCurrency(os.montant_prevu)}
                   </p>
                 )}
               </div>
@@ -472,7 +466,7 @@ function BudgetChainOverview() {
             <div className="p-3 rounded-lg bg-blue-50 text-center">
               <Wallet className="h-5 w-5 text-blue-600 mx-auto mb-1" />
               <p className="text-lg font-bold text-blue-700">
-                {formatMontant(budgetStats.budgetEngage)}
+                {formatCurrency(budgetStats.budgetEngage)}
               </p>
               <p className="text-xs text-blue-600">Engagé</p>
               <p className="text-xs text-blue-500 mt-1">{budgetStats.tauxEngagement}%</p>
@@ -480,7 +474,7 @@ function BudgetChainOverview() {
             <div className="p-3 rounded-lg bg-purple-50 text-center">
               <Receipt className="h-5 w-5 text-purple-600 mx-auto mb-1" />
               <p className="text-lg font-bold text-purple-700">
-                {formatMontant(budgetStats.budgetLiquide)}
+                {formatCurrency(budgetStats.budgetLiquide)}
               </p>
               <p className="text-xs text-purple-600">Liquidé</p>
               <p className="text-xs text-purple-500 mt-1">{budgetStats.tauxLiquidation}%</p>
@@ -488,14 +482,14 @@ function BudgetChainOverview() {
             <div className="p-3 rounded-lg bg-teal-50 text-center">
               <FileCheck className="h-5 w-5 text-teal-600 mx-auto mb-1" />
               <p className="text-lg font-bold text-teal-700">
-                {formatMontant(budgetStats.budgetOrdonnance)}
+                {formatCurrency(budgetStats.budgetOrdonnance)}
               </p>
               <p className="text-xs text-teal-600">Ordonnancé</p>
             </div>
             <div className="p-3 rounded-lg bg-green-50 text-center">
               <CheckCircle2 className="h-5 w-5 text-green-600 mx-auto mb-1" />
               <p className="text-lg font-bold text-green-700">
-                {formatMontant(budgetStats.budgetPaye)}
+                {formatCurrency(budgetStats.budgetPaye)}
               </p>
               <p className="text-xs text-green-600">Payé</p>
               <p className="text-xs text-green-500 mt-1">{budgetStats.tauxPaiement}%</p>
@@ -506,7 +500,7 @@ function BudgetChainOverview() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Progression globale</span>
-              <span className="font-medium">{formatMontant(budgetStats.budgetTotal)} FCFA</span>
+              <span className="font-medium">{formatCurrency(budgetStats.budgetTotal)}</span>
             </div>
             <div className="h-4 bg-gray-100 rounded-full overflow-hidden flex">
               <div
@@ -550,9 +544,7 @@ function BudgetChainOverview() {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-muted-foreground">Budget disponible</p>
-                <p className="text-xl font-bold">
-                  {formatMontant(budgetStats.budgetDisponible)} FCFA
-                </p>
+                <p className="text-xl font-bold">{formatCurrency(budgetStats.budgetDisponible)}</p>
               </div>
               <Badge
                 variant={budgetStats.budgetDisponible > 0 ? 'outline' : 'destructive'}

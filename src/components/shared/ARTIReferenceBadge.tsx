@@ -1,27 +1,22 @@
 /**
  * ARTIReferenceBadge - Affiche et permet de copier une référence ARTI
- * 
+ *
  * Format brut: ARTI0012600001 (13 caractères)
  * Format lisible: ARTI-SEF-01/26-0001
  */
 
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Copy, Check, Hash } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Copy, Check, Hash } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { 
-  parseARTIReferenceLocal, 
-  formatARTIReference, 
+  parseARTIReferenceLocal,
+  formatARTIReference,
   formatARTIReferenceShort,
-  ETAPE_LABELS 
-} from "@/lib/notes-sef/referenceService";
+  ETAPE_LABELS,
+} from '@/lib/notes-sef/referenceService';
 
 interface ARTIReferenceBadgeProps {
   /** Référence brute (ARTI0012600001) ou numéro fallback */
@@ -29,7 +24,7 @@ interface ARTIReferenceBadgeProps {
   /** Afficher le format court (SEF-01/26-0001) au lieu du format complet */
   short?: boolean;
   /** Taille du badge */
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
   /** Afficher le bouton copier */
   showCopy?: boolean;
   /** Afficher l'icône Hash */
@@ -37,17 +32,17 @@ interface ARTIReferenceBadgeProps {
   /** Classes CSS additionnelles */
   className?: string;
   /** Variante de style */
-  variant?: "default" | "outline" | "secondary" | "destructive";
+  variant?: 'default' | 'outline' | 'secondary' | 'destructive';
 }
 
 export function ARTIReferenceBadge({
   reference,
   short = false,
-  size = "md",
+  size = 'md',
   showCopy = true,
   showIcon = true,
   className,
-  variant = "outline",
+  variant = 'outline',
 }: ARTIReferenceBadgeProps) {
   const [copied, setCopied] = useState(false);
 
@@ -56,7 +51,7 @@ export function ARTIReferenceBadge({
 
   // Parser la référence
   const parsed = parseARTIReferenceLocal(reference);
-  
+
   // Déterminer le texte à afficher
   const displayText = parsed.isValid
     ? short
@@ -73,38 +68,39 @@ export function ARTIReferenceBadge({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Erreur copie référence:", err);
+      console.error('Erreur copie référence:', err);
     }
   };
 
   // Styles selon la taille
   const sizeClasses = {
-    sm: "text-xs px-1.5 py-0.5 gap-1",
-    md: "text-sm px-2 py-1 gap-1.5",
-    lg: "text-base px-3 py-1.5 gap-2",
+    sm: 'text-xs px-1.5 py-0.5 gap-1',
+    md: 'text-sm px-2 py-1 gap-1.5',
+    lg: 'text-base px-3 py-1.5 gap-2',
   };
 
   const iconSizes = {
-    sm: "h-3 w-3",
-    md: "h-3.5 w-3.5",
-    lg: "h-4 w-4",
+    sm: 'h-3 w-3',
+    md: 'h-3.5 w-3.5',
+    lg: 'h-4 w-4',
   };
 
   // Couleur selon l'étape
   const getEtapeColor = () => {
-    if (!parsed.isValid) return "";
+    if (!parsed.isValid) return '';
     const colors: Record<number, string> = {
-      0: "border-blue-500/50 text-blue-700 dark:text-blue-300", // SEF
-      1: "border-indigo-500/50 text-indigo-700 dark:text-indigo-300", // AEF
-      2: "border-purple-500/50 text-purple-700 dark:text-purple-300", // Imputation
-      3: "border-cyan-500/50 text-cyan-700 dark:text-cyan-300", // EB
-      4: "border-teal-500/50 text-teal-700 dark:text-teal-300", // PM
-      5: "border-emerald-500/50 text-emerald-700 dark:text-emerald-300", // Engagement
-      6: "border-orange-500/50 text-orange-700 dark:text-orange-300", // Liquidation
-      7: "border-amber-500/50 text-amber-700 dark:text-amber-300", // Ordonnancement
-      8: "border-green-500/50 text-green-700 dark:text-green-300", // Règlement
+      0: 'border-blue-500/50 text-blue-700 dark:text-blue-300', // SEF
+      1: 'border-indigo-500/50 text-indigo-700 dark:text-indigo-300', // AEF
+      2: 'border-purple-500/50 text-purple-700 dark:text-purple-300', // Imputation
+      3: 'border-cyan-500/50 text-cyan-700 dark:text-cyan-300', // EB
+      4: 'border-teal-500/50 text-teal-700 dark:text-teal-300', // PM
+      5: 'border-emerald-500/50 text-emerald-700 dark:text-emerald-300', // Engagement
+      6: 'border-orange-500/50 text-orange-700 dark:text-orange-300', // Liquidation
+      7: 'border-amber-500/50 text-amber-700 dark:text-amber-300', // Ordonnancement
+      8: 'border-green-500/50 text-green-700 dark:text-green-300', // Règlement
+      9: 'border-rose-500/50 text-rose-700 dark:text-rose-300', // Virement
     };
-    return colors[parsed.etape] || "";
+    return colors[parsed.etape] || '';
   };
 
   const tooltipContent = parsed.isValid ? (
@@ -112,16 +108,15 @@ export function ARTIReferenceBadge({
       <p className="font-mono font-bold">{reference}</p>
       <div className="text-xs space-y-0.5">
         <p>
-          <span className="text-muted-foreground">Étape:</span>{" "}
-          {ETAPE_LABELS[parsed.etape]}
+          <span className="text-muted-foreground">Étape:</span> {ETAPE_LABELS[parsed.etape]}
         </p>
         <p>
-          <span className="text-muted-foreground">Période:</span>{" "}
-          {String(parsed.mois).padStart(2, "0")}/{parsed.annee}
+          <span className="text-muted-foreground">Période:</span>{' '}
+          {String(parsed.mois).padStart(2, '0')}/{parsed.annee}
         </p>
         <p>
-          <span className="text-muted-foreground">Numéro:</span>{" "}
-          {String(parsed.numero).padStart(4, "0")}
+          <span className="text-muted-foreground">Numéro:</span>{' '}
+          {String(parsed.numero).padStart(4, '0')}
         </p>
       </div>
     </div>
@@ -136,28 +131,25 @@ export function ARTIReferenceBadge({
           <Badge
             variant={variant}
             className={cn(
-              "font-mono inline-flex items-center cursor-pointer hover:bg-accent transition-colors",
+              'font-mono inline-flex items-center cursor-pointer hover:bg-accent transition-colors',
               sizeClasses[size],
               parsed.isValid && getEtapeColor(),
               className
             )}
           >
-            {showIcon && <Hash className={cn(iconSizes[size], "opacity-60")} />}
+            {showIcon && <Hash className={cn(iconSizes[size], 'opacity-60')} />}
             <span>{displayText}</span>
             {showCopy && (
               <Button
                 variant="ghost"
                 size="icon"
-                className={cn(
-                  "h-auto w-auto p-0.5 ml-1 hover:bg-transparent",
-                  iconSizes[size]
-                )}
+                className={cn('h-auto w-auto p-0.5 ml-1 hover:bg-transparent', iconSizes[size])}
                 onClick={handleCopy}
               >
                 {copied ? (
-                  <Check className={cn(iconSizes[size], "text-green-500")} />
+                  <Check className={cn(iconSizes[size], 'text-green-500')} />
                 ) : (
-                  <Copy className={cn(iconSizes[size], "opacity-50 hover:opacity-100")} />
+                  <Copy className={cn(iconSizes[size], 'opacity-50 hover:opacity-100')} />
                 )}
               </Button>
             )}
@@ -165,9 +157,7 @@ export function ARTIReferenceBadge({
         </TooltipTrigger>
         <TooltipContent side="bottom" className="max-w-xs">
           {tooltipContent}
-          <p className="text-xs text-muted-foreground mt-1 italic">
-            Cliquez pour copier
-          </p>
+          <p className="text-xs text-muted-foreground mt-1 italic">Cliquez pour copier</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -187,12 +177,10 @@ export function ARTIReferenceInline({
   if (!reference) return <span className="text-muted-foreground">-</span>;
 
   const parsed = parseARTIReferenceLocal(reference);
-  const displayText = parsed.isValid
-    ? formatARTIReferenceShort(reference)
-    : reference;
+  const displayText = parsed.isValid ? formatARTIReferenceShort(reference) : reference;
 
   return (
-    <span className={cn("font-mono text-sm", className)} title={reference}>
+    <span className={cn('font-mono text-sm', className)} title={reference}>
       {displayText}
     </span>
   );
@@ -216,7 +204,7 @@ export function DossierHeaderWithARTI({
   const hasValidARTI = referencePivot && parseARTIReferenceLocal(referencePivot).isValid;
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn('flex items-center gap-2', className)}>
       {hasValidARTI ? (
         <>
           <ARTIReferenceBadge reference={referencePivot} size="lg" showIcon />

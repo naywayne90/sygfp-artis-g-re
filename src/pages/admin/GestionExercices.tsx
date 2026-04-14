@@ -44,6 +44,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ExerciceInitWizard } from '@/components/exercice/ExerciceInitWizard';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { formatCurrency } from '@/lib/utils';
 
 interface Exercice {
   id: string;
@@ -57,16 +58,6 @@ interface Exercice {
   budget_total: number | null;
   budget_lignes_count: number | null;
 }
-
-const formatMontant = (montant: number): string => {
-  if (montant >= 1_000_000_000) {
-    return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
-  }
-  if (montant >= 1_000_000) {
-    return `${(montant / 1_000_000).toFixed(1)} M`;
-  }
-  return new Intl.NumberFormat('fr-FR').format(montant);
-};
 
 export default function GestionExercices() {
   const queryClient = useQueryClient();
@@ -384,9 +375,7 @@ export default function GestionExercices() {
                     </div>
                   </TableCell>
                   <TableCell>{getStatutBadge(ex.statut)}</TableCell>
-                  <TableCell>
-                    {ex.budget_total ? formatMontant(ex.budget_total) + ' FCFA' : '-'}
-                  </TableCell>
+                  <TableCell>{ex.budget_total ? formatCurrency(ex.budget_total) : '-'}</TableCell>
                   <TableCell>{ex.budget_lignes_count || 0}</TableCell>
                   <TableCell>
                     {ex.date_ouverture

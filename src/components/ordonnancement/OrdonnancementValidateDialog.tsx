@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { CheckCircle } from "lucide-react";
-import { useOrdonnancements, VALIDATION_STEPS } from "@/hooks/useOrdonnancements";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle, ShieldAlert } from 'lucide-react';
+import { useOrdonnancements, VALIDATION_STEPS } from '@/hooks/useOrdonnancements';
+import { useRBAC } from '@/hooks/useRBAC';
 
 interface OrdonnancementValidateDialogProps {
   ordonnancement: any;
@@ -24,10 +26,12 @@ export function OrdonnancementValidateDialog({
   onOpenChange,
 }: OrdonnancementValidateDialogProps) {
   const { validateStep } = useOrdonnancements();
-  const [comments, setComments] = useState("");
+  const { roles, isAdmin } = useRBAC();
+  const [comments, setComments] = useState('');
 
   const currentStep = ordonnancement?.current_step || 1;
   const stepInfo = VALIDATION_STEPS.find((s) => s.order === currentStep);
+  const hasRequiredRole = isAdmin || (stepInfo && roles.includes(stepInfo.role as any));
 
   const handleValidate = async () => {
     await validateStep.mutateAsync({
@@ -35,7 +39,7 @@ export function OrdonnancementValidateDialog({
       stepOrder: currentStep,
       comments: comments || undefined,
     });
-    setComments("");
+    setComments('');
     onOpenChange(false);
   };
 
@@ -58,6 +62,15 @@ export function OrdonnancementValidateDialog({
             </p>
           </div>
 
+          {!hasRequiredRole && (
+            <Alert variant="destructive">
+              <ShieldAlert className="h-4 w-4" />
+              <AlertDescription>
+                Vous n'avez pas le rôle requis ({stepInfo?.role}) pour valider cette étape.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="comments">Commentaires (optionnel)</Label>
             <Textarea
@@ -76,10 +89,10 @@ export function OrdonnancementValidateDialog({
           </Button>
           <Button
             onClick={handleValidate}
-            disabled={validateStep.isPending}
+            disabled={validateStep.isPending || !hasRequiredRole}
             className="bg-success text-success-foreground hover:bg-success/90"
           >
-            {validateStep.isPending ? "Validation..." : "Valider"}
+            {validateStep.isPending ? 'Validation...' : 'Valider'}
           </Button>
         </DialogFooter>
       </DialogContent>

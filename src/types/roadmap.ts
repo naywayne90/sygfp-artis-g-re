@@ -10,7 +10,7 @@ export interface PlanTravail {
   description: string | null;
   exercice_id: string;
   direction_id: string;
-  statut: 'brouillon' | 'soumis' | 'valide' | 'en_cours' | 'cloture';
+  statut: 'soumis' | 'valide' | 'en_cours' | 'cloture';
   date_debut: string | null;
   date_fin: string | null;
   budget_alloue: number;

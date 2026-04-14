@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Configuration centralisée des statuts pour SYGFP
  * Source unique de vérité pour tous les statuts de workflow
@@ -9,18 +8,7 @@
 // ============================================
 
 export const STATUSES = {
-  // Brouillon
-  DRAFT: {
-    code: 'DRAFT',
-    dbValue: 'brouillon',
-    label: 'Brouillon',
-    color: 'slate',
-    bgColor: 'bg-slate-100',
-    textColor: 'text-slate-700',
-    borderColor: 'border-slate-300',
-    icon: 'FileEdit',
-    description: 'En cours de rédaction'
-  },
+  // brouillon supprime — creation = soumis directement
 
   // Soumis
   SUBMITTED: {
@@ -32,7 +20,7 @@ export const STATUSES = {
     textColor: 'text-blue-700',
     borderColor: 'border-blue-300',
     icon: 'Send',
-    description: 'En attente de traitement'
+    description: 'En attente de traitement',
   },
 
   // À valider
@@ -45,7 +33,7 @@ export const STATUSES = {
     textColor: 'text-amber-700',
     borderColor: 'border-amber-300',
     icon: 'Clock',
-    description: 'En attente de validation'
+    description: 'En attente de validation',
   },
 
   // Validé / Approuvé
@@ -58,7 +46,7 @@ export const STATUSES = {
     textColor: 'text-green-700',
     borderColor: 'border-green-300',
     icon: 'CheckCircle',
-    description: 'Validation accordée'
+    description: 'Validation accordée',
   },
 
   // Différé
@@ -71,7 +59,7 @@ export const STATUSES = {
     textColor: 'text-orange-700',
     borderColor: 'border-orange-300',
     icon: 'Pause',
-    description: 'Reporté à plus tard'
+    description: 'Reporté à plus tard',
   },
 
   // Rejeté
@@ -84,7 +72,7 @@ export const STATUSES = {
     textColor: 'text-red-700',
     borderColor: 'border-red-300',
     icon: 'XCircle',
-    description: 'Refusé'
+    description: 'Refusé',
   },
 
   // Soldé / Clôturé
@@ -97,7 +85,7 @@ export const STATUSES = {
     textColor: 'text-gray-600',
     borderColor: 'border-gray-300',
     icon: 'CheckCheck',
-    description: 'Complètement traité'
+    description: 'Complètement traité',
   },
 
   // Annulé
@@ -110,7 +98,7 @@ export const STATUSES = {
     textColor: 'text-red-600',
     borderColor: 'border-red-200',
     icon: 'Ban',
-    description: 'Annulé définitivement'
+    description: 'Annulé définitivement',
   },
 
   // En cours
@@ -123,7 +111,7 @@ export const STATUSES = {
     textColor: 'text-blue-600',
     borderColor: 'border-blue-200',
     icon: 'Loader',
-    description: 'Traitement en cours'
+    description: 'Traitement en cours',
   },
 
   // Imputé
@@ -136,7 +124,7 @@ export const STATUSES = {
     textColor: 'text-indigo-700',
     borderColor: 'border-indigo-300',
     icon: 'Tag',
-    description: 'Imputation budgétaire effectuée'
+    description: 'Imputation budgétaire effectuée',
   },
 
   // Engagé
@@ -149,7 +137,7 @@ export const STATUSES = {
     textColor: 'text-purple-700',
     borderColor: 'border-purple-300',
     icon: 'Lock',
-    description: 'Crédits réservés'
+    description: 'Crédits réservés',
   },
 
   // Liquidé
@@ -162,7 +150,7 @@ export const STATUSES = {
     textColor: 'text-cyan-700',
     borderColor: 'border-cyan-300',
     icon: 'Receipt',
-    description: 'Service fait constaté'
+    description: 'Service fait constaté',
   },
 
   // Ordonnancé
@@ -175,7 +163,7 @@ export const STATUSES = {
     textColor: 'text-teal-700',
     borderColor: 'border-teal-300',
     icon: 'FileCheck',
-    description: 'Ordre de paiement émis'
+    description: 'Ordre de paiement émis',
   },
 
   // Signé
@@ -188,7 +176,7 @@ export const STATUSES = {
     textColor: 'text-emerald-700',
     borderColor: 'border-emerald-300',
     icon: 'PenTool',
-    description: 'Signature apposée'
+    description: 'Signature apposée',
   },
 
   // Payé / Exécuté
@@ -201,7 +189,7 @@ export const STATUSES = {
     textColor: 'text-green-600',
     borderColor: 'border-green-200',
     icon: 'Banknote',
-    description: 'Paiement effectué'
+    description: 'Paiement effectué',
   },
 
   // Exécuté (règlement)
@@ -214,7 +202,7 @@ export const STATUSES = {
     textColor: 'text-green-700',
     borderColor: 'border-green-300',
     icon: 'CheckCircle2',
-    description: 'Règlement exécuté'
+    description: 'Règlement exécuté',
   },
 
   // Bloqué
@@ -227,7 +215,7 @@ export const STATUSES = {
     textColor: 'text-red-700',
     borderColor: 'border-red-300',
     icon: 'AlertOctagon',
-    description: 'Bloqué - action requise'
+    description: 'Bloqué - action requise',
   },
 } as const;
 
@@ -236,7 +224,7 @@ export const STATUSES = {
 // ============================================
 
 export type StatusCode = keyof typeof STATUSES;
-export type StatusConfig = typeof STATUSES[StatusCode];
+export type StatusConfig = (typeof STATUSES)[StatusCode];
 
 // ============================================
 // HELPER FUNCTIONS
@@ -251,7 +239,7 @@ export const getStatusConfig = (code: StatusCode): StatusConfig => STATUSES[code
  * Récupère la configuration d'un statut par sa valeur en base
  */
 export const getStatusByDbValue = (dbValue: string): StatusConfig | undefined =>
-  Object.values(STATUSES).find(s => s.dbValue === dbValue);
+  Object.values(STATUSES).find((s) => s.dbValue === dbValue);
 
 /**
  * Récupère le label d'un statut depuis sa valeur DB
@@ -286,7 +274,6 @@ export const getStatusBorderClass = (dbValue: string): string => {
  * Statuts pour les Notes SEF
  */
 export const NOTE_SEF_STATUSES = [
-  STATUSES.DRAFT,
   STATUSES.SUBMITTED,
   STATUSES.APPROVED,
   STATUSES.DEFERRED,
@@ -298,7 +285,6 @@ export const NOTE_SEF_STATUSES = [
  * Statuts pour les Notes AEF
  */
 export const NOTE_AEF_STATUSES = [
-  STATUSES.DRAFT,
   STATUSES.SUBMITTED,
   STATUSES.APPROVED,
   STATUSES.DEFERRED,
@@ -310,7 +296,7 @@ export const NOTE_AEF_STATUSES = [
  * Statuts pour les Engagements
  */
 export const ENGAGEMENT_STATUSES = [
-  STATUSES.DRAFT,
+  STATUSES.SUBMITTED,
   STATUSES.APPROVED,
   STATUSES.LIQUIDATED,
   STATUSES.ORDERED,
@@ -321,7 +307,7 @@ export const ENGAGEMENT_STATUSES = [
  * Statuts pour les Liquidations
  */
 export const LIQUIDATION_STATUSES = [
-  STATUSES.DRAFT,
+  STATUSES.SUBMITTED,
   STATUSES.APPROVED,
   STATUSES.ORDERED,
 ] as const;
@@ -330,7 +316,7 @@ export const LIQUIDATION_STATUSES = [
  * Statuts pour les Ordonnancements
  */
 export const ORDONNANCEMENT_STATUSES = [
-  STATUSES.DRAFT,
+  STATUSES.SUBMITTED,
   STATUSES.SIGNED,
   STATUSES.PAID,
 ] as const;
@@ -339,7 +325,7 @@ export const ORDONNANCEMENT_STATUSES = [
  * Statuts pour les Règlements
  */
 export const REGLEMENT_STATUSES = [
-  STATUSES.DRAFT,
+  STATUSES.SUBMITTED,
   STATUSES.IN_PROGRESS,
   STATUSES.EXECUTED,
 ] as const;
@@ -348,7 +334,7 @@ export const REGLEMENT_STATUSES = [
  * Statuts pour les Dossiers
  */
 export const DOSSIER_STATUSES = [
-  STATUSES.DRAFT,
+  STATUSES.SUBMITTED,
   STATUSES.IN_PROGRESS,
   STATUSES.APPROVED,
   STATUSES.BLOCKED,
@@ -360,32 +346,31 @@ export const DOSSIER_STATUSES = [
 // TRANSITIONS DE WORKFLOW
 // ============================================
 
+// brouillon supprime — creation = soumis directement
 export const WORKFLOW_TRANSITIONS = {
   NOTE_SEF: {
-    brouillon: ['soumis'],
     soumis: ['valide', 'rejete', 'differe'],
     valide: ['impute'],
     differe: ['soumis'],
-    rejete: ['brouillon'],
+    rejete: ['soumis'], // correction → resoumission directe (plus de brouillon)
     impute: [],
   },
   NOTE_AEF: {
-    brouillon: ['soumis'],
     soumis: ['valide', 'rejete', 'differe'],
     valide: ['impute'],
     differe: ['soumis'],
-    rejete: ['brouillon'],
+    rejete: ['soumis'], // correction → resoumission directe (plus de brouillon)
     impute: [],
   },
   ENGAGEMENT: {
-    brouillon: ['valide'],
+    soumis: ['valide'],
     valide: ['liquide'],
     liquide: ['ordonnance'],
     ordonnance: ['paye'],
     paye: [],
   },
   DOSSIER: {
-    brouillon: ['en_cours'],
+    soumis: ['en_cours'],
     en_cours: ['valide', 'bloque'],
     valide: ['solde'],
     bloque: ['en_cours', 'annule'],

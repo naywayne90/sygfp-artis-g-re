@@ -29,35 +29,35 @@ export interface NoteSEFEntity {
   urgence: NoteSEFUrgenceType | null;
   commentaire: string | null;
   statut: NoteSEFStatutType | null;
-  
+
   // Champs de rejet
   rejection_reason: string | null;
   rejected_by: string | null;
   rejected_at: string | null;
-  
+
   // Champs de report (différé)
   differe_motif: string | null;
   differe_condition: string | null;
   differe_date_reprise: string | null;
   differe_by: string | null;
   differe_at: string | null;
-  
+
   // Champs de validation
   validated_by: string | null;
   validated_at: string | null;
-  
+
   // Champs de soumission
   submitted_by: string | null;
   submitted_at: string | null;
-  
+
   // Métadonnées
   created_by: string | null;
   created_at: string;
   updated_at: string;
-  
+
   // Lien vers le dossier créé après validation
   dossier_id?: string | null;
-  
+
   // Relations (peuplées par les requêtes)
   direction?: DirectionRef | null;
   demandeur?: ProfileRef | null;
@@ -219,7 +219,6 @@ export interface NoteSEFFilters {
  */
 export interface NoteSEFCounts {
   total: number;
-  brouillon: number;
   soumis: number;
   a_valider: number;
   valide: number;

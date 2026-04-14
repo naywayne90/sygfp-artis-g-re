@@ -2,12 +2,12 @@
  * DashboardAICB - Dashboard spécialisé Audit Interne et Contrôle Budgétaire
  * Focalisé sur: Contrôles de conformité, Anomalies, Rapports d'audit
  */
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -15,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Shield,
   AlertTriangle,
@@ -31,11 +31,11 @@ import {
   Building2,
   ArrowUpRight,
   BarChart3,
-} from "lucide-react";
-import { useDirectionDashboard } from "@/hooks/dashboard/useDirectionDashboard";
-import { useControleurDashboard } from "@/hooks/useDashboardByRole";
-import { formatMontant } from "@/lib/config/sygfp-constants";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import { useDirectionDashboard } from '@/hooks/dashboard/useDirectionDashboard';
+import { useControleurDashboard } from '@/hooks/useDashboardByRole';
+import { cn, formatCurrency } from '@/lib/utils';
+import { formatMontant } from '@/lib/config/sygfp-constants';
 
 interface DashboardAICBProps {
   directionId: string;
@@ -43,11 +43,7 @@ interface DashboardAICBProps {
   directionNom: string;
 }
 
-export function DashboardAICB({
-  directionId,
-  directionCode,
-  directionNom,
-}: DashboardAICBProps) {
+export function DashboardAICB({ directionId, directionCode, directionNom }: DashboardAICBProps) {
   const navigate = useNavigate();
   const { kpis, isLoading: isLoadingDirection, refetch } = useDirectionDashboard(directionId);
   const { data: controleurStats, isLoading: isLoadingControleur } = useControleurDashboard();
@@ -72,9 +68,8 @@ export function DashboardAICB({
     anomaliesDetails: [],
   };
 
-  const conformiteGlobale = stats.totalLignes > 0
-    ? Math.round((stats.lignesSaines / stats.totalLignes) * 100)
-    : 100;
+  const conformiteGlobale =
+    stats.totalLignes > 0 ? Math.round((stats.lignesSaines / stats.totalLignes) * 100) : 100;
 
   return (
     <div className="space-y-6">
@@ -131,9 +126,12 @@ export function DashboardAICB({
                     fill="none"
                     strokeDasharray={`${conformiteGlobale * 2.51} 251`}
                     className={cn(
-                      "transition-all duration-500",
-                      conformiteGlobale >= 80 ? "text-success" :
-                      conformiteGlobale >= 60 ? "text-warning" : "text-destructive"
+                      'transition-all duration-500',
+                      conformiteGlobale >= 80
+                        ? 'text-success'
+                        : conformiteGlobale >= 60
+                          ? 'text-warning'
+                          : 'text-destructive'
                     )}
                   />
                 </svg>
@@ -169,9 +167,9 @@ export function DashboardAICB({
         </Card>
 
         {/* Anomalies */}
-        <Card className={cn(
-          stats.anomaliesDetectees > 0 && "border-destructive/50 bg-destructive/5"
-        )}>
+        <Card
+          className={cn(stats.anomaliesDetectees > 0 && 'border-destructive/50 bg-destructive/5')}
+        >
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <AlertOctagon className="h-4 w-4 text-destructive" />
@@ -179,11 +177,9 @@ export function DashboardAICB({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-destructive">
-              {stats.anomaliesDetectees}
-            </div>
+            <div className="text-3xl font-bold text-destructive">{stats.anomaliesDetectees}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {stats.anomaliesDetectees === 0 ? "Aucune anomalie détectée" : "À investiguer"}
+              {stats.anomaliesDetectees === 0 ? 'Aucune anomalie détectée' : 'À investiguer'}
             </p>
           </CardContent>
         </Card>
@@ -192,15 +188,12 @@ export function DashboardAICB({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <FileSearch className="h-4 w-4" />
-              À Viser
+              <FileSearch className="h-4 w-4" />À Viser
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.engagementsAViser}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Engagements en attente
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Engagements en attente</p>
           </CardContent>
         </Card>
       </div>
@@ -225,15 +218,15 @@ export function DashboardAICB({
             <CardTitle className="text-sm font-medium">Crédits Disponibles</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={cn(
-              "text-2xl font-bold",
-              stats.montantDisponible < 0 && "text-destructive"
-            )}>
+            <div
+              className={cn(
+                'text-2xl font-bold',
+                stats.montantDisponible < 0 && 'text-destructive'
+              )}
+            >
               {formatMontant(stats.montantDisponible)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Reste à engager
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Reste à engager</p>
           </CardContent>
         </Card>
 
@@ -243,9 +236,7 @@ export function DashboardAICB({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalLignes}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Lignes budgétaires actives
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Lignes budgétaires actives</p>
           </CardContent>
         </Card>
       </div>
@@ -258,9 +249,7 @@ export function DashboardAICB({
               <FileWarning className="h-5 w-5" />
               Anomalies Détectées
             </CardTitle>
-            <CardDescription>
-              Liste des anomalies nécessitant une investigation
-            </CardDescription>
+            <CardDescription>Liste des anomalies nécessitant une investigation</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -268,15 +257,15 @@ export function DashboardAICB({
                 <div
                   key={index}
                   className={cn(
-                    "flex items-start gap-3 p-3 rounded-lg border",
-                    anomalie.severity === "critical" && "border-destructive/50 bg-destructive/5",
-                    anomalie.severity === "warning" && "border-warning/50 bg-warning/5",
-                    anomalie.severity === "info" && "border-primary/50 bg-primary/5"
+                    'flex items-start gap-3 p-3 rounded-lg border',
+                    anomalie.severity === 'critical' && 'border-destructive/50 bg-destructive/5',
+                    anomalie.severity === 'warning' && 'border-warning/50 bg-warning/5',
+                    anomalie.severity === 'info' && 'border-primary/50 bg-primary/5'
                   )}
                 >
-                  {anomalie.severity === "critical" ? (
+                  {anomalie.severity === 'critical' ? (
                     <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-                  ) : anomalie.severity === "warning" ? (
+                  ) : anomalie.severity === 'warning' ? (
                     <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
                   ) : (
                     <AlertTriangle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
@@ -287,8 +276,11 @@ export function DashboardAICB({
                   </div>
                   <Badge
                     variant={
-                      anomalie.severity === "critical" ? "destructive" :
-                      anomalie.severity === "warning" ? "outline" : "secondary"
+                      anomalie.severity === 'critical'
+                        ? 'destructive'
+                        : anomalie.severity === 'warning'
+                          ? 'outline'
+                          : 'secondary'
                     }
                   >
                     {anomalie.severity}
@@ -308,9 +300,7 @@ export function DashboardAICB({
               <TrendingUp className="h-5 w-5 text-destructive" />
               Lignes Budgétaires Critiques
             </CardTitle>
-            <CardDescription>
-              Lignes avec taux de consommation supérieur à 90%
-            </CardDescription>
+            <CardDescription>Lignes avec taux de consommation supérieur à 90%</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -328,14 +318,10 @@ export function DashboardAICB({
                   <TableRow key={ligne.id}>
                     <TableCell className="font-mono text-sm">{ligne.code}</TableCell>
                     <TableCell className="max-w-[200px] truncate">{ligne.label}</TableCell>
+                    <TableCell className="text-right">{formatMontant(ligne.dotation)}</TableCell>
+                    <TableCell className="text-right">{formatMontant(ligne.engage)}</TableCell>
                     <TableCell className="text-right">
-                      {formatMontant(ligne.dotation)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatMontant(ligne.engage)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant={ligne.tauxConsommation >= 100 ? "destructive" : "outline"}>
+                      <Badge variant={ligne.tauxConsommation >= 100 ? 'destructive' : 'outline'}>
                         {ligne.tauxConsommation}%
                       </Badge>
                     </TableCell>
@@ -357,7 +343,7 @@ export function DashboardAICB({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/admin/journal-audit")}
+              onClick={() => navigate('/admin/journal-audit')}
             >
               <ClipboardCheck className="h-4 w-4" />
               Journal d'Audit
@@ -365,7 +351,7 @@ export function DashboardAICB({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/etats-execution")}
+              onClick={() => navigate('/etats-execution')}
             >
               <BarChart3 className="h-4 w-4" />
               États d'Exécution
@@ -373,7 +359,7 @@ export function DashboardAICB({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/engagements")}
+              onClick={() => navigate('/engagements')}
             >
               <FileSearch className="h-4 w-4" />
               Engagements à Viser
@@ -381,7 +367,7 @@ export function DashboardAICB({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/planification/structure")}
+              onClick={() => navigate('/planification/structure')}
             >
               <Building2 className="h-4 w-4" />
               Structure Budgétaire

@@ -50,7 +50,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import {
   useApprovisionnementsTresorerie,
   CreateApprovisionnementData,
@@ -83,7 +83,6 @@ export default function ApprovisionnementsCaisse() {
     createApprovisionnement,
     isCreating,
     exportToExcel,
-    formatMontant,
     refetch,
   } = useApprovisionnementsTresorerie({
     type: 'CASH',
@@ -357,7 +356,9 @@ export default function ApprovisionnementsCaisse() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-600">{formatMontant(stats.montantTotal)}</p>
+            <p className="text-2xl font-bold text-green-600">
+              {formatCurrency(stats.montantTotal)}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -496,7 +497,7 @@ export default function ApprovisionnementsCaisse() {
                         {appro.origine_fonds?.libelle || appro.origine_fonds_code || '-'}
                       </TableCell>
                       <TableCell className="text-right font-medium text-green-600">
-                        +{formatMontant(appro.montant)}
+                        +{formatCurrency(appro.montant)}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {appro.reference_piece || '-'}

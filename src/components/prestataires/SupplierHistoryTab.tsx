@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
 
 interface SupplierHistoryTabProps {
   supplierId: string;
@@ -149,11 +150,6 @@ export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistory
     }
   };
 
-  const formatMontant = (value: number | null) => {
-    if (value === null) return '-';
-    return new Intl.NumberFormat('fr-FR').format(value) + ' FCFA';
-  };
-
   const formatDate = (date: string | null) => {
     if (!date) return '-';
     return format(new Date(date), 'dd MMM yyyy', { locale: fr });
@@ -195,14 +191,14 @@ export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistory
           <FileSignature className="h-6 w-6 mx-auto mb-2 text-primary" />
           <p className="text-2xl font-bold">{contrats?.length || 0}</p>
           <p className="text-sm text-muted-foreground">Contrats</p>
-          <p className="text-xs text-primary font-medium mt-1">{formatMontant(totalContrats)}</p>
+          <p className="text-xs text-primary font-medium mt-1">{formatCurrency(totalContrats)}</p>
         </div>
         <div className="bg-muted/50 rounded-lg p-4 text-center">
           <CreditCard className="h-6 w-6 mx-auto mb-2 text-blue-600" />
           <p className="text-2xl font-bold">{engagements?.length || 0}</p>
           <p className="text-sm text-muted-foreground">Engagements</p>
           <p className="text-xs text-blue-600 font-medium mt-1">
-            {formatMontant(totalEngagements)}
+            {formatCurrency(totalEngagements)}
           </p>
         </div>
         <div className="bg-muted/50 rounded-lg p-4 text-center">
@@ -235,7 +231,7 @@ export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistory
                   <TableCell className="font-mono text-sm">{contrat.numero}</TableCell>
                   <TableCell className="max-w-[200px] truncate">{contrat.objet}</TableCell>
                   <TableCell>
-                    {formatMontant(contrat.montant_actuel || contrat.montant_initial)}
+                    {formatCurrency(contrat.montant_actuel || contrat.montant_initial)}
                   </TableCell>
                   <TableCell>{formatDate(contrat.date_signature)}</TableCell>
                   <TableCell>{getStatusBadge(contrat.statut)}</TableCell>
@@ -268,7 +264,7 @@ export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistory
                 <TableRow key={eng.id}>
                   <TableCell className="font-mono text-sm">{eng.numero}</TableCell>
                   <TableCell className="max-w-[200px] truncate">{eng.objet}</TableCell>
-                  <TableCell>{formatMontant(eng.montant)}</TableCell>
+                  <TableCell>{formatCurrency(eng.montant)}</TableCell>
                   <TableCell>{formatDate(eng.date_engagement)}</TableCell>
                   <TableCell>{getStatusBadge(eng.statut)}</TableCell>
                 </TableRow>
@@ -300,7 +296,7 @@ export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistory
                 <TableRow key={marche.id}>
                   <TableCell className="font-mono text-sm">{marche.numero}</TableCell>
                   <TableCell className="max-w-[200px] truncate">{marche.objet}</TableCell>
-                  <TableCell>{formatMontant(marche.montant)}</TableCell>
+                  <TableCell>{formatCurrency(marche.montant)}</TableCell>
                   <TableCell>{formatDate(marche.date_lancement)}</TableCell>
                   <TableCell>{getStatusBadge(marche.statut)}</TableCell>
                 </TableRow>

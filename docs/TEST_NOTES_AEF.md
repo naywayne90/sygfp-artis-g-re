@@ -1,6 +1,7 @@
 # Guide de Test Notes AEF - Checklist Complète
 
 ## Prérequis
+
 - Exercice actif sélectionné
 - Utilisateur connecté avec rôle approprié
 - Au moins une Direction dans le référentiel
@@ -26,7 +27,8 @@
 5. [ ] Cliquer "Créer la note"
 
 **Résultat attendu** :
-- ✅ Note AEF créée en statut "brouillon"
+
+- ✅ Note AEF créée en statut "soumis"
 - ✅ Lien vers la SEF visible dans les détails
 - ✅ Toast de confirmation affiché
 
@@ -49,6 +51,7 @@
 6. [ ] Créer la note
 
 **Résultat attendu** :
+
 - ✅ Note AEF directe créée
 - ✅ Champ `is_direct_aef = true` en base
 - ✅ Justification visible dans les détails
@@ -64,6 +67,7 @@
 3. [ ] Vérifier que la checkbox "AEF directe" est absente ou désactivée
 
 **Résultat attendu** :
+
 - ✅ Option AEF directe non accessible
 - ✅ Champ "Note SEF" obligatoire
 
@@ -73,7 +77,7 @@
 
 **Rôle requis** : Créateur + DG pour validation
 
-1. [ ] Créer une Note AEF (brouillon)
+1. [ ] Créer une Note AEF
 2. [ ] Soumettre la note
    - [ ] Vérifier statut = "soumis"
 3. [ ] En tant que DG, valider la note
@@ -81,7 +85,8 @@
 4. [ ] Vérifier que la note apparaît dans l'onglet "À imputer"
 
 **Résultat attendu** :
-- ✅ Transition brouillon → soumis → a_imputer
+
+- ✅ Transition soumis → a_imputer
 - ✅ Note visible dans onglet "À imputer"
 
 ---
@@ -101,6 +106,7 @@
 6. [ ] Valider l'imputation
 
 **Résultat attendu** :
+
 - ✅ Imputation créée en base
 - ✅ Statut AEF = "impute"
 - ✅ AEF disparaît de l'onglet "À imputer"
@@ -113,6 +119,7 @@
 2. [ ] Vérifier le message d'erreur
 
 **Résultat attendu** :
+
 - ✅ Message "Cette note a déjà été imputée"
 - ✅ Action bloquée
 
@@ -128,6 +135,7 @@
 4. [ ] Confirmer le rejet
 
 **Résultat attendu** :
+
 - ✅ Statut = "rejete"
 - ✅ Motif visible dans l'historique
 - ✅ Note visible dans onglet "Rejetées"
@@ -144,6 +152,7 @@
 4. [ ] Confirmer
 
 **Résultat attendu** :
+
 - ✅ Statut = "differe"
 - ✅ Date de reprise enregistrée
 - ✅ Note visible dans onglet "Différées"
@@ -161,6 +170,7 @@
    - [ ] "La description doit contenir au moins 10 caractères"
 
 **Résultat attendu** :
+
 - ✅ Messages d'erreur FR sous chaque champ
 - ✅ Formulaire non soumis
 
@@ -175,6 +185,7 @@
 3. [ ] Vérifier le téléchargement
 
 **Résultat attendu** :
+
 - ✅ Fichier .xlsx téléchargé
 - ✅ Contenu correspond aux notes affichées
 - ✅ Colonnes : Numéro, Objet, Direction, Montant, Statut, Date
@@ -184,14 +195,17 @@
 ## Vérifications techniques
 
 ### Console navigateur
+
 - [ ] Aucune erreur (error)
 - [ ] Aucun warning critique
 
 ### Réseau
+
 - [ ] Pas de requêtes en erreur (4xx, 5xx)
 - [ ] Temps de réponse < 2s
 
 ### Base de données
+
 - [ ] Données cohérentes (FK valides)
 - [ ] Historique d'audit enregistré
 
@@ -199,21 +213,21 @@
 
 ## Résumé des tests
 
-| Scénario | Statut |
-|----------|--------|
-| 1. AEF liée à SEF | [ ] |
-| 2. AEF directe DG | [ ] |
-| 3. AEF directe non-DG | [ ] |
-| 4. Workflow complet | [ ] |
-| 5. Imputation | [ ] |
-| 6. Double imputation | [ ] |
-| 7. Rejet | [ ] |
-| 8. Report | [ ] |
-| 9. Validation Zod | [ ] |
-| 10. Export Excel | [ ] |
+| Scénario              | Statut |
+| --------------------- | ------ |
+| 1. AEF liée à SEF     | [ ]    |
+| 2. AEF directe DG     | [ ]    |
+| 3. AEF directe non-DG | [ ]    |
+| 4. Workflow complet   | [ ]    |
+| 5. Imputation         | [ ]    |
+| 6. Double imputation  | [ ]    |
+| 7. Rejet              | [ ]    |
+| 8. Report             | [ ]    |
+| 9. Validation Zod     | [ ]    |
+| 10. Export Excel      | [ ]    |
 
-**Date du test** : ____/____/______
+**Date du test** : \_**\_/\_\_**/**\_\_**
 
-**Testeur** : _________________________
+**Testeur** : ************\_************
 
-**Version** : _________________________
+**Version** : ************\_************

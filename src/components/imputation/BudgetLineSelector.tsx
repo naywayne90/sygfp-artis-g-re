@@ -448,8 +448,6 @@ export function BudgetLineSelector({
     return line.disponible_net >= amount;
   };
 
-  const formatMontant = (montant: number) => formatCurrency(montant);
-
   const isLineSelected = (lineId: string) => selectedLines.some((l) => l.id === lineId);
 
   const getSelectedLine = (lineId: string) => selectedLines.find((l) => l.id === lineId);
@@ -464,7 +462,7 @@ export function BudgetLineSelector({
               Sélection des lignes budgétaires
             </CardTitle>
             <CardDescription>
-              Montant à imputer: <strong>{formatMontant(montantTotal)}</strong>
+              Montant à imputer: <strong>{formatCurrency(montantTotal)}</strong>
               {budgetLines.length > 0 && (
                 <span className="ml-2 text-muted-foreground">
                   ({budgetLines.length} ligne{budgetLines.length > 1 ? 's' : ''} disponible
@@ -692,7 +690,7 @@ export function BudgetLineSelector({
                     : 'text-orange-600 font-medium'
                 }
               >
-                {formatMontant(totalSelected)} / {formatMontant(montantTotal)}
+                {formatCurrency(totalSelected)} / {formatCurrency(montantTotal)}
               </span>
             </div>
             <Progress value={(totalSelected / montantTotal) * 100} className="h-2" />
@@ -702,7 +700,7 @@ export function BudgetLineSelector({
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Répartition incomplète</AlertTitle>
                 <AlertDescription>
-                  Il reste {formatMontant(remainingAmount)} à répartir
+                  Il reste {formatCurrency(remainingAmount)} à répartir
                 </AlertDescription>
               </Alert>
             )}
@@ -769,7 +767,7 @@ export function BudgetLineSelector({
                               isInsufficient ? 'text-destructive' : 'text-green-600'
                             }`}
                           >
-                            {formatMontant(line.disponible_net)}
+                            {formatCurrency(line.disponible_net)}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2 min-w-[100px]">
@@ -901,7 +899,7 @@ export function BudgetLineSelector({
                       </TableCell>
                       <TableCell className="max-w-[200px] truncate">{line.label}</TableCell>
                       <TableCell className="text-right">
-                        {formatMontant(line.dotation_actuelle)}
+                        {formatCurrency(line.dotation_actuelle)}
                       </TableCell>
                       <TableCell
                         className={`text-right font-medium ${
@@ -912,7 +910,7 @@ export function BudgetLineSelector({
                               : 'text-green-600'
                         }`}
                       >
-                        {formatMontant(line.disponible_net)}
+                        {formatCurrency(line.disponible_net)}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">

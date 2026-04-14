@@ -297,7 +297,7 @@ export function useReglements() {
           )
         `
         )
-        .eq('statut', 'valide')
+        .in('statut', ['valide', 'ordonnance'])
         .eq('exercice', exercice)
         .order('created_at', { ascending: false });
 
@@ -330,7 +330,9 @@ export function useReglements() {
     let query = supabase
       .from('reglements')
       .select('id, montant')
-      .eq('ordonnancement_id', ordonnancementId);
+      .eq('ordonnancement_id', ordonnancementId)
+      .neq('statut', 'rejete')
+      .neq('statut', 'annule');
 
     if (currentReglementId) {
       query = query.not('id', 'eq', currentReglementId);
@@ -499,16 +501,18 @@ export function useReglements() {
 
       if (fetchError || !reglement) throw fetchError ?? new Error('Règlement introuvable');
 
-      // Supprimer le règlement
-      const { error } = await supabase.from('reglements').delete().eq('id', id);
+      // Soft-delete : annuler le règlement au lieu de le supprimer physiquement
+      const { error } = await supabase.from('reglements').update({ statut: 'annule' }).eq('id', id);
 
       if (error) throw error;
 
-      // Recalculer le montant_paye de l'ordonnancement
+      // Recalculer le montant_paye de l'ordonnancement (exclure annulés et rejetés)
       const { data: remainingReglements } = await supabase
         .from('reglements')
         .select('montant')
-        .eq('ordonnancement_id', reglement.ordonnancement_id);
+        .eq('ordonnancement_id', reglement.ordonnancement_id)
+        .neq('statut', 'annule')
+        .neq('statut', 'rejete');
 
       const newMontantPaye = (remainingReglements || []).reduce(
         (sum, reg) => sum + (reg.montant || 0),

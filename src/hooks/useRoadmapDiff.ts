@@ -1,4 +1,3 @@
-// @ts-nocheck - Tables not in generated types
 /**
  * useRoadmapDiff - Hook pour la gestion du diff et versioning des feuilles de route
  *
@@ -6,15 +5,15 @@
  * et l'application sélective lors du réaménagement.
  */
 
-import { useState, useCallback } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useAuditLog } from "@/hooks/useAuditLog";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useState, useCallback } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 // Types
-export type ChangeType = "add" | "modify" | "remove";
+export type ChangeType = 'add' | 'modify' | 'remove';
 
 export interface DiffField {
   field: string;
@@ -37,7 +36,7 @@ export interface PendingChange {
   is_hierarchy_valid: boolean;
   hierarchy_warning: string | null;
   is_selected: boolean;
-  status: "pending" | "applied" | "rejected" | "skipped";
+  status: 'pending' | 'applied' | 'rejected' | 'skipped';
   applied_at: string | null;
   applied_by: string | null;
   created_at: string;
@@ -86,15 +85,15 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
 
   // Récupérer les changements en attente
   const changesQuery = useQuery({
-    queryKey: ["roadmap-pending-changes", importBatchId],
+    queryKey: ['roadmap-pending-changes', importBatchId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("roadmap_pending_changes")
-        .select("*")
-        .eq("import_batch_id", importBatchId!)
-        .eq("status", "pending")
-        .order("change_type")
-        .order("created_at");
+        .from('roadmap_pending_changes')
+        .select('*')
+        .eq('import_batch_id', importBatchId!)
+        .eq('status', 'pending')
+        .order('change_type')
+        .order('created_at');
 
       if (error) throw error;
       return data as PendingChange[];
@@ -105,15 +104,11 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
   // Calculer les statistiques
   const stats: DiffStats = {
     total: changesQuery.data?.length ?? 0,
-    additions: changesQuery.data?.filter((c) => c.change_type === "add").length ?? 0,
-    modifications: changesQuery.data?.filter((c) => c.change_type === "modify").length ?? 0,
-    removals: changesQuery.data?.filter((c) => c.change_type === "remove").length ?? 0,
-    selected:
-      changesQuery.data?.filter(
-        (c) => localSelections[c.id] ?? c.is_selected
-      ).length ?? 0,
-    hierarchyErrors:
-      changesQuery.data?.filter((c) => !c.is_hierarchy_valid).length ?? 0,
+    additions: changesQuery.data?.filter((c) => c.change_type === 'add').length ?? 0,
+    modifications: changesQuery.data?.filter((c) => c.change_type === 'modify').length ?? 0,
+    removals: changesQuery.data?.filter((c) => c.change_type === 'remove').length ?? 0,
+    selected: changesQuery.data?.filter((c) => localSelections[c.id] ?? c.is_selected).length ?? 0,
+    hierarchyErrors: changesQuery.data?.filter((c) => !c.is_hierarchy_valid).length ?? 0,
   };
 
   // Mutation pour calculer le diff
@@ -129,20 +124,20 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
     }) => {
       // Créer un snapshot avant le calcul
       const { data: snapshotId, error: snapshotError } = await supabase.rpc(
-        "create_roadmap_snapshot",
+        'create_roadmap_snapshot',
         {
           p_direction_id: dirId,
           p_exercice_id: exId,
-          p_reason: "Avant réaménagement (import)",
+          p_reason: 'Avant réaménagement (import)',
         }
       );
 
       if (snapshotError) {
-        console.warn("Erreur création snapshot:", snapshotError);
+        console.warn('Erreur création snapshot:', snapshotError);
       }
 
       // Calculer le diff
-      const { data, error } = await supabase.rpc("calculate_import_diff", {
+      const { data, error } = await supabase.rpc('calculate_import_diff', {
         p_import_batch_id: batchId,
         p_direction_id: dirId,
         p_exercice_id: exId,
@@ -152,7 +147,7 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
       return { changes: data, snapshotId };
     },
     onSuccess: ({ changes }) => {
-      queryClient.invalidateQueries({ queryKey: ["roadmap-pending-changes"] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-pending-changes'] });
       toast.success(`${changes?.length ?? 0} changement(s) détecté(s)`);
     },
     onError: (error: Error) => {
@@ -162,14 +157,8 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
 
   // Mutation pour basculer la sélection d'un changement
   const toggleSelectionMutation = useMutation({
-    mutationFn: async ({
-      changeId,
-      isSelected,
-    }: {
-      changeId: string;
-      isSelected: boolean;
-    }) => {
-      const { _data, error } = await supabase.rpc("toggle_change_selection", {
+    mutationFn: async ({ changeId, isSelected }: { changeId: string; isSelected: boolean }) => {
+      const { _data, error } = await supabase.rpc('toggle_change_selection', {
         p_change_id: changeId,
         p_is_selected: isSelected,
       });
@@ -194,7 +183,7 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
       toast.error(`Erreur: ${error.message}`);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["roadmap-pending-changes"] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-pending-changes'] });
     },
   });
 
@@ -210,13 +199,13 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
       changeType?: ChangeType;
     }) => {
       let query = supabase
-        .from("roadmap_pending_changes")
+        .from('roadmap_pending_changes')
         .update({ is_selected: isSelected })
-        .eq("import_batch_id", batchId)
-        .eq("status", "pending");
+        .eq('import_batch_id', batchId)
+        .eq('status', 'pending');
 
       if (changeType) {
-        query = query.eq("change_type", changeType);
+        query = query.eq('change_type', changeType);
       }
 
       const { error } = await query;
@@ -226,7 +215,7 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
     },
     onSuccess: () => {
       setLocalSelections({});
-      queryClient.invalidateQueries({ queryKey: ["roadmap-pending-changes"] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-pending-changes'] });
     },
     onError: (error: Error) => {
       toast.error(`Erreur: ${error.message}`);
@@ -236,7 +225,7 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
   // Mutation pour appliquer les changements sélectionnés
   const applyChangesMutation = useMutation({
     mutationFn: async (batchId: string) => {
-      const { data, error } = await supabase.rpc("apply_selected_changes", {
+      const { data, error } = await supabase.rpc('apply_selected_changes', {
         p_import_batch_id: batchId,
       });
 
@@ -244,13 +233,13 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
       return data[0] as ApplyResult;
     },
     onSuccess: (result, batchId) => {
-      queryClient.invalidateQueries({ queryKey: ["roadmap-pending-changes"] });
-      queryClient.invalidateQueries({ queryKey: ["activites"] });
-      queryClient.invalidateQueries({ queryKey: ["roadmap-submissions"] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-pending-changes'] });
+      queryClient.invalidateQueries({ queryKey: ['activites'] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-submissions'] });
 
       log({
-        action: "roadmap_changes_applied",
-        entity_type: "import_batch",
+        action: 'roadmap_changes_applied',
+        entity_type: 'import_batch',
         entity_id: batchId,
         details: result,
       });
@@ -275,12 +264,12 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
   // Helper pour formatter les champs de diff
   const formatDiffField = (field: DiffField): string => {
     const fieldLabels: Record<string, string> = {
-      libelle: "Libellé",
-      montant_prevu: "Montant prévu",
-      description: "Description",
-      responsable: "Responsable",
-      date_debut_prevue: "Date début",
-      date_fin_prevue: "Date fin",
+      libelle: 'Libellé',
+      montant_prevu: 'Montant prévu',
+      description: 'Description',
+      responsable: 'Responsable',
+      date_debut_prevue: 'Date début',
+      date_fin_prevue: 'Date fin',
     };
 
     return fieldLabels[field.field] || field.field;
@@ -326,19 +315,19 @@ export function useRoadmapVersionHistory(directionId?: string) {
   const { exerciceId } = useExercice();
 
   return useQuery({
-    queryKey: ["roadmap-snapshots", directionId, exerciceId],
+    queryKey: ['roadmap-snapshots', directionId, exerciceId],
     queryFn: async () => {
       let query = supabase
-        .from("roadmap_version_snapshots")
-        .select("*")
-        .order("version_number", { ascending: false });
+        .from('roadmap_version_snapshots')
+        .select('*')
+        .order('version_number', { ascending: false });
 
       if (directionId) {
-        query = query.eq("direction_id", directionId);
+        query = query.eq('direction_id', directionId);
       }
 
       if (exerciceId) {
-        query = query.eq("exercice_id", exerciceId);
+        query = query.eq('exercice_id', exerciceId);
       }
 
       const { data, error } = await query;
@@ -355,37 +344,23 @@ export function useRoadmapVersionHistory(directionId?: string) {
  */
 export function useCompareVersions(snapshotId1?: string, snapshotId2?: string) {
   return useQuery({
-    queryKey: ["roadmap-version-compare", snapshotId1, snapshotId2],
+    queryKey: ['roadmap-version-compare', snapshotId1, snapshotId2],
     queryFn: async () => {
       const [{ data: v1 }, { data: v2 }] = await Promise.all([
-        supabase
-          .from("roadmap_version_snapshots")
-          .select("*")
-          .eq("id", snapshotId1!)
-          .single(),
-        supabase
-          .from("roadmap_version_snapshots")
-          .select("*")
-          .eq("id", snapshotId2!)
-          .single(),
+        supabase.from('roadmap_version_snapshots').select('*').eq('id', snapshotId1!).single(),
+        supabase.from('roadmap_version_snapshots').select('*').eq('id', snapshotId2!).single(),
       ]);
 
       if (!v1 || !v2) {
-        throw new Error("Versions non trouvées");
+        throw new Error('Versions non trouvées');
       }
 
       // Calculer les différences
       const v1Activities = new Map(
-        (v1.snapshot_data as unknown as Array<{ code: string }>).map((a) => [
-          a.code,
-          a,
-        ])
+        (v1.snapshot_data as unknown as Array<{ code: string }>).map((a) => [a.code, a])
       );
       const v2Activities = new Map(
-        (v2.snapshot_data as unknown as Array<{ code: string }>).map((a) => [
-          a.code,
-          a,
-        ])
+        (v2.snapshot_data as unknown as Array<{ code: string }>).map((a) => [a.code, a])
       );
 
       const added: unknown[] = [];
@@ -402,11 +377,9 @@ export function useCompareVersions(snapshotId1?: string, snapshotId2?: string) {
           const oldAct = oldActivity as Record<string, unknown>;
           const newAct = activity as Record<string, unknown>;
 
-          if (oldAct.libelle !== newAct.libelle) changes.push("libelle");
-          if (oldAct.montant_prevu !== newAct.montant_prevu)
-            changes.push("montant_prevu");
-          if (oldAct.description !== newAct.description)
-            changes.push("description");
+          if (oldAct.libelle !== newAct.libelle) changes.push('libelle');
+          if (oldAct.montant_prevu !== newAct.montant_prevu) changes.push('montant_prevu');
+          if (oldAct.description !== newAct.description) changes.push('description');
 
           if (changes.length > 0) {
             modified.push({ old: oldActivity, new: activity, changes });

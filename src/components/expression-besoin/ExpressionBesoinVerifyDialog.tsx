@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShieldCheck } from 'lucide-react';
-import { formatMontant } from '@/lib/config/sygfp-constants';
+import { formatCurrency } from '@/lib/utils';
 
 interface ExpressionBesoinVerifyDialogProps {
   open: boolean;
@@ -49,7 +49,7 @@ export function ExpressionBesoinVerifyDialog({
     onOpenChange(value);
   };
 
-  const formatMontantOrDash = (m: number | null) => (m ? formatMontant(m) : '-');
+  const formatMontantOrDash = (m: number | null) => (m ? formatCurrency(m) : '-');
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>

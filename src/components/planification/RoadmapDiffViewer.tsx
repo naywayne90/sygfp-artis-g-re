@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * RoadmapDiffViewer - Composant pour visualiser et sélectionner les changements
  *
@@ -6,24 +5,17 @@
  * avec cases à cocher pour sélectionner les changements à appliquer.
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-} from "@/components/ui/table";
-import {
-} from "@/components/ui/collapsible";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {} from '@/components/ui/table';
+import {} from '@/components/ui/collapsible';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Plus,
   Minus,
@@ -38,8 +30,15 @@ import {
   Check,
   X,
   FileWarning,
-} from "lucide-react";
-import { useRoadmapDiff, useRoadmapVersionHistory, PendingChange, DiffField, ChangeType } from "@/hooks/useRoadmapDiff";
+} from 'lucide-react';
+import {
+  useRoadmapDiff,
+  useRoadmapVersionHistory,
+  PendingChange,
+  DiffField,
+  ChangeType,
+} from '@/hooks/useRoadmapDiff';
+import { formatCurrency } from '@/lib/utils';
 
 // Configuration des types de changement
 const CHANGE_TYPE_CONFIG: Record<
@@ -47,22 +46,22 @@ const CHANGE_TYPE_CONFIG: Record<
   { label: string; icon: React.ReactNode; color: string; bgColor: string }
 > = {
   add: {
-    label: "Nouveau",
+    label: 'Nouveau',
     icon: <Plus className="h-4 w-4" />,
-    color: "text-green-600",
-    bgColor: "bg-green-50",
+    color: 'text-green-600',
+    bgColor: 'bg-green-50',
   },
   modify: {
-    label: "Modifié",
+    label: 'Modifié',
     icon: <Edit2 className="h-4 w-4" />,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
   },
   remove: {
-    label: "Supprimé",
+    label: 'Supprimé',
     icon: <Minus className="h-4 w-4" />,
-    color: "text-red-600",
-    bgColor: "bg-red-50",
+    color: 'text-red-600',
+    bgColor: 'bg-red-50',
   },
 };
 
@@ -89,24 +88,12 @@ export function RoadmapDiffViewer({
     formatDiffField,
   } = useRoadmapDiff(importBatchId, directionId);
 
-  const [activeTab, setActiveTab] = useState<"all" | ChangeType>("all");
+  const [activeTab, setActiveTab] = useState<'all' | ChangeType>('all');
   const [expandedChanges, setExpandedChanges] = useState<Set<string>>(new Set());
-
-  // Formatage montant
-  const formatMontant = (montant: unknown): string => {
-    if (montant === null || montant === undefined) return "—";
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "XOF",
-      maximumFractionDigits: 0,
-    }).format(Number(montant));
-  };
 
   // Filtrer les changements par type
   const filteredChanges =
-    activeTab === "all"
-      ? changes
-      : changes.filter((c) => c.change_type === activeTab);
+    activeTab === 'all' ? changes : changes.filter((c) => c.change_type === activeTab);
 
   // Toggle expansion d'un changement
   const toggleExpand = (changeId: string) => {
@@ -202,8 +189,8 @@ export function RoadmapDiffViewer({
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Erreurs de hiérarchie</AlertTitle>
           <AlertDescription>
-            {stats.hierarchyErrors} changement(s) ont des problèmes de hiérarchie
-            (action/mission non trouvée). Ces changements ne peuvent pas être appliqués.
+            {stats.hierarchyErrors} changement(s) ont des problèmes de hiérarchie (action/mission
+            non trouvée). Ces changements ne peuvent pas être appliqués.
           </AlertDescription>
         </Alert>
       )}
@@ -213,9 +200,8 @@ export function RoadmapDiffViewer({
           <FileWarning className="h-4 w-4 text-orange-600" />
           <AlertTitle className="text-orange-800">Suppressions détectées</AlertTitle>
           <AlertDescription className="text-orange-700">
-            {stats.removals} activité(s) absentes du nouvel import. Par défaut, elles
-            ne sont pas sélectionnées pour désactivation. Cochez-les si vous souhaitez
-            les désactiver.
+            {stats.removals} activité(s) absentes du nouvel import. Par défaut, elles ne sont pas
+            sélectionnées pour désactivation. Cochez-les si vous souhaitez les désactiver.
           </AlertDescription>
         </Alert>
       )}
@@ -226,38 +212,25 @@ export function RoadmapDiffViewer({
           <CardTitle className="flex items-center justify-between">
             <span>Changements à appliquer</span>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleAll(importBatchId, true)}
-              >
+              <Button variant="outline" size="sm" onClick={() => toggleAll(importBatchId, true)}>
                 <Check className="h-4 w-4 mr-1" />
                 Tout sélectionner
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleAll(importBatchId, false)}
-              >
+              <Button variant="outline" size="sm" onClick={() => toggleAll(importBatchId, false)}>
                 <X className="h-4 w-4 mr-1" />
                 Tout désélectionner
               </Button>
             </div>
           </CardTitle>
           <CardDescription>
-            Cochez les changements que vous souhaitez appliquer.
-            Les suppressions désactivent les activités sans les supprimer.
+            Cochez les changements que vous souhaitez appliquer. Les suppressions désactivent les
+            activités sans les supprimer.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs
-            value={activeTab}
-            onValueChange={(v) => setActiveTab(v as typeof activeTab)}
-          >
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all">
-                Tous ({stats.total})
-              </TabsTrigger>
+              <TabsTrigger value="all">Tous ({stats.total})</TabsTrigger>
               <TabsTrigger value="add" className="text-green-600">
                 Ajouts ({stats.additions})
               </TabsTrigger>
@@ -270,14 +243,15 @@ export function RoadmapDiffViewer({
             </TabsList>
 
             <TabsContent value={activeTab} className="mt-4">
-              {activeTab !== "all" && (
+              {activeTab !== 'all' && (
                 <div className="flex justify-end gap-2 mb-4">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleToggleAllType(activeTab as ChangeType, true)}
                   >
-                    Sélectionner tous les {CHANGE_TYPE_CONFIG[activeTab as ChangeType].label.toLowerCase()}s
+                    Sélectionner tous les{' '}
+                    {CHANGE_TYPE_CONFIG[activeTab as ChangeType].label.toLowerCase()}s
                   </Button>
                   <Button
                     variant="ghost"
@@ -297,11 +271,9 @@ export function RoadmapDiffViewer({
                       change={change}
                       isSelected={getEffectiveSelection(change)}
                       isExpanded={expandedChanges.has(change.id)}
-                      onToggleSelect={(selected) =>
-                        toggleSelection(change.id, selected)
-                      }
+                      onToggleSelect={(selected) => toggleSelection(change.id, selected)}
                       onToggleExpand={() => toggleExpand(change.id)}
-                      formatMontant={formatMontant}
+                      formatCurrency={formatCurrency}
                       formatDiffField={formatDiffField}
                     />
                   ))}
@@ -343,7 +315,10 @@ interface ChangeCardProps {
   isExpanded: boolean;
   onToggleSelect: (selected: boolean) => void;
   onToggleExpand: () => void;
-  formatMontant: (value: unknown) => string;
+  formatCurrency: (
+    value: number | null | undefined,
+    options?: { showSymbol?: boolean; decimals?: number }
+  ) => string;
   formatDiffField: (field: DiffField) => string;
 }
 
@@ -353,7 +328,7 @@ function ChangeCard({
   isExpanded,
   onToggleSelect,
   onToggleExpand,
-  formatMontant,
+  formatCurrency,
   formatDiffField,
 }: ChangeCardProps) {
   const config = CHANGE_TYPE_CONFIG[change.change_type];
@@ -365,10 +340,10 @@ function ChangeCard({
     <div
       className={`border rounded-lg transition-colors ${
         !change.is_hierarchy_valid
-          ? "border-red-300 bg-red-50/50"
+          ? 'border-red-300 bg-red-50/50'
           : isSelected
-          ? "border-primary/50 bg-primary/5"
-          : "border-border"
+            ? 'border-primary/50 bg-primary/5'
+            : 'border-border'
       }`}
     >
       <div className="flex items-center gap-3 p-3">
@@ -411,31 +386,22 @@ function ChangeCard({
 
         {/* Montant */}
         <div className="text-right">
-          {change.change_type === "modify" && change.old_data && change.new_data ? (
+          {change.change_type === 'modify' && change.old_data && change.new_data ? (
             <div className="flex items-center gap-2 text-sm">
               <span className="text-muted-foreground line-through">
-                {formatMontant(change.old_data.montant_prevu)}
+                {formatCurrency(change.old_data.montant_prevu)}
               </span>
               <ArrowRight className="h-3 w-3" />
-              <span className="font-medium">
-                {formatMontant(change.new_data.montant_prevu)}
-              </span>
+              <span className="font-medium">{formatCurrency(change.new_data.montant_prevu)}</span>
             </div>
           ) : (
-            <span className="font-mono text-sm">
-              {formatMontant(data?.montant_prevu)}
-            </span>
+            <span className="font-mono text-sm">{formatCurrency(data?.montant_prevu)}</span>
           )}
         </div>
 
         {/* Expand button for modifications */}
-        {change.change_type === "modify" && change.diff_fields && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleExpand}
-            className="ml-2"
-          >
+        {change.change_type === 'modify' && change.diff_fields && (
+          <Button variant="ghost" size="sm" onClick={onToggleExpand} className="ml-2">
             {isExpanded ? (
               <ChevronDown className="h-4 w-4" />
             ) : (
@@ -448,28 +414,24 @@ function ChangeCard({
       {/* Détail des modifications */}
       {isExpanded && change.diff_fields && (
         <div className="border-t px-3 py-2 bg-muted/30">
-          <div className="text-xs font-medium text-muted-foreground mb-2">
-            Champs modifiés:
-          </div>
+          <div className="text-xs font-medium text-muted-foreground mb-2">Champs modifiés:</div>
           <div className="space-y-1">
             {change.diff_fields.map((diff, idx) => (
               <div
                 key={idx}
                 className="flex items-center gap-2 text-sm py-1 px-2 bg-background rounded"
               >
-                <span className="font-medium min-w-[100px]">
-                  {formatDiffField(diff)}:
-                </span>
+                <span className="font-medium min-w-[100px]">{formatDiffField(diff)}:</span>
                 <span className="text-muted-foreground line-through">
-                  {diff.field === "montant_prevu"
-                    ? formatMontant(diff.old)
-                    : String(diff.old || "—")}
+                  {diff.field === 'montant_prevu'
+                    ? formatCurrency(diff.old)
+                    : String(diff.old || '—')}
                 </span>
                 <ArrowRight className="h-3 w-3 text-muted-foreground" />
                 <span className="font-medium">
-                  {diff.field === "montant_prevu"
-                    ? formatMontant(diff.new)
-                    : String(diff.new || "—")}
+                  {diff.field === 'montant_prevu'
+                    ? formatCurrency(diff.new)
+                    : String(diff.new || '—')}
                 </span>
               </div>
             ))}
@@ -527,27 +489,25 @@ export function RoadmapVersionHistory({ directionId }: VersionHistoryProps) {
               <Badge variant="outline">v{snapshot.version_number}</Badge>
               <div>
                 <div className="font-medium">
-                  {new Date(snapshot.snapshot_date).toLocaleDateString("fr-FR", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
+                  {new Date(snapshot.snapshot_date).toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
                   })}
                 </div>
                 {snapshot.reason && (
-                  <div className="text-sm text-muted-foreground">
-                    {snapshot.reason}
-                  </div>
+                  <div className="text-sm text-muted-foreground">{snapshot.reason}</div>
                 )}
               </div>
             </div>
             <div className="text-right text-sm">
               <div>{snapshot.nb_activites} activités</div>
               <div className="text-muted-foreground">
-                {new Intl.NumberFormat("fr-FR", {
-                  style: "currency",
-                  currency: "XOF",
+                {new Intl.NumberFormat('fr-FR', {
+                  style: 'currency',
+                  currency: 'XOF',
                   maximumFractionDigits: 0,
                 }).format(snapshot.montant_total)}
               </div>

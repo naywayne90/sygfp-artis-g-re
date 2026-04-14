@@ -1,15 +1,23 @@
-import { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Search, CreditCard, Eye, FileText } from "lucide-react";
-import { ImputationForm } from "./ImputationForm";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Search, CreditCard, Eye, FileText } from 'lucide-react';
+import { ImputationForm } from './ImputationForm';
+import { useNavigate } from 'react-router-dom';
+import { formatCurrency } from '@/lib/utils';
 
 interface Note {
   id: string;
@@ -30,11 +38,8 @@ interface ImputationListProps {
 
 export function ImputationList({ notes, isLoading, onRefresh }: ImputationListProps) {
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
-
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat("fr-FR").format(montant) + " FCFA" : "-";
 
   const filteredNotes = notes.filter(
     (note) =>
@@ -45,13 +50,13 @@ export function ImputationList({ notes, isLoading, onRefresh }: ImputationListPr
 
   const getPriorityBadge = (priorite: string | null) => {
     switch (priorite) {
-      case "urgente":
+      case 'urgente':
         return <Badge variant="destructive">Urgente</Badge>;
-      case "haute":
+      case 'haute':
         return <Badge className="bg-orange-500 hover:bg-orange-600">Haute</Badge>;
-      case "normale":
+      case 'normale':
         return <Badge variant="secondary">Normale</Badge>;
-      case "basse":
+      case 'basse':
         return <Badge variant="outline">Basse</Badge>;
       default:
         return <Badge variant="outline">-</Badge>;
@@ -82,14 +87,12 @@ export function ImputationList({ notes, isLoading, onRefresh }: ImputationListPr
               />
             </div>
             <Badge variant="outline" className="text-sm">
-              {filteredNotes.length} note{filteredNotes.length > 1 ? "s" : ""} en attente
+              {filteredNotes.length} note{filteredNotes.length > 1 ? 's' : ''} en attente
             </Badge>
           </div>
 
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Chargement...
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Chargement...</div>
           ) : filteredNotes.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -113,26 +116,20 @@ export function ImputationList({ notes, isLoading, onRefresh }: ImputationListPr
                 <TableBody>
                   {filteredNotes.map((note) => (
                     <TableRow key={note.id}>
-                      <TableCell className="font-mono text-sm">
-                        {note.numero || "-"}
-                      </TableCell>
-                      <TableCell className="max-w-[200px] truncate">
-                        {note.objet}
-                      </TableCell>
-                      <TableCell>
-                        {note.direction?.sigle || note.direction?.label || "-"}
-                      </TableCell>
+                      <TableCell className="font-mono text-sm">{note.numero || '-'}</TableCell>
+                      <TableCell className="max-w-[200px] truncate">{note.objet}</TableCell>
+                      <TableCell>{note.direction?.sigle || note.direction?.label || '-'}</TableCell>
                       <TableCell>
                         {note.created_by_profile?.first_name} {note.created_by_profile?.last_name}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {formatMontant(note.montant_estime)}
+                        {note.montant_estime ? formatCurrency(note.montant_estime) : '-'}
                       </TableCell>
                       <TableCell>{getPriorityBadge(note.priorite)}</TableCell>
                       <TableCell>
                         {note.validated_at
-                          ? format(new Date(note.validated_at), "dd MMM yyyy", { locale: fr })
-                          : "-"}
+                          ? format(new Date(note.validated_at), 'dd MMM yyyy', { locale: fr })
+                          : '-'}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -143,10 +140,7 @@ export function ImputationList({ notes, isLoading, onRefresh }: ImputationListPr
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => setSelectedNote(note)}
-                          >
+                          <Button size="sm" onClick={() => setSelectedNote(note)}>
                             <CreditCard className="mr-2 h-4 w-4" />
                             Imputer
                           </Button>

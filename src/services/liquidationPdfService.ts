@@ -14,6 +14,7 @@ import { createElement } from 'react';
 import { Liquidation, VALIDATION_STEPS } from '@/hooks/useLiquidations';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
 import logoArti from '@/assets/logo-arti.jpg';
 
 // ============================================================================
@@ -129,11 +130,6 @@ function formatDateShort(date: string | Date | null): string {
   } catch {
     return '-';
   }
-}
-
-function formatMontant(montant: number | null | undefined): string {
-  if (montant == null) return '-';
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 }
 
 // ============================================================================
@@ -255,9 +251,9 @@ async function generatePage1(
     startY: yPos,
     head: [['Désignation', 'Montant']],
     body: [
-      ['Montant Hors Taxes (HT)', formatMontant(liquidation.montant_ht)],
-      [`TVA (${liquidation.tva_taux || 0}%)`, formatMontant(liquidation.tva_montant)],
-      ['Montant TTC', formatMontant(liquidation.montant)],
+      ['Montant Hors Taxes (HT)', formatCurrency(liquidation.montant_ht)],
+      [`TVA (${liquidation.tva_taux || 0}%)`, formatCurrency(liquidation.tva_montant)],
+      ['Montant TTC', formatCurrency(liquidation.montant)],
     ],
     styles: { fontSize: fonts.body, cellPadding: 3 },
     headStyles: {
@@ -292,32 +288,32 @@ async function generatePage1(
   if (liquidation.airsi_montant) {
     retenueRows.push([
       `AIRSI (${liquidation.airsi_taux || 0}%)`,
-      formatMontant(liquidation.airsi_montant),
+      formatCurrency(liquidation.airsi_montant),
     ]);
   }
   if (liquidation.retenue_bic_montant) {
     retenueRows.push([
       `BIC (${liquidation.retenue_bic_taux || 0}%)`,
-      formatMontant(liquidation.retenue_bic_montant),
+      formatCurrency(liquidation.retenue_bic_montant),
     ]);
   }
   if (liquidation.retenue_bnc_montant) {
     retenueRows.push([
       `BNC (${liquidation.retenue_bnc_taux || 0}%)`,
-      formatMontant(liquidation.retenue_bnc_montant),
+      formatCurrency(liquidation.retenue_bnc_montant),
     ]);
   }
   if (liquidation.retenue_source_montant) {
     retenueRows.push([
       `Retenue à la source (${liquidation.retenue_source_taux || 0}%)`,
-      formatMontant(liquidation.retenue_source_montant),
+      formatCurrency(liquidation.retenue_source_montant),
     ]);
   }
   if (liquidation.penalites_montant) {
-    retenueRows.push(['Pénalités de retard', formatMontant(liquidation.penalites_montant)]);
+    retenueRows.push(['Pénalités de retard', formatCurrency(liquidation.penalites_montant)]);
   }
-  retenueRows.push(['TOTAL RETENUES', formatMontant(liquidation.total_retenues)]);
-  retenueRows.push(['NET À PAYER', formatMontant(liquidation.net_a_payer)]);
+  retenueRows.push(['TOTAL RETENUES', formatCurrency(liquidation.total_retenues)]);
+  retenueRows.push(['NET À PAYER', formatCurrency(liquidation.net_a_payer)]);
 
   autoTable(doc, {
     startY: yPos,
@@ -428,7 +424,7 @@ async function generatePage2(
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...colors.secondary);
   doc.text(
-    `Réf: ${liquidation.numero || 'N/A'} — Net à payer: ${formatMontant(liquidation.net_a_payer)}`,
+    `Réf: ${liquidation.numero || 'N/A'} — Net à payer: ${formatCurrency(liquidation.net_a_payer)}`,
     pageWidth / 2,
     yPos,
     {

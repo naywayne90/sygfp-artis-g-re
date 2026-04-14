@@ -30,11 +30,14 @@ import {
   Pencil,
   CreditCard,
   Receipt,
+  Building2,
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Engagement, VALIDATION_STEPS, VALIDATION_STATUTS } from '@/hooks/useEngagements';
 import { isRoleForStep } from '@/lib/engagement/engagementRbac';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 interface EngagementListProps {
   engagements: Engagement[];
@@ -50,6 +53,8 @@ interface EngagementListProps {
   onCreateLiquidation?: (engagementId: string) => void;
   userRole?: string | null;
   showActions?: boolean;
+  showDirection?: boolean;
+  showStepProgress?: boolean;
   isLoading?: boolean;
   emptyMessage?: string;
 }
@@ -91,6 +96,57 @@ const getValidationProgress = (currentStep: number | null) => {
     </span>
   ) : null;
 };
+
+/** Mini stepper visuel : ●―●―○―○ avec tooltip sur chaque étape */
+function MiniStepProgress({ statut }: { statut: string | null }) {
+  // Détermine l'index de l'étape courante à partir du statut
+  const currentStepIndex = VALIDATION_STEPS.findIndex((s) => s.visaStatut === statut);
+  // Si validé, toutes les étapes sont complétées
+  const allCompleted = statut === 'valide';
+
+  return (
+    <TooltipProvider>
+      <div className="flex items-center gap-0.5">
+        {VALIDATION_STEPS.map((step, i) => {
+          const isCompleted = allCompleted || i < currentStepIndex;
+          const isCurrent = !allCompleted && i === currentStepIndex;
+          const isPending = !allCompleted && i > currentStepIndex;
+
+          return (
+            <div key={step.order} className="flex items-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className={cn(
+                      'w-3.5 h-3.5 rounded-full border-2 transition-all cursor-help',
+                      isCompleted && 'bg-green-500 border-green-500',
+                      isCurrent && 'bg-primary border-primary ring-2 ring-primary/30',
+                      isPending && 'bg-transparent border-muted-foreground/30'
+                    )}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">
+                  <p className="font-medium">{step.shortLabel ?? step.role}</p>
+                  <p className="text-muted-foreground">
+                    {isCompleted ? 'Validé' : isCurrent ? 'En cours' : 'En attente'}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+              {i < VALIDATION_STEPS.length - 1 && (
+                <div
+                  className={cn(
+                    'w-2.5 h-0.5 mx-px',
+                    isCompleted ? 'bg-green-500' : 'bg-muted-foreground/20'
+                  )}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </TooltipProvider>
+  );
+}
 
 function EngagementRowSkeleton() {
   return (
@@ -137,6 +193,8 @@ export function EngagementList({
   onCreateLiquidation,
   userRole,
   showActions = true,
+  showDirection = false,
+  showStepProgress = false,
   isLoading = false,
   emptyMessage = 'Aucun engagement trouvé',
 }: EngagementListProps) {
@@ -154,6 +212,7 @@ export function EngagementList({
       <TableHeader>
         <TableRow>
           <TableHead>Numéro</TableHead>
+          {showDirection && <TableHead>Direction</TableHead>}
           <TableHead className="hidden lg:table-cell">Objet</TableHead>
           <TableHead>Fournisseur</TableHead>
           <TableHead className="text-right">Montant</TableHead>
@@ -190,6 +249,18 @@ export function EngagementList({
                     </div>
                   </div>
                 </TableCell>
+                {showDirection && (
+                  <TableCell>
+                    <div className="flex items-center gap-1.5">
+                      <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="text-sm truncate max-w-[100px]">
+                        {engagement.budget_line?.direction?.sigle ||
+                          engagement.budget_line?.direction?.label ||
+                          '-'}
+                      </span>
+                    </div>
+                  </TableCell>
+                )}
                 <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
                   {engagement.objet}
                 </TableCell>
@@ -203,7 +274,11 @@ export function EngagementList({
                 <TableCell>
                   <div className="space-y-1">
                     {getStatusBadge(statut, engagement.workflow_status)}
-                    {isInValidation && getValidationProgress(engagement.current_step)}
+                    {showStepProgress && isInValidation ? (
+                      <MiniStepProgress statut={statut} />
+                    ) : (
+                      isInValidation && getValidationProgress(engagement.current_step)
+                    )}
                     {statut === 'differe' && engagement.motif_differe && (
                       <div className="text-xs text-muted-foreground truncate max-w-[150px]">
                         {engagement.motif_differe}

@@ -56,7 +56,6 @@ const URGENCE_COLORS: Record<string, { bg: string; text: string }> = {
 // Mapping des onglets vers labels de fichier
 const TAB_FILE_LABELS: Record<string, string> = {
   toutes: 'toutes',
-  brouillons: 'soumis',
   a_valider: 'a_valider',
   validees: 'validees',
   differees: 'differees',
@@ -65,7 +64,6 @@ const TAB_FILE_LABELS: Record<string, string> = {
 
 const TAB_DISPLAY_LABELS: Record<string, string> = {
   toutes: 'Toutes les notes',
-  brouillons: 'Soumis',
   a_valider: 'À valider',
   validees: 'Validées',
   differees: 'Différées',

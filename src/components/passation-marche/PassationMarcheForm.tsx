@@ -48,7 +48,7 @@ import { useBudgetAvailability } from '@/hooks/useBudgetAvailability';
 import type { ExpressionBesoinLigne } from '@/hooks/useExpressionsBesoin';
 import { usePrestataires } from '@/hooks/usePrestataires';
 import { useExercice } from '@/contexts/ExerciceContext';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import {
   FileText,
   Search,
@@ -308,9 +308,6 @@ export function PassationMarcheForm({
     setManualName('');
   };
 
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -364,7 +361,7 @@ export function PassationMarcheForm({
                             </p>
                           )}
                         </div>
-                        <Badge variant="outline">{formatMontant(eb.montant_estime)}</Badge>
+                        <Badge variant="outline">{formatCurrency(eb.montant_estime)}</Badge>
                       </div>
                     </div>
                   ))
@@ -397,7 +394,7 @@ export function PassationMarcheForm({
                   </div>
                   <div>
                     <span className="text-muted-foreground">Montant:</span>{' '}
-                    <span className="font-medium">{formatMontant(selectedEB.montant_estime)}</span>
+                    <span className="font-medium">{formatCurrency(selectedEB.montant_estime)}</span>
                     {selectedEB.montant_estime &&
                       (() => {
                         const seuil = getSeuilForMontant(selectedEB.montant_estime);
@@ -437,14 +434,14 @@ export function PassationMarcheForm({
                           >
                             <span className="truncate mr-4">{a.designation}</span>
                             <span className="font-mono whitespace-nowrap">
-                              {a.quantite} {a.unite} x {formatMontant(a.prix_unitaire)}
+                              {a.quantite} {a.unite} x {formatCurrency(a.prix_unitaire)}
                             </span>
                           </div>
                         ))}
                         <div className="flex justify-between text-xs font-bold pt-1 border-t">
                           <span>Total articles</span>
                           <span className="font-mono">
-                            {formatMontant(articles.reduce((s, a) => s + (a.prix_total || 0), 0))}
+                            {formatCurrency(articles.reduce((s, a) => s + (a.prix_total || 0), 0))}
                           </span>
                         </div>
                       </div>
@@ -462,7 +459,7 @@ export function PassationMarcheForm({
                               : 'text-green-700'
                           )}
                         >
-                          {formatMontant(lineAvailability.disponible)}
+                          {formatCurrency(lineAvailability.disponible)}
                         </span>
                       </div>
                     </div>
@@ -505,7 +502,7 @@ export function PassationMarcheForm({
                     <CreditCard className="h-4 w-4" />
                     <AlertDescription>
                       <strong>Seuil automatique :</strong> {seuilDGMP.label} (montant{' '}
-                      {formatMontant(selectedEB?.montant_estime ?? null)})
+                      {formatCurrency(selectedEB?.montant_estime ?? null)})
                     </AlertDescription>
                   </Alert>
                 )}
@@ -541,7 +538,7 @@ export function PassationMarcheForm({
                     <Alert className="bg-yellow-50 border-yellow-300">
                       <AlertTriangle className="h-4 w-4 text-yellow-700" />
                       <AlertDescription className="text-yellow-800">
-                        Pour un montant de {formatMontant(selectedEB.montant_estime)}, la procedure
+                        Pour un montant de {formatCurrency(selectedEB.montant_estime)}, la procedure
                         recommandee est « {getSeuilForMontant(selectedEB.montant_estime)?.label} ».
                       </AlertDescription>
                     </Alert>
@@ -694,7 +691,7 @@ export function PassationMarcheForm({
                                       : 'text-foreground'
                                 )}
                               >
-                                {formatMontant(totalLots)}
+                                {formatCurrency(totalLots)}
                               </span>
                             </div>
                             {montantMarche > 0 && (
@@ -702,7 +699,7 @@ export function PassationMarcheForm({
                                 <span className="text-muted-foreground">
                                   Montant du marché (EB)
                                 </span>
-                                <span className="font-mono">{formatMontant(montantMarche)}</span>
+                                <span className="font-mono">{formatCurrency(montantMarche)}</span>
                               </div>
                             )}
                           </div>
@@ -712,8 +709,8 @@ export function PassationMarcheForm({
                           <Alert variant="destructive">
                             <AlertTriangle className="h-4 w-4" />
                             <AlertDescription>
-                              Le total des lots ({formatMontant(totalLots)}) dépasse le montant du
-                              marché ({formatMontant(montantMarche)}). Veuillez corriger les
+                              Le total des lots ({formatCurrency(totalLots)}) dépasse le montant du
+                              marché ({formatCurrency(montantMarche)}). Veuillez corriger les
                               montants.
                             </AlertDescription>
                           </Alert>
@@ -723,8 +720,8 @@ export function PassationMarcheForm({
                           <Alert className="bg-yellow-50 border-yellow-300">
                             <AlertTriangle className="h-4 w-4 text-yellow-700" />
                             <AlertDescription className="text-yellow-800">
-                              Le total des lots ({formatMontant(totalLots)}) ne correspond pas au
-                              montant du marché ({formatMontant(montantMarche)}).
+                              Le total des lots ({formatCurrency(totalLots)}) ne correspond pas au
+                              montant du marché ({formatCurrency(montantMarche)}).
                             </AlertDescription>
                           </Alert>
                         )}
@@ -737,7 +734,7 @@ export function PassationMarcheForm({
                             <p className="font-medium text-sm">Lot unique (implicite)</p>
                             <p className="text-xs text-muted-foreground">
                               Le marché n'est pas alloti. Un lot unique sera créé avec le montant
-                              total de {formatMontant(montantMarche)}.
+                              total de {formatCurrency(montantMarche)}.
                             </p>
                           </div>
                         </div>
@@ -1071,7 +1068,7 @@ export function PassationMarcheForm({
                                 <div>
                                   <p className="font-medium">{ps.raison_sociale}</p>
                                   <p className="text-sm text-muted-foreground">
-                                    Offre: {formatMontant(ps.offre_montant)}
+                                    Offre: {formatCurrency(ps.offre_montant)}
                                   </p>
                                 </div>
                               </div>

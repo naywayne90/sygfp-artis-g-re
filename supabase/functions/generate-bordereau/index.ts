@@ -49,8 +49,8 @@ const formatDate = (date: string | null): string => {
 const getModeLabel = (mode: string): string => {
   const labels: Record<string, string> = {
     virement: 'Virement bancaire',
-    cheque: 'Cheque',
-    especes: 'Especes',
+    cheque: 'Chèque',
+    especes: 'Espèces',
     mobile_money: 'Mobile Money',
   };
   return labels[mode] || mode;
@@ -124,14 +124,14 @@ function generateBordereauHTML(
   <div class="header">
     <img src="${logoUrl}" alt="ARTI" class="logo" onerror="this.style.display='none'"/>
     <div class="title-section">
-      <h1 class="title">BORDEREAU DE REGLEMENT</h1>
+      <h1 class="title">BORDEREAU DE RÈGLEMENT</h1>
       <p class="subtitle">Exercice ${exercice}</p>
     </div>
   </div>
 
   <div class="info-bar">
     <div class="info-item">
-      <span class="info-label">N* Bordereau :</span>
+      <span class="info-label">N° Bordereau :</span>
       <span class="info-value">${bordereauNumero}</span>
     </div>
     <div class="info-item">
@@ -139,14 +139,14 @@ function generateBordereauHTML(
       <span class="info-value">${dateGeneration}</span>
     </div>
     <div class="info-item">
-      <span class="info-label">Nombre de reglements :</span>
+      <span class="info-label">Nombre de règlements :</span>
       <span class="info-value">${reglements.length}</span>
     </div>
   </div>
 
   <div class="summary">
     <div class="summary-card">
-      <div class="label">Nombre de reglements</div>
+      <div class="label">Nombre de règlements</div>
       <div class="value">${reglements.length}</div>
     </div>
     <div class="summary-card">
@@ -163,13 +163,13 @@ function generateBordereauHTML(
     <thead>
       <tr>
         <th style="width: 30px;">#</th>
-        <th>N* Reglement</th>
+        <th>N° Règlement</th>
         <th>Date Paiement</th>
-        <th>Beneficiaire</th>
+        <th>Bénéficiaire</th>
         <th>Objet</th>
-        <th>N* Ordonnancement</th>
+        <th>N° Ordonnancement</th>
         <th>Mode</th>
-        <th>Reference</th>
+        <th>Référence</th>
         <th style="text-align: right;">Montant (FCFA)</th>
       </tr>
     </thead>
@@ -194,17 +194,17 @@ function generateBordereauHTML(
       <div>Date: _______________</div>
     </div>
     <div class="signature-box">
-      <div class="signature-title">Le Controleur Financier</div>
+      <div class="signature-title">Le Contrôleur Financier</div>
       <div>Date: _______________</div>
     </div>
     <div class="signature-box">
-      <div class="signature-title">Le Directeur General</div>
+      <div class="signature-title">Le Directeur Général</div>
       <div>Date: _______________</div>
     </div>
   </div>
 
   <div class="footer">
-    Bordereau ${bordereauNumero} - Genere le ${dateGeneration} a ${heureGeneration} par ${signataire.full_name} - ARTI SYGFP
+    Bordereau ${bordereauNumero} - Généré le ${dateGeneration} à ${heureGeneration} par ${signataire.full_name} - ARTI SYGFP
   </div>
 </body>
 </html>`;

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * useFundingSources - Hook pour gérer les sources/origines de financement
  *
@@ -10,10 +9,10 @@
  * - Export CSV
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useCallback } from 'react';
 
 // ============================================
 // TYPES
@@ -36,11 +35,11 @@ export interface FundingSource {
   updated_at: string;
 }
 
-export type FundingSourceType = "etat" | "partenaire" | "recette" | "emprunt" | "don" | "autre";
+export type FundingSourceType = 'etat' | 'partenaire' | 'recette' | 'emprunt' | 'don' | 'autre';
 
 export interface FundingSourceFilters {
-  status?: "active" | "inactive" | "all";
-  type?: FundingSourceType | "all";
+  status?: 'active' | 'inactive' | 'all';
+  type?: FundingSourceType | 'all';
   search?: string;
 }
 
@@ -59,12 +58,12 @@ export interface UpdateFundingSourceData extends Partial<CreateFundingSourceData
 
 // Types de financement avec labels
 export const FUNDING_SOURCE_TYPES: { value: FundingSourceType; label: string }[] = [
-  { value: "etat", label: "État" },
-  { value: "partenaire", label: "Partenaire" },
-  { value: "recette", label: "Recette" },
-  { value: "emprunt", label: "Emprunt" },
-  { value: "don", label: "Don" },
-  { value: "autre", label: "Autre" },
+  { value: 'etat', label: 'État' },
+  { value: 'partenaire', label: 'Partenaire' },
+  { value: 'recette', label: 'Recette' },
+  { value: 'emprunt', label: 'Emprunt' },
+  { value: 'don', label: 'Don' },
+  { value: 'autre', label: 'Autre' },
 ];
 
 // ============================================
@@ -84,24 +83,24 @@ export function useFundingSources(filters?: FundingSourceFilters) {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["funding-sources", filters],
+    queryKey: ['funding-sources', filters],
     queryFn: async () => {
       let query = supabase
-        .from("funding_sources")
-        .select("*")
-        .order("ordre", { ascending: true })
-        .order("libelle", { ascending: true });
+        .from('funding_sources')
+        .select('*')
+        .order('ordre', { ascending: true })
+        .order('libelle', { ascending: true });
 
       // Filtre par statut
-      if (filters?.status === "active") {
-        query = query.eq("est_actif", true);
-      } else if (filters?.status === "inactive") {
-        query = query.eq("est_actif", false);
+      if (filters?.status === 'active') {
+        query = query.eq('est_actif', true);
+      } else if (filters?.status === 'inactive') {
+        query = query.eq('est_actif', false);
       }
 
       // Filtre par type
-      if (filters?.type && filters.type !== "all") {
-        query = query.eq("type", filters.type);
+      if (filters?.type && filters.type !== 'all') {
+        query = query.eq('type', filters.type);
       }
 
       const { data, error } = await query;
@@ -126,27 +125,25 @@ export function useFundingSources(filters?: FundingSourceFilters) {
 
   // Sources actives uniquement (pour les sélecteurs)
   const { data: activeSources } = useQuery({
-    queryKey: ["funding-sources-active"],
+    queryKey: ['funding-sources-active'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("funding_sources")
-        .select("id, code, libelle, type, ordre")
-        .eq("est_actif", true)
-        .order("ordre", { ascending: true })
-        .order("libelle", { ascending: true });
+        .from('funding_sources')
+        .select('id, code, libelle, type, ordre')
+        .eq('est_actif', true)
+        .order('ordre', { ascending: true })
+        .order('libelle', { ascending: true });
 
       if (error) throw error;
-      return data as Pick<FundingSource, "id" | "code" | "libelle" | "type" | "ordre">[];
+      return data as Pick<FundingSource, 'id' | 'code' | 'libelle' | 'type' | 'ordre'>[];
     },
   });
 
   // Statistiques
   const { data: stats } = useQuery({
-    queryKey: ["funding-sources-stats"],
+    queryKey: ['funding-sources-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("funding_sources")
-        .select("est_actif, type");
+      const { data, error } = await supabase.from('funding_sources').select('est_actif, type');
 
       if (error) throw error;
 
@@ -177,7 +174,7 @@ export function useFundingSources(filters?: FundingSourceFilters) {
   const createSource = useMutation({
     mutationFn: async (data: CreateFundingSourceData) => {
       const { data: result, error } = await supabase
-        .from("funding_sources")
+        .from('funding_sources')
         .insert({
           code: data.code.toUpperCase().trim(),
           libelle: data.libelle.trim(),
@@ -191,8 +188,8 @@ export function useFundingSources(filters?: FundingSourceFilters) {
         .single();
 
       if (error) {
-        if (error.code === "23505") {
-          throw new Error("Ce code existe déjà");
+        if (error.code === '23505') {
+          throw new Error('Ce code existe déjà');
         }
         throw error;
       }
@@ -200,11 +197,11 @@ export function useFundingSources(filters?: FundingSourceFilters) {
       return result as FundingSource;
     },
     onSuccess: () => {
-      toast.success("Source de financement créée");
-      queryClient.invalidateQueries({ queryKey: ["funding-sources"] });
+      toast.success('Source de financement créée');
+      queryClient.invalidateQueries({ queryKey: ['funding-sources'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -220,19 +217,18 @@ export function useFundingSources(filters?: FundingSourceFilters) {
       if (updates.description !== undefined)
         updateData.description = updates.description?.trim() || null;
       if (updates.ordre !== undefined) updateData.ordre = updates.ordre;
-      if (updates.legacy_codes !== undefined)
-        updateData.legacy_codes = updates.legacy_codes;
+      if (updates.legacy_codes !== undefined) updateData.legacy_codes = updates.legacy_codes;
 
       const { data: result, error } = await supabase
-        .from("funding_sources")
+        .from('funding_sources')
         .update(updateData)
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
 
       if (error) {
-        if (error.code === "23505") {
-          throw new Error("Ce code existe déjà");
+        if (error.code === '23505') {
+          throw new Error('Ce code existe déjà');
         }
         throw error;
       }
@@ -240,18 +236,18 @@ export function useFundingSources(filters?: FundingSourceFilters) {
       return result as FundingSource;
     },
     onSuccess: () => {
-      toast.success("Source de financement mise à jour");
-      queryClient.invalidateQueries({ queryKey: ["funding-sources"] });
+      toast.success('Source de financement mise à jour');
+      queryClient.invalidateQueries({ queryKey: ['funding-sources'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
   // Désactiver une source
   const deactivateSource = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
-      const { data, error } = await supabase.rpc("deactivate_funding_source", {
+      const { data, error } = await supabase.rpc('deactivate_funding_source', {
         p_source_id: id,
         p_reason: reason || null,
       });
@@ -260,18 +256,18 @@ export function useFundingSources(filters?: FundingSourceFilters) {
       return data as FundingSource;
     },
     onSuccess: () => {
-      toast.success("Source de financement désactivée");
-      queryClient.invalidateQueries({ queryKey: ["funding-sources"] });
+      toast.success('Source de financement désactivée');
+      queryClient.invalidateQueries({ queryKey: ['funding-sources'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
   // Réactiver une source
   const reactivateSource = useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase.rpc("reactivate_funding_source", {
+      const { data, error } = await supabase.rpc('reactivate_funding_source', {
         p_source_id: id,
       });
 
@@ -279,11 +275,11 @@ export function useFundingSources(filters?: FundingSourceFilters) {
       return data as FundingSource;
     },
     onSuccess: () => {
-      toast.success("Source de financement réactivée");
-      queryClient.invalidateQueries({ queryKey: ["funding-sources"] });
+      toast.success('Source de financement réactivée');
+      queryClient.invalidateQueries({ queryKey: ['funding-sources'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -303,12 +299,12 @@ export function useFundingSources(filters?: FundingSourceFilters) {
    */
   const getTypeColor = useCallback((type: FundingSourceType): string => {
     const colors: Record<FundingSourceType, string> = {
-      etat: "bg-blue-100 text-blue-800",
-      partenaire: "bg-green-100 text-green-800",
-      recette: "bg-purple-100 text-purple-800",
-      emprunt: "bg-orange-100 text-orange-800",
-      don: "bg-pink-100 text-pink-800",
-      autre: "bg-gray-100 text-gray-800",
+      etat: 'bg-blue-100 text-blue-800',
+      partenaire: 'bg-green-100 text-green-800',
+      recette: 'bg-purple-100 text-purple-800',
+      emprunt: 'bg-orange-100 text-orange-800',
+      don: 'bg-pink-100 text-pink-800',
+      autre: 'bg-gray-100 text-gray-800',
     };
     return colors[type] || colors.autre;
   }, []);
@@ -318,13 +314,11 @@ export function useFundingSources(filters?: FundingSourceFilters) {
    */
   const getSourceLabel = useCallback(
     (codeOrLegacy: string | null | undefined): string => {
-      if (!codeOrLegacy) return "-";
+      if (!codeOrLegacy) return '-';
 
       // Chercher dans les sources actives
       const source = activeSources?.find(
-        (s) =>
-          s.code === codeOrLegacy ||
-          s.code.toLowerCase() === codeOrLegacy.toLowerCase()
+        (s) => s.code === codeOrLegacy || s.code.toLowerCase() === codeOrLegacy.toLowerCase()
       );
 
       if (source) return source.libelle;
@@ -340,7 +334,7 @@ export function useFundingSources(filters?: FundingSourceFilters) {
       if (allSource) return allSource.libelle;
 
       // Fallback: retourner la valeur originale formatée
-      return codeOrLegacy.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+      return codeOrLegacy.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
     },
     [activeSources, sources]
   );
@@ -350,36 +344,36 @@ export function useFundingSources(filters?: FundingSourceFilters) {
    */
   const exportToCSV = useCallback(() => {
     if (!sources || sources.length === 0) {
-      toast.error("Aucune donnée à exporter");
+      toast.error('Aucune donnée à exporter');
       return;
     }
 
-    const headers = ["Code", "Libellé", "Type", "Description", "Actif", "Ordre"];
+    const headers = ['Code', 'Libellé', 'Type', 'Description', 'Actif', 'Ordre'];
     const rows = sources.map((s) => [
       s.code,
       s.libelle,
       getTypeLabel(s.type),
-      s.description || "",
-      s.est_actif ? "Oui" : "Non",
+      s.description || '',
+      s.est_actif ? 'Oui' : 'Non',
       s.ordre.toString(),
     ]);
 
     const csvContent = [
-      headers.join(";"),
-      ...rows.map((r) => r.map((c) => `"${c}"`).join(";")),
-    ].join("\n");
+      headers.join(';'),
+      ...rows.map((r) => r.map((c) => `"${c}"`).join(';')),
+    ].join('\n');
 
-    const blob = new Blob(["\ufeff" + csvContent], {
-      type: "text/csv;charset=utf-8;",
+    const blob = new Blob(['﻿' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
     });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `origines_fonds_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `origines_fonds_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
 
-    toast.success("Export CSV téléchargé");
+    toast.success('Export CSV téléchargé');
   }, [sources, getTypeLabel]);
 
   // ============================================

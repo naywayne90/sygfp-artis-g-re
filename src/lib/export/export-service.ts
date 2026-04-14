@@ -109,7 +109,6 @@ export const formatters = {
     if (!value) return '-';
     const statusMap: Record<string, string> = {
       draft: 'Soumis',
-      brouillon: 'Soumis',
       pending: 'En attente',
       en_attente: 'En attente',
       en_attente_validation: 'En attente de validation',
@@ -344,7 +343,7 @@ export function exportToCSV(
     );
 
     // UTF-8 BOM for Excel compatibility
-    const BOM = '\uFEFF';
+    const BOM = '﻿';
     const csvContent = BOM + [headers, ...rows].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv; charset=utf-8' });

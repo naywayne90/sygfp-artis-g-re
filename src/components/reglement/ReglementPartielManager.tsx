@@ -1,19 +1,13 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 import {
   Table,
   TableBody,
@@ -21,23 +15,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  CheckCircle,
-  Clock,
-  Plus,
-  FileText,
-  CreditCard,
-  Receipt,
-} from "lucide-react";
-import { ReglementForm } from "./ReglementForm";
+} from '@/components/ui/dialog';
+import { CheckCircle, Clock, Plus, FileText, CreditCard, Receipt } from 'lucide-react';
+import { ReglementForm } from './ReglementForm';
+import { formatCurrency } from '@/lib/utils';
 
 interface ReglementPartielManagerProps {
   ordonnancementId: string;
@@ -53,9 +41,6 @@ interface ReglementPartielManagerProps {
   onReglementCreated?: () => void;
 }
 
-const formatMontant = (montant: number) =>
-  new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
-
 export function ReglementPartielManager({
   ordonnancementId,
   ordonnancement,
@@ -65,11 +50,12 @@ export function ReglementPartielManager({
 
   // Récupérer les règlements existants
   const { data: reglements = [], refetch } = useQuery({
-    queryKey: ["reglements-by-ordonnancement", ordonnancementId],
+    queryKey: ['reglements-by-ordonnancement', ordonnancementId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("reglements")
-        .select(`
+        .from('reglements')
+        .select(
+          `
           id,
           numero,
           date_paiement,
@@ -84,9 +70,10 @@ export function ReglementPartielManager({
           created_by_profile:profiles!reglements_created_by_fkey(
             full_name
           )
-        `)
-        .eq("ordonnancement_id", ordonnancementId)
-        .order("date_paiement", { ascending: true });
+        `
+        )
+        .eq('ordonnancement_id', ordonnancementId)
+        .order('date_paiement', { ascending: true });
 
       if (error) throw error;
       return data || [];
@@ -107,10 +94,10 @@ export function ReglementPartielManager({
 
   const getModePaiementLabel = (mode: string) => {
     const labels: Record<string, string> = {
-      virement: "Virement",
-      cheque: "Chèque",
-      especes: "Espèces",
-      mobile_money: "Mobile Money",
+      virement: 'Virement',
+      cheque: 'Chèque',
+      especes: 'Espèces',
+      mobile_money: 'Mobile Money',
     };
     return labels[mode] || mode;
   };
@@ -147,19 +134,19 @@ export function ReglementPartielManager({
           <div className="grid grid-cols-3 gap-4">
             <div className="p-4 bg-muted/50 rounded-lg text-center">
               <p className="text-xs text-muted-foreground mb-1">Montant ordonnancé</p>
-              <p className="text-xl font-bold">{formatMontant(montantOrdonnance)}</p>
+              <p className="text-xl font-bold">{formatCurrency(montantOrdonnance)}</p>
             </div>
             <div className="p-4 bg-success/10 rounded-lg text-center">
               <p className="text-xs text-muted-foreground mb-1">Total payé</p>
-              <p className="text-xl font-bold text-success">{formatMontant(totalPaye)}</p>
-              <p className="text-xs text-muted-foreground">
-                {reglements.length} règlement(s)
-              </p>
+              <p className="text-xl font-bold text-success">{formatCurrency(totalPaye)}</p>
+              <p className="text-xs text-muted-foreground">{reglements.length} règlement(s)</p>
             </div>
-            <div className={`p-4 rounded-lg text-center ${isFullyPaid ? "bg-success/10" : "bg-warning/10"}`}>
+            <div
+              className={`p-4 rounded-lg text-center ${isFullyPaid ? 'bg-success/10' : 'bg-warning/10'}`}
+            >
               <p className="text-xs text-muted-foreground mb-1">Restant à payer</p>
-              <p className={`text-xl font-bold ${isFullyPaid ? "text-success" : "text-warning"}`}>
-                {formatMontant(restantAPayer)}
+              <p className={`text-xl font-bold ${isFullyPaid ? 'text-success' : 'text-warning'}`}>
+                {formatCurrency(restantAPayer)}
               </p>
             </div>
           </div>
@@ -196,11 +183,9 @@ export function ReglementPartielManager({
                 <TableBody>
                   {reglements.map((reglement) => (
                     <TableRow key={reglement.id}>
-                      <TableCell className="font-mono">
-                        {reglement.numero}
-                      </TableCell>
+                      <TableCell className="font-mono">{reglement.numero}</TableCell>
                       <TableCell>
-                        {format(new Date(reglement.date_paiement), "dd/MM/yyyy", { locale: fr })}
+                        {format(new Date(reglement.date_paiement), 'dd/MM/yyyy', { locale: fr })}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
@@ -208,10 +193,10 @@ export function ReglementPartielManager({
                         </Badge>
                       </TableCell>
                       <TableCell className="font-mono text-sm">
-                        {reglement.reference_paiement || "-"}
+                        {reglement.reference_paiement || '-'}
                       </TableCell>
                       <TableCell className="text-right font-bold text-success">
-                        {formatMontant(reglement.montant)}
+                        {formatCurrency(reglement.montant)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -227,7 +212,7 @@ export function ReglementPartielManager({
             <DialogTrigger asChild>
               <Button className="w-full gap-2">
                 <Plus className="h-4 w-4" />
-                Ajouter un règlement ({formatMontant(restantAPayer)} restant)
+                Ajouter un règlement ({formatCurrency(restantAPayer)} restant)
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
