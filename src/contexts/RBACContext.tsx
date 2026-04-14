@@ -58,6 +58,7 @@ export interface RBACContextValue {
   canAccessData: (directionId: string | null) => boolean;
   canCreate: (entityType: string) => boolean;
   canExport: () => boolean;
+  hasRole: (roleCode: string) => boolean;
 
   // Routes accessibles
   accessibleRoutes: string[];
@@ -283,6 +284,17 @@ export function RBACProvider({ children }: RBACProviderProps) {
   // Once authChecked=true and userId=null → not loading, just not authenticated
   const effectiveLoading = !authChecked || (!!userId && isLoading);
 
+  // Vérifie si l'utilisateur possède un rôle donné (profil fonctionnel ou rôle hiérarchique).
+  // Match insensible à la casse pour tolérer les variations 'DG' vs 'dg', 'Admin' vs 'ADMIN'.
+  const hasRole = (roleCode: string): boolean => {
+    if (!user || !roleCode) return false;
+    const target = roleCode.toUpperCase();
+    return (
+      (user.profilFonctionnel || '').toUpperCase() === target ||
+      (user.roleHierarchique || '').toUpperCase() === target
+    );
+  };
+
   const value: RBACContextValue = {
     user,
     isLoading: effectiveLoading,
@@ -306,6 +318,7 @@ export function RBACProvider({ children }: RBACProviderProps) {
     canAccessData,
     canCreate,
     canExport,
+    hasRole,
     accessibleRoutes,
     getProfilLabel,
     getProfilColor,

@@ -73,9 +73,19 @@ export interface DGStats {
     dossiersTraites: number;
     montantValide: number;
     tauxValidation: number;
+    // Détail dénominateur : total actions du mois (valide + rejeté + différé + annulé)
+    totalActionsMois: number;
   };
   // Prestataires
   prestatairesActifs: number;
+  // ─── Indicateurs réglementaires SYGFP (contexte CI / DGBF) ───
+  // DGP = Délai Global de Paiement (engagement validé → règlement)
+  // Seuils CI : 30j standard, 45j tolérance. Au-delà : intérêts moratoires 4,5%/an.
+  dgp: {
+    risque30j: number; // engagements valides depuis > 30j sans paiement
+    critique45j: number; // engagements valides depuis > 45j sans paiement
+    interetsMoratoiresEstimes: number; // estimation FCFA d'intérêts dus (4,5%/an pro rata)
+  };
 }
 
 // Stats pour DAF/SDCT
@@ -149,7 +159,7 @@ export function useDGDashboard() {
       // Engagements
       const { data: engagements } = await supabase
         .from('budget_engagements')
-        .select('id, montant, statut, budget_line_id')
+        .select('id, montant, statut, budget_line_id, created_at, updated_at, dossier_id')
         .eq('exercice', exercice);
 
       const budgetEngage =
@@ -158,9 +168,11 @@ export function useDGDashboard() {
           .reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
 
       // Liquidations
+      // Note : la table budget_liquidations n'a PAS de colonne `updated_at`.
+      // La date de validation est exposée via `validated_at`.
       const { data: liquidations } = await supabase
         .from('budget_liquidations')
-        .select('id, montant, statut')
+        .select('id, montant, statut, created_at, validated_at')
         .eq('exercice', exercice);
 
       const budgetLiquide =
@@ -171,7 +183,7 @@ export function useDGDashboard() {
       // Ordonnancements
       const { data: ordonnancements } = await supabase
         .from('ordonnancements')
-        .select('id, montant, statut')
+        .select('id, montant, statut, created_at, updated_at')
         .eq('exercice', exercice);
 
       const budgetOrdonnance =
@@ -179,10 +191,10 @@ export function useDGDashboard() {
           ?.filter((o) => o.statut === 'valide')
           .reduce((sum, o) => sum + (o.montant || 0), 0) || 0;
 
-      // Règlements
+      // Règlements (dossier_id requis pour le calcul DGP)
       const { data: reglements } = await supabase
         .from('reglements')
-        .select('id, montant, statut')
+        .select('id, montant, statut, dossier_id')
         .eq('exercice', exercice);
 
       const budgetPaye =
@@ -293,7 +305,7 @@ export function useDGDashboard() {
         supabase.from('expressions_besoin').select('id').eq('exercice', exercice),
         supabase
           .from('passation_marche')
-          .select('id, statut, montant_estime')
+          .select('id, statut, montant_retenu')
           .eq('exercice', exercice),
         supabase.from('prestataires').select('id').eq('statut', 'actif'),
         // Logs de validation du mois en cours (table logs_actions, actions en MAJUSCULES)
@@ -344,10 +356,12 @@ export function useDGDashboard() {
       ).length;
 
       // Passation Marchés — DG approuve les marchés attribués
+      // Note: le montant_retenu (attribué au soumissionnaire choisi) est
+      // peuplé dès l'étape "attribue", ce qui est exactement ce qu'on veut ici.
       const marchesAttribue = marchesData.filter((m) => m.statut === 'attribue');
       const marchesAApprouver = marchesAttribue.length;
       const marchesAApprouverMontant = marchesAttribue.reduce(
-        (s, m) => s + (((m as Record<string, unknown>).montant_estime as number) || 0),
+        (s, m) => s + (((m as Record<string, unknown>).montant_retenu as number) || 0),
         0
       );
 
@@ -399,9 +413,12 @@ export function useDGDashboard() {
       liquidations
         ?.filter((l) => l.statut === 'valide')
         .forEach((l) => {
-          if ((l as any).updated_at) {
-            const creation = new Date((l as any).created_at);
-            const validation = new Date((l as any).updated_at);
+          // budget_liquidations utilise `validated_at` (pas `updated_at`)
+          const validatedAt = (l as Record<string, unknown>).validated_at as string | null;
+          const createdAt = (l as Record<string, unknown>).created_at as string | null;
+          if (validatedAt && createdAt) {
+            const creation = new Date(createdAt);
+            const validation = new Date(validatedAt);
             const delai = Math.floor(
               (validation.getTime() - creation.getTime()) / (1000 * 60 * 60 * 24)
             );
@@ -429,6 +446,38 @@ export function useDGDashboard() {
             }
           }
         });
+
+      // ===== DGP — Délai Global de Paiement (réglementation CI) =====
+      // Pour chaque engagement validé : compter ceux qui n'ont pas de règlement
+      // associé (via dossier_id) et dont la date de validation dépasse 30/45j.
+      // Intérêts moratoires estimés : 4,5% annuel pro rata sur montant × (jours - 45).
+      const engagementsValidesPourDGP = engagements?.filter((e) => e.statut === 'valide') || [];
+      const dossiersReglement = new Set(
+        (reglements || [])
+          .filter((r) => r.statut === 'paye' || r.statut === 'vise' || r.statut === 'enregistre')
+          .map((r) => (r as Record<string, unknown>).dossier_id as string | null | undefined)
+          .filter((d): d is string => !!d)
+      );
+      const nowMs = Date.now();
+      let dgpRisque30 = 0;
+      let dgpCritique45 = 0;
+      let interetsMoratoiresEstimes = 0;
+      engagementsValidesPourDGP.forEach((e) => {
+        const refDate = (e as Record<string, unknown>).updated_at as string | undefined;
+        const dossierId = (e as Record<string, unknown>).dossier_id as string | undefined;
+        if (!refDate) return;
+        if (dossierId && dossiersReglement.has(dossierId)) return; // déjà payé
+        const joursEcoules = Math.floor((nowMs - new Date(refDate).getTime()) / 86_400_000);
+        if (joursEcoules > 30) dgpRisque30++;
+        if (joursEcoules > 45) {
+          dgpCritique45++;
+          const joursRetard = joursEcoules - 45;
+          const montant = (e as Record<string, unknown>).montant as number | undefined;
+          if (montant) {
+            interetsMoratoiresEstimes += (montant * 0.045 * joursRetard) / 365;
+          }
+        }
+      });
 
       // ─── Construction de la Corbeille DG ───
       const corbeille: CorbeilleDGItem[] = [];
@@ -569,8 +618,14 @@ export function useDGDashboard() {
           dossiersTraites: dossiersTraitesMois,
           montantValide: engagementsAValiderDGMontant, // Approximation: on utilise le montant du mois
           tauxValidation: tauxValidationMois,
+          totalActionsMois,
         },
         prestatairesActifs: prestataires.length,
+        dgp: {
+          risque30j: dgpRisque30,
+          critique45j: dgpCritique45,
+          interetsMoratoiresEstimes: Math.round(interetsMoratoiresEstimes),
+        },
       };
     },
     enabled: !!exercice,

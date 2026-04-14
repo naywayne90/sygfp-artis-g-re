@@ -45,6 +45,8 @@ import {
   FileSignature,
   Banknote,
   Inbox,
+  Gavel,
+  CalendarClock,
   type LucideIcon,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -493,13 +495,17 @@ export function DashboardDG() {
           <CardContent>
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-bold text-red-500">{criticalAlerts.length}</span>
+              <span className="text-xs text-muted-foreground">
+                critique{criticalAlerts.length > 1 ? 's' : ''}
+              </span>
               {warningAlerts.length > 0 && (
-                <span className="text-sm text-amber-500">+{warningAlerts.length}</span>
+                <span className="text-sm text-amber-500 ml-1">
+                  +{warningAlerts.length} warning{warningAlerts.length > 1 ? 's' : ''}
+                </span>
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              {stats?.alertesDepassement || 0} dépassement
-              {(stats?.alertesDepassement || 0) > 1 ? 's' : ''}
+              Lignes dépassées : {stats?.alertesDepassement || 0}
             </p>
           </CardContent>
         </Card>
@@ -587,33 +593,64 @@ export function DashboardDG() {
                   label: 'Engagement',
                   value: stats?.delais.moyenEngagement,
                   icon: CreditCard,
-                  color: 'emerald',
+                  seuilOk: 7,
+                  seuilAlert: 15,
                 },
                 {
                   label: 'Liquidation',
                   value: stats?.delais.moyenLiquidation,
                   icon: Receipt,
-                  color: 'amber',
+                  seuilOk: 10,
+                  seuilAlert: 20,
                 },
                 {
                   label: 'Ordonnancement',
                   value: stats?.delais.moyenOrdonnancement,
                   icon: FileCheck,
-                  color: 'purple',
+                  seuilOk: 5,
+                  seuilAlert: 10,
                 },
               ].map((d) => {
                 const Icon = d.icon;
-                const colors = COLOR_MAP[d.color] || COLOR_MAP.blue;
+                // Couleur selon seuil : vert ≤ ok, ambre ≤ alert, rouge sinon
+                const hasValue = d.value !== null && d.value !== undefined;
+                const level = !hasValue
+                  ? 'gray'
+                  : (d.value as number) <= d.seuilOk
+                    ? 'green'
+                    : (d.value as number) <= d.seuilAlert
+                      ? 'amber'
+                      : 'red';
+                const levelClasses: Record<string, { bg: string; text: string; value: string }> = {
+                  green: {
+                    bg: 'bg-emerald-500/10',
+                    text: 'text-emerald-500',
+                    value: 'text-emerald-600',
+                  },
+                  amber: { bg: 'bg-amber-500/10', text: 'text-amber-500', value: 'text-amber-600' },
+                  red: { bg: 'bg-red-500/10', text: 'text-red-500', value: 'text-red-600' },
+                  gray: {
+                    bg: 'bg-muted',
+                    text: 'text-muted-foreground',
+                    value: 'text-muted-foreground',
+                  },
+                };
+                const c = levelClasses[level];
                 return (
                   <div
                     key={d.label}
                     className="flex flex-col items-center gap-2 p-3 rounded-lg border"
+                    title={
+                      hasValue
+                        ? `Seuil SYGFP : ≤ ${d.seuilOk}j OK, ≤ ${d.seuilAlert}j à surveiller, > ${d.seuilAlert}j critique`
+                        : 'Aucune donnée disponible'
+                    }
                   >
-                    <div className={`p-2 rounded-full ${colors.bg}`}>
-                      <Icon className={`h-4 w-4 ${colors.text}`} />
+                    <div className={`p-2 rounded-full ${c.bg}`}>
+                      <Icon className={`h-4 w-4 ${c.text}`} />
                     </div>
-                    <p className="text-xl font-bold">
-                      {d.value !== null && d.value !== undefined ? `${d.value}j` : 'N/A'}
+                    <p className={`text-xl font-bold ${c.value}`}>
+                      {hasValue ? `${d.value}j` : 'N/A'}
                     </p>
                     <p className="text-[10px] text-muted-foreground text-center">{d.label}</p>
                   </div>
@@ -648,17 +685,93 @@ export function DashboardDG() {
                 <p className="text-xl font-bold">{stats?.pendingDGActions || 0}</p>
                 <p className="text-[10px] text-muted-foreground text-center">En attente</p>
               </div>
-              <div className="flex flex-col items-center gap-2 p-3 rounded-lg border">
+              <div
+                className="flex flex-col items-center gap-2 p-3 rounded-lg border"
+                title={`${stats?.synthèseMois.dossiersTraites ?? 0} validés sur ${stats?.synthèseMois.totalActionsMois ?? 0} décisions prises ce mois (validations, rejets, différés, annulations)`}
+              >
                 <div className="p-2 rounded-full bg-green-500/10">
                   <TrendingUp className="h-4 w-4 text-green-500" />
                 </div>
                 <p className="text-xl font-bold">{stats?.synthèseMois.tauxValidation || 0}%</p>
-                <p className="text-[10px] text-muted-foreground text-center">Taux validation</p>
+                <p className="text-[10px] text-muted-foreground text-center">
+                  Taux validation
+                  {stats?.synthèseMois.totalActionsMois ? (
+                    <>
+                      <br />
+                      <span className="text-[9px]">
+                        {stats.synthèseMois.dossiersTraites}/{stats.synthèseMois.totalActionsMois}
+                      </span>
+                    </>
+                  ) : null}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Conformité réglementaire CI — DGP & Intérêts moratoires */}
+      <Card className="border-l-4 border-l-orange-500">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Gavel className="h-4 w-4 text-orange-500" />
+            Conformité DGP (Délai Global de Paiement)
+          </CardTitle>
+          <CardDescription>
+            Seuils réglementaires Côte d'Ivoire : 30 j tolérance · 45 j max avant intérêts
+            moratoires (4,5 %/an)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+            <div
+              className="flex items-center gap-3 p-3 rounded-lg border bg-amber-50 dark:bg-amber-950/20"
+              title="Engagements validés il y a plus de 30 jours sans paiement associé"
+            >
+              <CalendarClock className="h-7 w-7 text-amber-500 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                  {stats?.dgp.risque30j ?? 0}
+                </p>
+                <p className="text-xs text-muted-foreground">Risque DGP (&gt; 30 j)</p>
+              </div>
+            </div>
+            <div
+              className="flex items-center gap-3 p-3 rounded-lg border bg-red-50 dark:bg-red-950/20"
+              title="Engagements qui déclenchent des intérêts moratoires (au-delà de 45 j)"
+            >
+              <AlertTriangle className="h-7 w-7 text-red-500 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  {stats?.dgp.critique45j ?? 0}
+                </p>
+                <p className="text-xs text-muted-foreground">Critique DGP (&gt; 45 j)</p>
+              </div>
+            </div>
+            <div
+              className="flex items-center gap-3 p-3 rounded-lg border bg-red-50 dark:bg-red-950/20"
+              title="Estimation : 4,5 %/an × montant × jours de retard au-delà de 45 j"
+            >
+              <Banknote className="h-7 w-7 text-red-500 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xl font-bold text-red-600 dark:text-red-400 break-all">
+                  {formatCurrency(stats?.dgp.interetsMoratoiresEstimes ?? 0)}
+                </p>
+                <p className="text-xs text-muted-foreground">Intérêts moratoires estimés</p>
+              </div>
+            </div>
+          </div>
+          {(stats?.dgp.critique45j ?? 0) > 0 && (
+            <div className="mt-3 flex items-start gap-2 p-3 rounded-md bg-red-100/60 dark:bg-red-950/30 text-xs text-red-700 dark:text-red-300">
+              <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+              <span>
+                Action recommandée : prioriser la chaîne liquidation → ordonnancement → règlement
+                sur les dossiers les plus anciens pour limiter l'exposition aux intérêts moratoires.
+              </span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Top directions + État dossiers */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -675,13 +788,13 @@ export function DashboardDG() {
             <div className="space-y-4">
               {stats?.topDirections.map((dir, index) => (
                 <div key={dir.id} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-muted-foreground w-5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="text-sm font-medium text-muted-foreground w-5 shrink-0">
                         {index + 1}.
                       </span>
-                      <span className="font-medium">{dir.code}</span>
-                      <span className="text-sm text-muted-foreground truncate max-w-[150px]">
+                      <span className="font-medium shrink-0">{dir.code}</span>
+                      <span className="text-sm text-muted-foreground truncate" title={dir.label}>
                         {dir.label}
                       </span>
                     </div>
@@ -693,13 +806,14 @@ export function DashboardDG() {
                             ? 'default'
                             : 'secondary'
                       }
+                      className="shrink-0"
                     >
                       {dir.tauxExecution}%
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2">
                     <Progress value={dir.tauxExecution} className="h-2 flex-1" />
-                    <span className="text-xs text-muted-foreground w-24 text-right">
+                    <span className="text-xs text-muted-foreground w-28 text-right shrink-0">
                       {formatCurrency(dir.dotation)}
                     </span>
                   </div>
